@@ -224,7 +224,7 @@ fu! debug#filterop(type) abort
     endtry
 endfu
 
-" :Scriptnames {{{1
+" scriptname() {{{1
 
 fu! debug#scriptnames_qflist() abort
     let names = execute('scriptnames')
@@ -243,16 +243,6 @@ fu! debug#scriptname(file) abort
     else
         return a:file
     endif
-endfu
-
-fu! debug#scriptid(filename) abort
-    let filename = fnamemodify(expand(a:filename), ':p')
-    for script in debug#scriptnames_qflist()
-        if script.filename ==# filename
-            return +script.text
-        endif
-    endfor
-    return ''
 endfu
 
 " :Runtime {{{1
@@ -563,10 +553,6 @@ fu! debug#setup_vim() abort
     cno <expr><buffer> <Plug><cfile> debug#cfile()
     let b:dispatch = ':Runtime'
     com! -bar -bang -buffer Console Runtime|PP
-    com! -buffer -bar -nargs=? -complete=custom,s:Complete_breakadd Breakadd
-                \ exe s:break('add',<q-args>)
-    com! -buffer -bar -nargs=? -complete=custom,s:Complete_breakdel Breakdel
-                \ exe s:break('del',<q-args>)
 
     nno <buffer> <nowait> <silent>  K  :<c-u>exe 'help '.debug#helptopic()<cr>
 endfu
