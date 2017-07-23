@@ -122,7 +122,6 @@ fu! debug#messages() abort
                  \ 'yanked lines':       '%(block of )?\d+ lines yanked',
                  \ }
 
-    " Col 1 of 6; Line 1 of 2293; Word 1 of 10046; Char 1 of 90827; Byte 1 of 100875
     for noise in values(noises)
         sil! exe 'g/\v^'.noise.'$/d_'
     endfor
