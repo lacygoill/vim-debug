@@ -281,3 +281,36 @@ fu! debug#scriptnames() abort
     call setqflist([], 'a', { 'title': ':Scriptnames'})
     copen
 endfu
+" time {{{1
+
+" Check if debug#time() exists before trying to define it.
+" Otherwise, `:Time source %` raises an error because it tries to redefine
+" debug#time() while it's running.
+
+if exists('*debug#time')
+    finish
+endif
+
+fu! debug#time(cmd, cnt)
+    let time = reltime()
+    try
+        " We could get rid of the if/else/endif, and shorten the code, but we
+        " won't do it, because the most usual case is a:cnt = 1. And we want to
+        " execute a:cmd as fast as possible (no let,  no while loop), because Ex
+        " commands are slow.
+        if a:cnt > 1
+            let i = 0
+            while i < a:cnt
+                exe a:cmd
+                let i += 1
+            endwhile
+        else
+            exe a:cmd
+        endif
+    finally
+        " We clear the screen before displaying the results, to erase the
+        " possible messages displayed by the command.
+        redraw
+        echomsg matchstr(reltimestr(reltime(time)), '\v.*\..{,3}').' seconds to run :'.a:cmd
+    endtry
+endfu
