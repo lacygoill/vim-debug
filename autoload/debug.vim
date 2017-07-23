@@ -19,7 +19,7 @@ endfu
 
 " Completion {{{1
 
-fu! scriptease#complete(A,L,P) abort
+fu! debug#complete(A,L,P) abort
     let cheats = {
                 \ 'a': 'autoload',
                 \ 'd': 'doc',
@@ -59,7 +59,7 @@ let s:escapes = {
             \ "\"": '\"',
             \ "\\": '\\'}
 
-fu! scriptease#dump(object, ...) abort
+fu! debug#dump(object, ...) abort
     let opt = extend({'width': 0, 'level': 0, 'indent': 1, 'tail': 0, 'seen': []}, a:0 ? copy(a:1) : {})
     let opt.seen = copy(opt.seen)
     let childopt = copy(opt)
@@ -78,24 +78,24 @@ fu! scriptease#dump(object, ...) abort
         endif
     elseif type(a:object) ==# type([])
         let childopt.seen += [a:object]
-        let dump = '['.join(map(copy(a:object), 'scriptease#dump(v:val, {"seen": childopt.seen, "level": childopt.level})'), ', ').']'
+        let dump = '['.join(map(copy(a:object), 'debug#dump(v:val, {"seen": childopt.seen, "level": childopt.level})'), ', ').']'
         if opt.width && opt.level + len(s:gsub(dump, '.', '.')) > opt.width
             let space = repeat(' ', opt.level)
-            let dump = "[".join(map(copy(a:object), 'scriptease#dump(v:val, childopt)'), ",\n ".space).']'
+            let dump = "[".join(map(copy(a:object), 'debug#dump(v:val, childopt)'), ",\n ".space).']'
         endif
     elseif type(a:object) ==# type({})
         let childopt.seen += [a:object]
         let keys = sort(keys(a:object))
-        let dump = '{'.join(map(copy(keys), 'scriptease#dump(v:val) . ": " . scriptease#dump(a:object[v:val], {"seen": childopt.seen, "level": childopt.level})'), ', ').'}'
+        let dump = '{'.join(map(copy(keys), 'debug#dump(v:val) . ": " . debug#dump(a:object[v:val], {"seen": childopt.seen, "level": childopt.level})'), ', ').'}'
         if opt.width && opt.level + len(s:gsub(dump, '.', '.')) > opt.width
             let space = repeat(' ', opt.level)
             let lines = []
             let last = get(keys, -1, '')
             for k in keys
-                let prefix = scriptease#dump(k) . ':'
-                let suffix = scriptease#dump(a:object[k]) . ','
+                let prefix = debug#dump(k) . ':'
+                let suffix = debug#dump(a:object[k]) . ','
                 if len(space . prefix . ' ' . suffix) >= opt.width - (k ==# last ? opt.tail : '')
-                    call extend(lines, [prefix, scriptease#dump(a:object[k], childopt) . ','])
+                    call extend(lines, [prefix, debug#dump(a:object[k], childopt) . ','])
                 else
                     call extend(lines, [prefix . ' ' . suffix])
                 endif
@@ -111,20 +111,20 @@ fu! scriptease#dump(object, ...) abort
 endfu
 
 fu! s:backslashdump(value, indent) abort
-    let out = scriptease#dump(a:value, {'level': 0, 'width': &textwidth - &shiftwidth * 3 - a:indent})
+    let out = debug#dump(a:value, {'level': 0, 'width': &textwidth - &shiftwidth * 3 - a:indent})
     return s:gsub(out, '\n', "\n".repeat(' ', a:indent + &shiftwidth * 3).'\\')
 endfu
 
-fu! scriptease#pp_command(bang, lnum, value) abort
+fu! debug#pp_command(bang, lnum, value) abort
     if v:errmsg !=# ''
         return
     elseif a:lnum == -1
-        echo scriptease#dump(a:value, {'width': a:bang ? 0 : &columns-1})
+        echo debug#dump(a:value, {'width': a:bang ? 0 : &columns-1})
     else
         exe a:lnum
         let indent = indent(prevnonblank('.'))
         if a:bang
-            let out = scriptease#dump(a:value)
+            let out = debug#dump(a:value)
         else
             let out = s:backslashdump(a:value, indent)
         endif
@@ -133,17 +133,17 @@ fu! scriptease#pp_command(bang, lnum, value) abort
     endif
 endfu
 
-fu! scriptease#ppmsg_command(bang, count, value) abort
+fu! debug#ppmsg_command(bang, count, value) abort
     if v:errmsg !=# ''
         return
     elseif &verbose >= a:count
-        for line in split(scriptease#dump(a:value, {'width': a:bang ? 0 : &columns-1}), "\n")
+        for line in split(debug#dump(a:value, {'width': a:bang ? 0 : &columns-1}), "\n")
             echomsg line
         endfor
     endif
 endfu
 
-fu! scriptease#pp(expr, bang, count) abort
+fu! debug#pp(expr, bang, count) abort
     if empty(a:expr)
       try
         set nomore
@@ -155,7 +155,7 @@ fu! scriptease#pp(expr, bang, count) abort
           echon "\n"
           let v:errmsg = ''
           try
-            call scriptease#pp_command(a:bang, -1, eval(s:input))
+            call debug#pp_command(a:bang, -1, eval(s:input))
           catch
             echohl ErrorMsg
             echo v:exception
@@ -168,14 +168,14 @@ fu! scriptease#pp(expr, bang, count) abort
     endtry
     else
       let v:errmsg = ''
-      call scriptease#pp_command(a:bang, a:count, eval(a:expr))
+      call debug#pp_command(a:bang, a:count, eval(a:expr))
     endif
 endfu
 
-fu! scriptease#ppmsg(expr, bang, count) abort
+fu! debug#ppmsg(expr, bang, count) abort
     if !empty(a:expr)
         let v:errmsg = ''
-        call scriptease#ppmsg_command(a:bang, a:count, empty(a:expr) ? expand('<sfile>') : eval(a:expr))
+        call debug#ppmsg_command(a:bang, a:count, empty(a:expr) ? expand('<sfile>') : eval(a:expr))
     elseif &verbose >= a:count && !empty(expand('<sfile>'))
         echomsg expand('<sfile>').', line '.expand('<slnum>')
     endif
@@ -207,11 +207,11 @@ fu! s:opfunc(type) abort
     endtry
 endfu
 
-fu! scriptease#filterop(type) abort
+fu! debug#filterop(type) abort
     let reg_save = @@
     try
         let expr = s:opfunc(a:type)
-        let @@ = matchstr(expr, '^\_s\+').scriptease#dump(eval(s:gsub(expr,'\n%(\s*\\)=',''))).matchstr(expr, '\_s\+$')
+        let @@ = matchstr(expr, '^\_s\+').debug#dump(eval(s:gsub(expr,'\n%(\s*\\)=',''))).matchstr(expr, '\_s\+$')
         if @@ !~# '^\n*$'
             norm! gv""p
         endif
@@ -226,7 +226,7 @@ endfu
 
 " :Scriptnames {{{1
 
-fu! scriptease#scriptnames_qflist() abort
+fu! debug#scriptnames_qflist() abort
     let names = execute('scriptnames')
     let list = []
     for line in split(names, "\n")
@@ -237,17 +237,17 @@ fu! scriptease#scriptnames_qflist() abort
     return list
 endfu
 
-fu! scriptease#scriptname(file) abort
+fu! debug#scriptname(file) abort
     if a:file =~# '^\d\+$'
-        return get(scriptease#scriptnames_qflist(), a:file-1, {'filename': a:file}).filename
+        return get(debug#scriptnames_qflist(), a:file-1, {'filename': a:file}).filename
     else
         return a:file
     endif
 endfu
 
-fu! scriptease#scriptid(filename) abort
+fu! debug#scriptid(filename) abort
     let filename = fnamemodify(expand(a:filename), ':p')
-    for script in scriptease#scriptnames_qflist()
+    for script in debug#scriptnames_qflist()
         if script.filename ==# filename
             return +script.text
         endif
@@ -288,7 +288,7 @@ fu! s:lencompare(a, b) abort
     return len(a:a) - len(a:b)
 endfu
 
-fu! scriptease#locate(path) abort
+fu! debug#locate(path) abort
     let path = fnamemodify(a:path, ':p')
     let candidates = []
     for glob in split(&runtimepath, ',')
@@ -301,7 +301,7 @@ fu! scriptease#locate(path) abort
     return [preferred, path[strlen(preferred)+1 : -1]]
 endfu
 
-fu! scriptease#runtime_command(bang, ...) abort
+fu! debug#runtime_command(bang, ...) abort
     let unlets = []
     let do = []
     let predo = ''
@@ -309,7 +309,7 @@ fu! scriptease#runtime_command(bang, ...) abort
     if a:0
         let files = a:000
     elseif &filetype ==# 'vim' || expand('%:e') ==# 'vim'
-        let files = [scriptease#locate(expand('%:p'))[1]]
+        let files = [debug#locate(expand('%:p'))[1]]
         if empty(files[0])
             let files = ['%']
         endif
@@ -333,7 +333,7 @@ fu! scriptease#runtime_command(bang, ...) abort
 
     for request in files
         if request =~# '^\.\=[\\/]\|^\w:[\\/]\|^[%#~]\|^\d\+$'
-            let request = scriptease#scriptname(request)
+            let request = debug#scriptname(request)
             let unlets += split(glob(request), "\n")
             let do += map(copy(unlets), '"source ".escape(v:val, " \t|!")')
         else
@@ -358,7 +358,7 @@ endfu
 
 " :Disarm {{{1
 
-fu! scriptease#disarm(file) abort
+fu! debug#disarm(file) abort
     let augroups = filter(readfile(a:file), 'v:val =~# "^\\s*aug\\%[roup]\\s"')
     call filter(augroups, 'v:val !~# "^\\s*aug\\%[roup]\\s\\+END"')
     for augroup in augroups
@@ -406,12 +406,12 @@ fu! s:disable_maps_and_commands(file, buf) abort
     endfor
 endfu
 
-fu! scriptease#disarm_command(bang, ...) abort
+fu! debug#disarm_command(bang, ...) abort
     let files = []
     let unlets = []
     for request in a:000
         if request =~# '^\.\=[\\/]\|^\w:[\\/]\|^[%#~]\|^\d\+$'
-            let request = expand(scriptease#scriptname(request))
+            let request = expand(debug#scriptname(request))
             if isdirectory(request)
                 let request .= "/**/*.vim"
             endif
@@ -421,7 +421,7 @@ fu! scriptease#disarm_command(bang, ...) abort
         endif
     endfor
     for file in files
-        let unlets += [scriptease#disarm(expand(file))]
+        let unlets += [debug#disarm(expand(file))]
     endfor
     echo join(files, ' ')
     return join(filter(unlets, 'v:val !=# ""'), '|')
@@ -442,7 +442,7 @@ fu! s:runtime_globpath(file) abort
     return split(globpath(escape(&runtimepath, ' '), a:file), "\n")
 endfu
 
-fu! scriptease#open_command(count,cmd,file,lcd) abort
+fu! debug#open_command(count,cmd,file,lcd) abort
     let found = s:runtime_globpath(a:file)
     let file = get(found, a:count - 1, '')
     if file ==# ''
@@ -475,7 +475,7 @@ endfu
 
 " zS {{{1
 
-fu! scriptease#synnames(...) abort
+fu! debug#synnames(...) abort
     if a:0
         let [line, col] = [a:1, a:2]
     else
@@ -484,21 +484,21 @@ fu! scriptease#synnames(...) abort
     return reverse(map(synstack(line, col), 'synIDattr(v:val,"name")'))
 endfu
 
-fu! scriptease#synnames_map(count) abort
+fu! debug#synnames_map(count) abort
     if a:count
-        let name = get(scriptease#synnames(), a:count-1, '')
+        let name = get(debug#synnames(), a:count-1, '')
         if name !=# ''
             return 'syntax list '.name
         endif
     else
-        echo join(scriptease#synnames(), ' ')
+        echo join(debug#synnames(), ' ')
     endif
     return ''
 endfu
 
 " K {{{1
 
-fu! scriptease#helptopic() abort
+fu! debug#helptopic() abort
     let col = col('.') - 1
     while col && getline('.')[col] =~# '\k'
         let col -= 1
@@ -509,7 +509,7 @@ fu! scriptease#helptopic() abort
         let col += 1
     endwhile
     let post = getline('.')[col : -1]
-    let syn = get(scriptease#synnames(), 0, '')
+    let syn = get(debug#synnames(), 0, '')
     let cword = expand('<cword>')
     if syn ==# 'vimFuncName'
         return cword.'()'
@@ -536,7 +536,7 @@ fu! s:build_path() abort
     return !empty(old_path) ? old_path.','.new_path : new_path
 endfu
 
-fu! scriptease#includeexpr(file) abort
+fu! debug#includeexpr(file) abort
     if a:file =~# '^\.\=[A-Za-z_]\w*\%(#\w\+\)\+$'
         let f = substitute(a:file, '^\.', '', '')
         return 'autoload/'.tr(matchstr(f, '[^.]\+\ze#') . '.vim', '#', '/')
@@ -544,23 +544,23 @@ fu! scriptease#includeexpr(file) abort
     return substitute(a:file, '<sfile>', '%', 'g')
 endfu
 
-fu! scriptease#cfile() abort
+fu! debug#cfile() abort
     let original = expand('<cfile>')
     let cfile = original
     if cfile =~# '^\.\=[A-Za-z_]\w*\%(#\w\+\)\+$'
-        return '+djump\ ' . matchstr(cfile, '[^.]*') . ' ' . scriptease#includeexpr(cfile)
+        return '+djump\ ' . matchstr(cfile, '[^.]*') . ' ' . debug#includeexpr(cfile)
     else
-        return scriptease#includeexpr(cfile)
+        return debug#includeexpr(cfile)
     endif
 endfu
 
-fu! scriptease#setup_vim() abort
+fu! debug#setup_vim() abort
     let &l:path = s:build_path()
     setl suffixesadd=.vim keywordprg=:help
-    setl includeexpr=scriptease#includeexpr(v:fname)
+    setl includeexpr=debug#includeexpr(v:fname)
     setl include=^\\s*\\%(so\\%[urce]\\\|ru\\%[untime]\\)[!\ ]\ *
     setl define=^\\s*fu\\%[nction][!\ ]\\s*
-    cno <expr><buffer> <Plug><cfile> scriptease#cfile()
+    cno <expr><buffer> <Plug><cfile> debug#cfile()
     let b:dispatch = ':Runtime'
     com! -bar -bang -buffer Console Runtime|PP
     com! -buffer -bar -nargs=? -complete=custom,s:Complete_breakadd Breakadd
@@ -568,10 +568,10 @@ fu! scriptease#setup_vim() abort
     com! -buffer -bar -nargs=? -complete=custom,s:Complete_breakdel Breakdel
                 \ exe s:break('del',<q-args>)
 
-    nno <buffer> <nowait> <silent>  K  :<c-u>exe 'help '.scriptease#helptopic()<cr>
+    nno <buffer> <nowait> <silent>  K  :<c-u>exe 'help '.debug#helptopic()<cr>
 endfu
 
-fu! scriptease#setup_help() abort
+fu! debug#setup_help() abort
     let &l:path = s:build_path()
     com! -bar -bang -buffer Console PP
 endfu
