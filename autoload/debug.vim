@@ -1,6 +1,133 @@
-" messages_command {{{1
+" break {{{1
 
-fu! debug#messages_command(bang) abort
+fu! s:break(type, arg) abort
+    if a:arg ==# 'here' || a:arg ==# ''
+        " we can't simply look for `fu!` backwards, because there could be
+        " a whole function defined before us inside the current function
+        "
+        " so we need to use `searchpair()`
+        "
+        " what `searchpair('fu!', … , 'b')` does, is:
+        "
+        "         initialize a counter to 0
+        "         look at `fu!` backwards
+        "         every time `endfu` is found, increase the counter
+        "         every time `fu!` is found, decrease the counter
+        "         go on until `fu!` is found while the counter is zero
+
+        let l:lnum = searchpair('^\s*fu\%[nction]\>.*(', '', '^\s*endf\%[unction]\>', 'Wbn')
+        if l:lnum && l:lnum < line('.')
+            let function = matchstr(getline(l:lnum), '^\s*\w\+!\=\s*\zs[^( ]*')
+            if function =~# '^s:\|^<SID>'
+                let id = s:script_id('%')
+                if id
+                    let function = s:sub(function, '^s:|^\<SID\>', '<SNR>'.id.'_')
+                else
+                    return 'echoerr "Could not determine script id"'
+                endif
+            endif
+            if function =~# '\.'
+                return 'echoerr "Dictionary functions not supported"'
+            endif
+            return 'break'.a:type.' func '.(line('.')==l:lnum ? '' : line('.')-l:lnum).' '.function
+        else
+            return 'break'.a:type.' here'
+        endif
+    endif
+    return 'break'.a:type.' '.s:break_snr(a:arg)
+endfu
+
+" break_setup {{{1
+
+fu! debug#break_setup() abort
+    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakadd Breakadd
+                \ exe s:break('add',<q-args>)
+    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakdel Breakdel
+                \ exe s:break('del',<q-args>)
+endfu
+
+" break_snr {{{1
+
+fu! s:break_snr(arg) abort
+    let id = s:script_id('%')
+    if id
+        return s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
+    else
+        return a:arg
+    endif
+endfu
+
+" complete_breakadd {{{1
+
+fu! s:complete_breakadd(arg, cmdline, _pos) abort
+    let functions = join(sort(map(split(execute('function'), '\n'), 'matchstr(v:val, " \\zs[^(]*")')), '\n')
+    if a:cmdline =~# '^\w\+\s\+\w*$'
+        return "here\nfile\nfunc"
+
+    elseif a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
+        let id = s:script_id('%')
+        return s:gsub(functions,'\<SNR\>'.id.'_', 's:')
+
+    elseif a:cmdline =~# '^\w\+\s\+func '
+        return functions
+
+    elseif a:cmdline =~# '^\w\+\s\+file '
+        return glob(a:arg.'*')
+    else
+        return ''
+    endif
+endfu
+
+" complete_breakdel {{{1
+
+fu! s:complete_breakdel(arg, cmdline, _pos) abort
+    let args = matchstr(a:cmdline, '\s\zs\S.*')
+    let list = split(execute('breaklist'), '\n')
+    call map(list, 's:sub(v:val, ''^\s*\d+\s*(\w+) (.*)  line (\d+)$'', ''\1 \3 \2'')')
+
+    if a:cmdline =~# '^\w\+\s\+\w*$'
+        return "*\nhere\nfile\nfunc"
+
+    elseif a:cmdline =~# '\v^\w+\s+func\s'
+        return join(map(filter(list, 'v:val =~# "^func"'), 'v:val[5 : -1]'), '\n')
+
+    elseif a:cmdline =~# '\v^\w+\s+file\s'
+        return join(map(filter(list, 'v:val =~# "^file"'), 'v:val[5 : -1]'), '\n')
+
+    else
+        return ''
+    endif
+endfu
+
+" gsub {{{1
+
+fu! s:gsub(str,pat,rep) abort
+    return substitute(a:str,'\v\C'.a:pat,a:rep,'g')
+endfu
+
+" messages {{{1
+
+fu! debug#messages() abort
+    0Verbose messages
+    let noises = {
+                 \ 'changes':            '\d+ changes?; %(before|after) #\d+.*ago' ,
+                 \ 'empty lines':        '\s*' ,
+                 \ 'file loaded':        '".{-}".*\d+L, \d+C',
+                 \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
+                 \ 'verbose':            ':0Verbose messages$',
+                 \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; before #\d+.*ago)?',
+                 \ '1 more line less':   '1 %(more )?line%( less)?%(; before #\d+.*ago)?',
+                 \ 'yanked lines':       '\d+ lines yanked',
+                 \ }
+
+    for noise in values(noises)
+        sil! exe 'g/\v^'.noise.'$/d_'
+    endfor
+
+    call matchadd('ErrorMsg', '^E\d\+:\s\+.*')
+endfu
+
+fu! debug#messages_old() abort
 
     " `qfl` is a list of dictionaries
     " each one has the key:
@@ -139,113 +266,6 @@ fu! debug#messages_command(bang) abort
     call search('^[^|]', 'bWc')
 endfu
 
-" break {{{1
-
-fu! s:break(type, arg) abort
-    if a:arg ==# 'here' || a:arg ==# ''
-        " we can't simply look for `fu!` backwards, because there could be
-        " a whole function defined before us inside the current function
-        "
-        " so we need to use `searchpair()`
-        "
-        " what `searchpair('fu!', … , 'b')` does, is:
-        "
-        "         initialize a counter to 0
-        "         look at `fu!` backwards
-        "         every time `endfu` is found, increase the counter
-        "         every time `fu!` is found, decrease the counter
-        "         go on until `fu!` is found while the counter is zero
-
-        let l:lnum = searchpair('^\s*fu\%[nction]\>.*(', '', '^\s*endf\%[unction]\>', 'Wbn')
-        if l:lnum && l:lnum < line('.')
-            let function = matchstr(getline(l:lnum), '^\s*\w\+!\=\s*\zs[^( ]*')
-            if function =~# '^s:\|^<SID>'
-                let id = s:script_id('%')
-                if id
-                    let function = s:sub(function, '^s:|^\<SID\>', '<SNR>'.id.'_')
-                else
-                    return 'echoerr "Could not determine script id"'
-                endif
-            endif
-            if function =~# '\.'
-                return 'echoerr "Dictionary functions not supported"'
-            endif
-            return 'break'.a:type.' func '.(line('.')==l:lnum ? '' : line('.')-l:lnum).' '.function
-        else
-            return 'break'.a:type.' here'
-        endif
-    endif
-    return 'break'.a:type.' '.s:break_snr(a:arg)
-endfu
-
-" break_setup {{{1
-
-fu! debug#break_setup() abort
-    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakadd Breakadd
-                \ exe s:break('add',<q-args>)
-    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakdel Breakdel
-                \ exe s:break('del',<q-args>)
-endfu
-
-" break_snr {{{1
-
-fu! s:break_snr(arg) abort
-    let id = s:script_id('%')
-    if id
-        return s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
-    else
-        return a:arg
-    endif
-endfu
-
-" complete_breakadd {{{1
-
-fu! s:complete_breakadd(A, L, P) abort
-    let functions = join(sort(map(split(execute('function'), '\n'), 'matchstr(v:val, " \\zs[^(]*")')), '\n')
-    if a:L =~# '^\w\+\s\+\w*$'
-        return "here\nfile\nfunc"
-
-    elseif a:L =~# '^\w\+\s\+func\s*\d*\s\+s:'
-        let id = s:script_id('%')
-        return s:gsub(functions,'\<SNR\>'.id.'_', 's:')
-
-    elseif a:L =~# '^\w\+\s\+func '
-        return functions
-
-    elseif a:L =~# '^\w\+\s\+file '
-        return glob(a:A.'*')
-    else
-        return ''
-    endif
-endfu
-
-" complete_breakdel {{{1
-
-fu! s:complete_breakdel(A, L, P) abort
-    let args = matchstr(a:L, '\s\zs\S.*')
-    let list = split(execute('breaklist'), "\n")
-    call map(list, 's:sub(v:val, ''^\s*\d+\s*(\w+) (.*)  line (\d+)$'', ''\1 \3 \2'')')
-
-    if a:L =~# '^\w\+\s\+\w*$'
-        return "*\nhere\nfile\nfunc"
-
-    elseif a:L =~# '^\w\+\s\+func\s'
-        return join(map(filter(list, 'v:val =~# "^func"'), 'v:val[5 : -1]'), "\n")
-
-    elseif a:L =~# '^\w\+\s\+file\s'
-        return join(map(filter(list, 'v:val =~# "^file"'), 'v:val[5 : -1]'), "\n")
-
-    else
-        return ''
-    endif
-endfu
-
-" gsub {{{1
-
-fu! s:gsub(str,pat,rep) abort
-    return substitute(a:str,'\v\C'.a:pat,a:rep,'g')
-endfu
-
 " script_id {{{1
 
 fu! s:script_id(filename) abort
@@ -256,12 +276,6 @@ fu! s:script_id(filename) abort
         endif
     endfor
     return ''
-endfu
-
-" sub {{{1
-
-fu! s:sub(str,pat,rep) abort
-    return substitute(a:str,'\v\C'.a:pat,a:rep,'')
 endfu
 
 " scriptnames {{{1
@@ -281,6 +295,12 @@ fu! debug#scriptnames() abort
     call setqflist([], 'a', { 'title': ':Scriptnames'})
     copen
 endfu
+" sub {{{1
+
+fu! s:sub(str,pat,rep) abort
+    return substitute(a:str,'\v\C'.a:pat,a:rep,'')
+endfu
+
 " time {{{1
 
 " Check if debug#time() exists before trying to define it.
@@ -290,6 +310,13 @@ endfu
 if exists('*debug#time')
     finish
 endif
+" NOTE:
+" We could also add a guard at the beginning of this file:
+"
+"         if exists('g:loaded_my_debug')
+"           finish
+"         endif
+"         let g:loaded_my_debug = 1
 
 fu! debug#time(cmd, cnt)
     let time = reltime()

@@ -3,8 +3,8 @@ augroup my_debug
     au FileType vim call debug#break_setup()
 augroup END
 
-com! -bar -bang  Messages     call debug#messages_command(<bang>0)
-com! -bar        Scriptnames  call debug#scriptnames()
+nno <silent>  g?           :<c-u>call debug#messages()<cr>
+com! -bar     Scriptnames  call debug#scriptnames()
 
 " NOTE: If we execute the function (like tpope does), we have to make it return
 " an empty string. Otherwise, by default, it will return 0, which makes the cursor
