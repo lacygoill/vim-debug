@@ -3,7 +3,9 @@ augroup my_debug
     au FileType vim call debug#break_setup()
 augroup END
 
-nno <silent>  g?           :<c-u>call debug#messages()<cr>
+nno <silent>  g?   :<c-u>call debug#messages()<cr>
+nno <silent>  zS   :<c-u>exe debug#synnames_map(v:count)<cr>
+
 com! -bar     Scriptnames  call debug#scriptnames()
 
 " NOTE: If we execute the function (like tpope does), we have to make it return
