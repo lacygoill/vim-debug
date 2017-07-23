@@ -9,11 +9,11 @@ fu! s:break(type, arg) abort
         "
         " what `searchpair('fu!', … , 'b')` does, is:
         "
-        "         initialize a counter to 0
-        "         look at `fu!` backwards
-        "         every time `endfu` is found, increase the counter
-        "         every time `fu!` is found, decrease the counter
-        "         go on until `fu!` is found while the counter is zero
+        "       1. initialize a counter to 0
+        "       2. look at `fu!` backwards
+        "       3. every time `endfu` is found, increase the counter
+        "       4. every time `fu!` is found, decrease the counter
+        "       5. go on until `fu!` is found while the counter is zero
 
         let l:lnum = searchpair('^\s*fu\%[nction]\>.*(', '', '^\s*endf\%[unction]\>', 'Wbn')
         if l:lnum && l:lnum < line('.')
@@ -117,14 +117,16 @@ fu! debug#messages() abort
                  \ 'verbose':            ':0Verbose messages',
                  \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; before #\d+.*ago)?',
                  \ '1 more line less':   '1 %(more )?line%( less)?%(; before #\d+.*ago)?',
-                 \ 'yanked lines':       '\d+ lines yanked',
+                 \ 'yanked lines':       '%(block of )?\d+ lines yanked',
                  \ }
 
     for noise in values(noises)
         sil! exe 'g/\v^'.noise.'$/d_'
     endfor
 
-    call matchadd('ErrorMsg', '^E\d\+:\s\+.*')
+    call matchadd('ErrorMsg', '\v^E\d+:\s+.*')
+    call matchadd('ErrorMsg', '^Error detected while processing.*')
+    call matchadd('LineNr', '\v^line\s+\d+:$')
 endfu
 
 fu! debug#messages_old() abort

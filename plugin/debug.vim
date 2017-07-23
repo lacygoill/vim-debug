@@ -8,10 +8,11 @@ nno <silent>  zS   :<c-u>exe debug#synnames_map(v:count)<cr>
 
 com! -bar     Scriptnames  call debug#scriptnames()
 
-" NOTE: If we execute the function (like tpope does), we have to make it return
-" an empty string. Otherwise, by default, it will return 0, which makes the cursor
-" move on line 0 (1st line of buffer).
-
+"                                             ┌─ If we execute the function (like tpope does),
+"                                             │  we have to make it return an empty string.
+"                                             │  Otherwise, by default, it will return 0, which makes
+"                                             │  the cursor move on line 0 (1st line of buffer).
+"                                             │
 com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "    │
 "    └─ tpope uses `-count=1` instead of `-range=1`
