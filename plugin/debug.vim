@@ -1,12 +1,13 @@
+" autocmd {{{1
+
 augroup my_debug
     au!
     au FileType vim call debug#break_setup()
 augroup END
 
-nno <silent>  g?   :<c-u>call debug#messages()<cr>
-nno <silent>  zS   :<c-u>exe debug#synnames_map(v:count)<cr>
+" commands {{{1
 
-com! -bar     Scriptnames  call debug#scriptnames()
+com! -bar Scriptnames  call debug#scriptnames()
 
 "                                             ┌─ If we execute the function (like tpope does),
 "                                             │  we have to make it return an empty string.
@@ -22,3 +23,16 @@ com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "
 "       I prefer `-range=1`: only works as a prefix. I will never use the
 "       other syntax anyway.
+
+" mappings {{{1
+
+nno <silent>  g?   :<c-u>call debug#messages()<cr>
+
+" Usage:
+" all these commands apply to the character under the cursor
+"
+"     ZS     show the names of all syntax groups
+"     1ZS    show the definition of the innermost syntax group
+"     3ZS    show the definition of the 3rd syntax group
+
+nno <silent>  ZS   :<c-u>call debug#synnames_map(v:count)<cr>

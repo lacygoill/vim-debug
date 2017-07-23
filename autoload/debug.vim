@@ -116,11 +116,13 @@ fu! debug#messages() abort
                  \ 'empty lines':        '\s*' ,
                  \ 'file loaded':        '".{-}" line \d+ of \d+ --\d+\%-- col \d+',
                  \ 'file reloaded':      '".{-}".*\d+L, \d+C',
+                 \ 'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
                  \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
                  \ 'verbose':            ':0Verbose messages',
                  \ 'yanked lines':       '%(block of )?\d+ lines yanked',
                  \ }
 
+    " Col 1 of 6; Line 1 of 2293; Word 1 of 10046; Char 1 of 90827; Byte 1 of 100875
     for noise in values(noises)
         sil! exe 'g/\v^'.noise.'$/d_'
     endfor
@@ -347,22 +349,28 @@ endfu
 " zS {{{1
 
 fu! debug#synnames(...) abort
-    if a:0
-        let [line, col] = [a:1, a:2]
-    else
-        let [line, col] = [line('.'), col('.')]
-    endif
-    return reverse(map(synstack(line, col), 'synIDattr(v:val,"name")'))
+    "                     The syntax element under the cursor is part of
+    "                     a group, which can be contained in another one, and
+    "                     so on.
+    "
+    "                     This imbrication of syntax groups can be seen as a stack.
+    "                     `synstack()` returns the list of IDs for all syntax groups
+    "                     in the stack, at the position given.
+    "
+    "                     They are sorted from the outer syntax group, to the innermost.
+    "
+    "                  ┌─ The last one is what `synID()` returns.
+    "                  │
+    return reverse(map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")'))
 endfu
 
 fu! debug#synnames_map(count) abort
     if a:count
         let name = get(debug#synnames(), a:count-1, '')
-        if name !=# ''
-            return 'syntax list '.name
+        if !empty(name)
+            exe 'syntax list '.name
         endif
     else
-        echo join(debug#synnames(), ' ')
+        echo join(debug#synnames())
     endif
-    return ''
 endfu
