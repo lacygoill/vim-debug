@@ -1,4 +1,1 @@
-com! -bar -count=0 Scriptnames
-                \  call setqflist(debug#scriptnames())
-                \| copen
-                \| <count>
+com! -bar Scriptnames call debug#scriptnames()

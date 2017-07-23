@@ -10,5 +10,8 @@ fu! debug#scriptnames() abort
                            \ })
         endif
     endfor
-    return list
+
+    call setqflist(list)
+    call setqflist([], 'a', { 'title': ':Scriptnames'})
+    copen
 endfu
