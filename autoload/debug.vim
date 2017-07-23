@@ -112,7 +112,8 @@ fu! debug#messages() abort
     let noises = {
                  \ 'changes':            '\d+ changes?; %(before|after) #\d+.*ago' ,
                  \ 'empty lines':        '\s*' ,
-                 \ 'file loaded':        '".{-}".*\d+L, \d+C',
+                 \ 'file loaded':        '".{-}" line \d+ of \d+ --\d+\%-- col \d+',
+                 \ 'file reloaded':      '".{-}".*\d+L, \d+C',
                  \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
                  \ 'verbose':            ':0Verbose messages',
                  \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; before #\d+.*ago)?',
