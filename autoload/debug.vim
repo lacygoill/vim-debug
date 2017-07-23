@@ -114,7 +114,7 @@ fu! debug#messages() abort
                  \ 'empty lines':        '\s*' ,
                  \ 'file loaded':        '".{-}".*\d+L, \d+C',
                  \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
-                 \ 'verbose':            ':0Verbose messages$',
+                 \ 'verbose':            ':0Verbose messages',
                  \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; before #\d+.*ago)?',
                  \ '1 more line less':   '1 %(more )?line%( less)?%(; before #\d+.*ago)?',
                  \ 'yanked lines':       '\d+ lines yanked',
