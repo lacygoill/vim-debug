@@ -463,29 +463,6 @@ fu! debug#open_command(count,cmd,file,lcd) abort
     endif
 endfu
 
-" zS {{{1
-
-fu! debug#synnames(...) abort
-    if a:0
-        let [line, col] = [a:1, a:2]
-    else
-        let [line, col] = [line('.'), col('.')]
-    endif
-    return reverse(map(synstack(line, col), 'synIDattr(v:val,"name")'))
-endfu
-
-fu! debug#synnames_map(count) abort
-    if a:count
-        let name = get(debug#synnames(), a:count-1, '')
-        if name !=# ''
-            return 'syntax list '.name
-        endif
-    else
-        echo join(debug#synnames(), ' ')
-    endif
-    return ''
-endfu
-
 " K {{{1
 
 fu! debug#helptopic() abort
@@ -516,6 +493,15 @@ fu! debug#helptopic() abort
     else
         return cword
     endif
+endfu
+
+fu! debug#synnames(...) abort
+    if a:0
+        let [line, col] = [a:1, a:2]
+    else
+        let [line, col] = [line('.'), col('.')]
+    endif
+    return reverse(map(synstack(line, col), 'synIDattr(v:val,"name")'))
 endfu
 
 " Settings {{{1

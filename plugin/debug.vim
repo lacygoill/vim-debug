@@ -8,11 +8,6 @@ let g:loaded_scriptease = 1
 com! -bang -range=-1 -nargs=? -complete=expression PP    call debug#pp(<q-args>, <bang>0, <count>)
 com! -bang -range=0  -nargs=? -complete=expression PPmsg call debug#ppmsg()
 
-com! -bar -count=0 Scriptnames
-            \  call setqflist(debug#scriptnames_qflist())
-            \| copen
-            \| <count>
-
 com! -bar -bang Messages exe debug#messages_command(<bang>0)
 
 com! -bang -bar -nargs=* -complete=customlist,debug#complete Runtime
@@ -43,8 +38,6 @@ com! -bar -bang -range=1 -nargs=1 -complete=customlist,debug#complete Vread
 nno <silent>  g!   :<c-u>set opfunc=debug#filterop<cr>g@
 nno <silent>  g!!  :<c-u>set opfunc=debug#filterop<cr>g@_
 xno <silent>  g!   :<c-u>call debug#filterop(visualmode())<cr>
-
-nno <silent>  zS   :<c-u>exe debug#synnames_map(v:count)<cr>
 
 " Filetype {{{1
 
