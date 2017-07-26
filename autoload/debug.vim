@@ -113,6 +113,7 @@ fu! debug#messages() abort
                  \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; %(before|after) #\d+.*)?',
                  \ '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
                  \ 'changes':            '\d+ changes?; %(before|after) #\d+.*' ,
+                 \ 'end of changelist':  'E663: At end of changelist',
                  \ 'empty lines':        '\s*' ,
                  \ 'file loaded':        '".{-}" line \d+ of \d+ --\d+\%-- col \d+',
                  \ 'file reloaded':      '".{-}".*\d+L, \d+C',
