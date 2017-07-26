@@ -119,6 +119,7 @@ fu! debug#messages() abort
                  \ 'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
                  \ 'empty lines':        '\s*' ,
                  \ 'lines filtered':     '\d+ lines filtered' ,
+                 \ 'lines indented':     '\d+ lines [><]ed \d+ times?',
                  \ 'file loaded':        '".{-}"%( \[RO\])? line \d+ of \d+ --\d+\%-- col \d+%(-\d+)?',
                  \ 'file reloaded':      '".{-}".*\d+L, \d+C',
                  \ 'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
