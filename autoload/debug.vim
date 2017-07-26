@@ -114,6 +114,8 @@ fu! debug#messages() abort
                  \ '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
                  \ 'changes':            '\d+ changes?; %(before|after) #\d+.*' ,
                  \ 'e387':               'E387: Match is on current line',
+                 \ 'e486':               'E486: Pattern not found: \S*',
+                 \ 'e492':               'E492: Not an editor command: \S+',
                  \ 'e501':               'E501: At end-of-file',
                  \ 'e663':               'E663: At end of changelist',
                  \ 'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
