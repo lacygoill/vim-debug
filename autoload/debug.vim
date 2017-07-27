@@ -353,6 +353,7 @@ fu! debug#time(cmd, cnt)
         echomsg matchstr(reltimestr(reltime(time)), '\v.*\..{,3}').' seconds to run :'.a:cmd
     endtry
 endfu
+
 " zS {{{1
 
 fu! debug#synnames(...) abort
