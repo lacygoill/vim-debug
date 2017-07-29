@@ -109,6 +109,12 @@ endfu
 
 fu! debug#messages() abort
     0Verbose messages
+
+    " From a help buffer, the buffer displayed in a newly opened preview
+    " window inherits some settings, such as 'nomodifiable' and 'readonly'.
+    " Make sure they're disabled so that we can remove noise.
+    setl ma noro
+
     let noises = {
                  \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; %(before|after) #\d+.*)?',
                  \ '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
