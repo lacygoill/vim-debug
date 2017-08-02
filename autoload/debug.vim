@@ -118,6 +118,7 @@ fu! debug#messages() abort
     let noises = {
                  \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; %(before|after) #\d+.*)?',
                  \ '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
+                 \ 'change':             'Already at %(new|old)est change',
                  \ 'changes':            '\d+ changes?; %(before|after) #\d+.*' ,
                  \ 'E21':                "E21: Cannot make changes, 'modifiable' is off",
                  \ 'E387':               'E387: Match is on current line',
@@ -134,7 +135,7 @@ fu! debug#messages() abort
                  \ 'file reloaded':      '".{-}".*\d+L, \d+C',
                  \ 'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
                  \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
-                 \ 'newest change':      'Already at newest change',
+                 \ 'substitutions':      '\d+ substitutions? on \d+ lines?',
                  \ 'verbose':            ':0Verbose messages',
                  \ 'W10':                'W10: Warning: Changing a readonly file',
                  \ 'yanked lines':       '%(block of )?\d+ lines yanked',
