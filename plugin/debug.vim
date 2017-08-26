@@ -31,8 +31,21 @@ nno <silent>  g?   :<c-u>call debug#messages()<cr>
 " Usage:
 " all these commands apply to the character under the cursor
 "
-"     ZS     show the names of all syntax groups
-"     1ZS    show the definition of the innermost syntax group
-"     3ZS    show the definition of the 3rd syntax group
+"     zs     show the names of all syntax groups
+"     1zs    show the definition of the innermost syntax group
+"     3zs    show the definition of the 3rd syntax group
 
-nno <silent>  ZS   :<c-u>call debug#synnames_map(v:count)<cr>
+nno <silent>  zs   :<c-u>call debug#synnames_map(v:count)<cr>
+
+" We've just lost the default `zs` command. Restore it on `zS`.
+nno zS zs
+" For consistency's sake, do the same for `ze`.
+nno zE ze
+
+" NOTE:
+" What do `zs` and `ze` do?
+" When 'wrap' is off, and the cursor is on a long line, a few characters after
+" the beginning of the line (column 7?), `zs` will move the viewport so that the
+" current character is near the start of the line.
+" `ze` do the same, but it moves the viewport so that the current character is
+" near the end of the line.
