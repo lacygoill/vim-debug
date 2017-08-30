@@ -1,3 +1,10 @@
+" guard {{{1
+
+if exists('g:auto_loaded_debug')
+    finish
+endif
+let g:auto_loaded_debug = 1
+
 " break {{{1
 
 fu! s:break(type, arg) abort

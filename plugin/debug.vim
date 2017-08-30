@@ -1,3 +1,10 @@
+" guard {{{1
+
+if exists('g:loaded_debug')
+    finish
+endif
+let g:loaded_debug = 1
+
 " autocmd {{{1
 
 augroup my_debug
