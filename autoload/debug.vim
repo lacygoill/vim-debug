@@ -367,12 +367,15 @@ fu! debug#time(cmd, cnt)
         else
             exe a:cmd
         endif
+    catch
+        return 'echoerr '.string(v:exception)
     finally
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
         redraw
-        echomsg matchstr(reltimestr(reltime(time)), '\v.*\..{,3}').' seconds to run :'.a:cmd
+        echom matchstr(reltimestr(reltime(time)), '\v.*\..{,3}').' seconds to run :'.a:cmd
     endtry
+    return ''
 endfu
 
 " zS {{{1
