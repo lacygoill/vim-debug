@@ -47,10 +47,10 @@ endfu
 " break_setup {{{1
 
 fu! debug#break_setup() abort
-    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakadd Breakadd
-                \ exe s:break('add',<q-args>)
-    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakdel Breakdel
-                \ exe s:break('del',<q-args>)
+    com! -buffer -nargs=? -complete=custom,s:complete_breakadd Breakadd
+    \                                                          exe s:break('add',<q-args>)
+    com! -buffer -nargs=? -complete=custom,s:complete_breakdel Breakdel
+    \                                                          exe s:break('del',<q-args>)
 endfu
 
 " break_snr {{{1
