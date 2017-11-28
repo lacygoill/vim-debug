@@ -26,6 +26,11 @@ com! -range=1 -nargs=+ -complete=command Time exe debug#time(<q-args>, <count>)
 "       I prefer `-range=1`: only works as a prefix. I will never use the
 "       other syntax anyway.
 
+com! -bar -nargs=1 -complete=option Vov echo 'local: '
+\|                                      verb setl <args>?
+\|                                      echo "\nglobal: "
+\|                                      verb setg <args>?
+
 " mappings {{{1
 
 nno <silent>  g?   :<c-u>call debug#messages()<cr>
