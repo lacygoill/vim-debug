@@ -14,6 +14,26 @@ augroup END
 
 " commands {{{1
 
+" Purpose:{{{
+"
+" Our custom <cr> mapping prevents us from using `:debug`.
+" Don't even try, you wouldn't be able to quit debug mode.
+" We install `:Debug` as a thin wrapper which temporarily removes our mapping.
+"}}}
+" What happens if we use a custom mapping while in debug mode?{{{
+"
+" You'll see  the first  line of  the function  which it  calls (it  happens for
+" example with `c-t` ; transpose-chars).  And, you'll step through it.
+"}}}
+" What to do in this case?{{{
+"
+" Execute `cont` to get out.
+"
+" If you have used one of our custom editing command several times, you'll
+" have to re-execute `cont` as many times as needed.
+"}}}
+com! -bar -nargs=1 Debug exe debug#wrapper(<q-args>)
+
 com! -bar Scriptnames  call debug#scriptnames()
 
 com! -range=1 -nargs=+ -complete=command Time exe debug#time(<q-args>, <count>)

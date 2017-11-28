@@ -1,9 +1,9 @@
 " guard {{{1
 
-if exists('g:auto_loaded_debug')
+if exists('g:autoloaded_debug')
     finish
 endif
-let g:auto_loaded_debug = 1
+let g:autoloaded_debug = 1
 
 " break {{{1
 
@@ -336,21 +336,6 @@ endfu
 
 " time {{{1
 
-" Check if debug#time() exists before trying to define it.
-" Otherwise, `:Time source %` raises an error because it tries to redefine
-" debug#time() while it's running.
-
-if exists('*debug#time')
-    finish
-endif
-" NOTE:
-" We could also add a guard at the beginning of this file:
-"
-"         if exists('g:loaded_my_debug')
-"           finish
-"         endif
-"         let g:loaded_my_debug = 1
-
 fu! debug#time(cmd, cnt)
     let time = reltime()
     try
@@ -374,6 +359,18 @@ fu! debug#time(cmd, cnt)
         " possible messages displayed by the command.
         redraw
         echom matchstr(reltimestr(reltime(time)), '\v.*\..{,3}').' seconds to run :'.a:cmd
+    endtry
+    return ''
+endfu
+
+fu! debug#wrapper(cmd) abort "{{{1
+    try
+        ToggleEditingCommands 0
+        exe 'debug '.a:cmd
+    catch
+        return 'echoerr '.string(v:exception)
+    finally
+        ToggleEditingCommands 1
     endtry
     return ''
 endfu
