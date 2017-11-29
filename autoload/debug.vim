@@ -1,3 +1,125 @@
+" fu! debug#runtime_command(bang, ...) abort
+"     let unlets = []
+"     let do = []
+"     let predo = ''
+"
+"     if a:0
+"         let files = a:000
+"     elseif &filetype ==# 'vim' || expand('%:e') ==# 'vim'
+"         let files = [debug#locate(expand('%:p'))[1]]
+"         if empty(files[0])
+"             let files = ['%']
+"         endif
+"         if &modified && (&autowrite || &autowriteall)
+"             let predo = 'sil wall|'
+"         endif
+"     else
+"         for ft in split(&filetype, '\.')
+"             for pat in ['ftplugin/%s.vim', 'ftplugin/%s_*.vim', 'ftplugin/%s/*.vim', 'indent/%s.vim', 'syntax/%s.vim', 'syntax/%s/*.vim']
+"                 call extend(unlets, split(globpath(&rtp, printf(pat, ft)), "\n"))
+"             endfor
+"         endfor
+"         let run = s:unlet_for(unlets)
+"         if run !=# ''
+"             let run .= '|'
+"         endif
+"         let run .= 'filetype detect'
+"         echo ':'.run
+"         return run
+"     endif
+"
+"     for request in files
+"         if request =~# '^\.\=[\\/]\|^\w:[\\/]\|^[%#~]\|^\d\+$'
+"             let request = debug#scriptname(request)
+"             let unlets += split(glob(request), "\n")
+"             let do += map(copy(unlets), '"source ".escape(v:val, " \t|!")')
+"         else
+"             if get(do, 0, [''])[0] !~# '^runtime!'
+"                 let do += ['runtime!']
+"             endif
+"             let unlets += split(globpath(&rtp, request, 1), "\n")
+"             let do[-1] .= ' '.escape(request, " \t|!")
+"         endif
+"     endfor
+"     if !a:bang
+"         call extend(do, ['filetype detect'])
+"     endif
+"     let run = s:unlet_for(unlets)
+"     if run !=# ''
+"         let run .= '|'
+"     endif
+"     let run .= join(do, '|')
+"     echo ':'.run
+"     return predo.run
+" endfu
+
+" fu! s:unlet_for(files) abort
+"     let guards = []
+"     for file in a:files
+"         if filereadable(file)
+"             let lines = readfile(file, '', 500)
+"             if len(lines)
+"                 for i in range(len(lines)-1)
+"                     let unlet = matchstr(lines[i], '^if .*\<exists *( *[''"]\%(\g:\)\=\zs[0-9A-Za-z_#]\+\ze[''"]')
+"                     if unlet !=# '' && index(guards, unlet) == -1
+"                         for j in range(0, 4)
+"                             if get(lines, i+j, '') =~# '^\s*finish\>'
+"                                 call extend(guards, [unlet])
+"                                 break
+"                             endif
+"                         endfor
+"                     endif
+"                 endfor
+"             endif
+"         endif
+"     endfor
+"     if empty(guards)
+"         return ''
+"     else
+"         return 'unlet! '.join(map(guards, '"g:".v:val'), ' ')
+"     endif
+" endfu
+
+" fu! debug#locate(path) abort
+"     let path = fnamemodify(a:path, ':p')
+"     let candidates = []
+"     for glob in split(&runtimepath, ',')
+"         let candidates += filter(split(glob(glob), "\n"), 'path[0 : len(v:val)-1] ==# v:val && path[len(v:val)] =~# "[\\/]"')
+"     endfor
+"     if empty(candidates)
+"         return ['', '']
+"     endif
+"     let preferred = sort(candidates, s:function('s:lencompare'))[-1]
+"     return [preferred, path[strlen(preferred)+1 : -1]]
+" endfu
+
+" fu! s:function(name) abort
+"     return function(substitute(a:name,'^s:',matchstr(expand('<sfile>'), '.*\zs<SNR>\d\+_'),''))
+" endfu
+
+" fu! s:lencompare(a, b) abort
+"     return len(a:a) - len(a:b)
+" endfu
+
+" fu! debug#scriptnames_qflist() abort
+"     let names = execute('scriptnames')
+"     let list = []
+"     for line in split(names, "\n")
+"         if line =~# ':'
+"             call add(list, {'text': matchstr(line, '\d\+'), 'filename': expand(matchstr(line, ': \zs.*'))})
+"         endif
+"     endfor
+"     return list
+" endfu
+
+" fu! debug#scriptname(file) abort
+"     if a:file =~# '^\d\+$'
+"         return get(debug#scriptnames_qflist(), a:file-1, {'filename': a:file}).filename
+"     else
+"         return a:file
+"     endif
+" endfu
+
 " guard {{{1
 
 if exists('g:autoloaded_debug')
@@ -66,7 +188,7 @@ endfu
 
 " complete_breakadd {{{1
 
-fu! s:complete_breakadd(arg, cmdline, _pos) abort
+fu! s:complete_breakadd(arglead, cmdline, _p) abort
     let functions = join(sort(map(split(execute('function'), '\n'), 'matchstr(v:val, " \\zs[^(]*")')), '\n')
     if a:cmdline =~# '^\w\+\s\+\w*$'
         return "here\nfile\nfunc"
@@ -79,7 +201,7 @@ fu! s:complete_breakadd(arg, cmdline, _pos) abort
         return functions
 
     elseif a:cmdline =~# '^\w\+\s\+file '
-        return glob(a:arg.'*')
+        return glob(a:arglead.'*')
     else
         return ''
     endif
@@ -87,7 +209,7 @@ endfu
 
 " complete_breakdel {{{1
 
-fu! s:complete_breakdel(arg, cmdline, _pos) abort
+fu! s:complete_breakdel(arglead, cmdline, _pos) abort
     let args = matchstr(a:cmdline, '\s\zs\S.*')
     let list = split(execute('breaklist'), '\n')
     call map(list, 's:sub(v:val, ''^\s*\d+\s*(\w+) (.*)  line (\d+)$'', ''\1 \3 \2'')')
@@ -104,6 +226,51 @@ fu! s:complete_breakdel(arg, cmdline, _pos) abort
     else
         return ''
     endif
+endfu
+
+fu! debug#complete_runtime(arglead, _c, _p) abort "{{{1
+    let cheats = {
+    \              'a': 'autoload',
+    \              'd': 'doc',
+    \              'f': 'ftplugin',
+    \              'i': 'indent',
+    \              'p': 'plugin',
+    \              's': 'syntax',
+    \            }
+
+    " Purpose:
+    " If the lead of the argument begins with `a/` replace it with `autoload/`.
+    " Same thing for other kind of idiomatic directories.
+    "
+    "                                ┌ the lead of the argument begins with a word character
+    "                                │ followed by a slash
+    "                                │                               ┌ and this character is in `cheats`
+    "             ┌──────────────────┤    ┌──────────────────────────┤
+    let request = a:arglead =~# '^\w/' && has_key(cheats,a:arglead[0])
+    \?                cheats[a:arglead[0]].a:arglead[1:-1]
+    \:                a:arglead
+
+    " put a wildcard before every slash, and one at the end
+    let pat = substitute(request,'/','*/','g').'*'
+    let found = {}
+    for path in split(&rtp, ',')
+        let matches = glob(path.'/'.pat, 0, 1, 1)
+        " append a slash for every match which is a directory
+        call map(matches,'isdirectory(v:val) ? v:val."/" : v:val')
+        " remove the path (the one in the rtp) from the match
+        call map(matches,'fnamemodify(v:val, ":p")[strlen(path)+1:-1]')
+        "                                          └────────────┤
+        "                                                       └ `strlen(path) - 1`
+        "                                                          would include the last character in the path
+        "
+        "                                                         `strlen(path)`
+        "                                                          would include the slash after the path
+
+        for a_match in matches
+            let found[a_match] = 1
+        endfor
+    endfor
+    return sort(keys(found))
 endfu
 
 " gsub {{{1
@@ -272,17 +439,17 @@ fu! debug#messages_old() abort
 
             for j in range(len(body)-len(code)-2)
                 if function =~# '^{'
-                    let pattern = '.*\.'
+                    let pat = '.*\.'
                 elseif function =~# '^<SNR>'
-                    let pattern = '\%(s:\|<SID>\)'.matchstr(function, '_\zs.*').'\>'
+                    let pat = '\%(s:\|<SID>\)'.matchstr(function, '_\zs.*').'\>'
                 else
-                    let pattern = function.'\>'
+                    let pat = function.'\>'
                 endif
 
-                if body[j][0] =~# '\C^\s*fu\%[nction]!\=\s*'.pattern
+                if body[j][0] =~# '\C^\s*fu\%[nction]!\=\s*'.pat
              \ && (body[j + len(code) + 1][0] =~# '\C^\s*endf'
              \ && map(body[j+1 : j+len(code)], 'v:val[0]') ==# code
-             \ || pattern !~# '\*')
+             \ || pat !~# '\*')
                     let qfl[-1].filename = filename
                     let qfl[-1].lnum = j + body[j][1] + l:lnum + 1
                     break
@@ -328,6 +495,7 @@ fu! debug#scriptnames() abort
     call setqflist([], 'a', { 'title': ':Scriptnames'})
     copen
 endfu
+
 " sub {{{1
 
 fu! s:sub(str,pat,rep) abort

@@ -34,6 +34,9 @@ augroup END
 "}}}
 com! -bar -nargs=1 Debug exe debug#wrapper(<q-args>)
 
+com! -bang -bar -nargs=* -complete=customlist,debug#complete_runtime Runtime
+\                                                                    exe debug#runtime_command(<bang>0, <f-args>)
+
 com! -bar Scriptnames  call debug#scriptnames()
 
 com! -range=1 -nargs=+ -complete=command Time exe debug#time(<q-args>, <count>)
