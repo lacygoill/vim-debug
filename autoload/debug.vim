@@ -16,7 +16,7 @@
 "     else
 "         for ft in split(&filetype, '\.')
 "             for pat in ['ftplugin/%s.vim', 'ftplugin/%s_*.vim', 'ftplugin/%s/*.vim', 'indent/%s.vim', 'syntax/%s.vim', 'syntax/%s/*.vim']
-"                 call extend(unlets, split(globpath(&rtp, printf(pat, ft)), "\n"))
+"               call extend(unlets, globpath(&rtp, printf(pat, ft), 0, 1))
 "             endfor
 "         endfor
 "         let run = s:unlet_for(unlets)
@@ -31,14 +31,21 @@
 "     for request in files
 "         if request =~# '^\.\=[\\/]\|^\w:[\\/]\|^[%#~]\|^\d\+$'
 "             let request = debug#scriptname(request)
-"             let unlets += split(glob(request), "\n")
-"             let do += map(copy(unlets), '"source ".escape(v:val, " \t|!")')
+"             let unlets += glob(request, 0, 1)
+"                                                                  ┌ why double quotes?
+"                                                                  │ do we need `\t` to be translated into a tab,
+"                                                                  │ or do we need `\` and `t`?
+"                                                                  │
+"             let do += map(copy(unlets), { k,v -> 'so '.escape(v, " \t|!"))
 "         else
 "             if get(do, 0, [''])[0] !~# '^runtime!'
 "                 let do += ['runtime!']
 "             endif
-"             let unlets += split(globpath(&rtp, request, 1), "\n")
-"             let do[-1] .= ' '.escape(request, " \t|!")
+"                                                   ┌ here, tpope uses 1, why?
+"                                                   │
+"             let unlets += globpath(&rtp, request, 1, 1)
+"             let do[-1] .=
+"             ' '.escape(request, " \t|!")
 "         endif
 "     endfor
 "     if !a:bang
@@ -60,7 +67,8 @@
 "             let lines = readfile(file, '', 500)
 "             if len(lines)
 "                 for i in range(len(lines)-1)
-"                     let unlet = matchstr(lines[i], '^if .*\<exists *( *[''"]\%(\g:\)\=\zs[0-9A-Za-z_#]\+\ze[''"]')
+"                     let unlet = matchstr(lines[i],
+"                     \                    '^if .*\<exists *( *[''"]\%(\g:\)\=\zs[0-9A-Za-z_#]\+\ze[''"]')
 "                     if unlet !=# '' && index(guards, unlet) == -1
 "                         for j in range(0, 4)
 "                             if get(lines, i+j, '') =~# '^\s*finish\>'
@@ -76,7 +84,7 @@
 "     if empty(guards)
 "         return ''
 "     else
-"         return 'unlet! '.join(map(guards, '"g:".v:val'), ' ')
+"       return 'unlet! '.join(map(guards, { k,v -> 'g:'.v }), ' ')
 "     endif
 " endfu
 
@@ -84,7 +92,7 @@
 "     let path = fnamemodify(a:path, ':p')
 "     let candidates = []
 "     for glob in split(&runtimepath, ',')
-"         let candidates += filter(split(glob(glob), "\n"), 'path[0 : len(v:val)-1] ==# v:val && path[len(v:val)] =~# "[\\/]"')
+"       let candidates += filter(glob(glob, 0, 1), { k,v -> path[0 : len(v)-1] ==# v && path[len(v)] =~# '[\/]' })
 "     endfor
 "     if empty(candidates)
 "         return ['', '']
@@ -104,7 +112,7 @@
 " fu! debug#scriptnames_qflist() abort
 "     let names = execute('scriptnames')
 "     let list = []
-"     for line in split(names, "\n")
+"     for line in split(names, '\n')
 "         if line =~# ':'
 "             call add(list, {'text': matchstr(line, '\d\+'), 'filename': expand(matchstr(line, ': \zs.*'))})
 "         endif
@@ -120,8 +128,6 @@
 "     endif
 " endfu
 
-" guard {{{1
-
 if exists('g:autoloaded_debug')
     finish
 endif
@@ -131,22 +137,25 @@ let g:autoloaded_debug = 1
 
 fu! s:break(type, arg) abort
     if a:arg ==# 'here' || a:arg ==# ''
-        " we can't simply look for `fu!` backwards, because there could be
-        " a whole function defined before us inside the current function
+        " Search for `fu!` backward.
+        " Why use `searchpair()` instead of `search()`?{{{
         "
-        " so we need to use `searchpair()`
+        " There could be  a whole function defined before us  inside the current
+        " function.
         "
-        " what `searchpair('fu!', … , 'b')` does, is:
+        " So we need to use `searchpair()`.
+        " What `searchpair('fu!', … , 'b')` does, is:
         "
         "       1. initialize a counter to 0
         "       2. look at `fu!` backwards
         "       3. every time `endfu` is found, increase the counter
         "       4. every time `fu!` is found, decrease the counter
-        "       5. go on until `fu!` is found while the counter is zero
-
+        "       5. go on until `fu!` is found, AND the counter is zero
+"}}}
         let l:lnum = searchpair('^\s*fu\%[nction]\>.*(', '', '^\s*endf\%[unction]\>', 'Wbn')
+        " check you found sth, and it's valid (i.e. before where we are)
         if l:lnum && l:lnum < line('.')
-            let function = matchstr(getline(l:lnum), '^\s*\w\+!\=\s*\zs[^( ]*')
+            let function = matchstr(getline(l:lnum), '^\s*\w\+!\?\s*\zs[^( ]*')
             if function =~# '^s:\|^<SID>'
                 let id = s:script_id('%')
                 if id
@@ -158,7 +167,10 @@ fu! s:break(type, arg) abort
             if function =~# '\.'
                 return 'echoerr "Dictionary functions not supported"'
             endif
-            return 'break'.a:type.' func '.(line('.')==l:lnum ? '' : line('.')-l:lnum).' '.function
+            return printf('break%s func %d %s',
+            \                  a:type,
+            \                  line('.') == l:lnum ? '' : line('.') - l:lnum,
+            \                  function )
         else
             return 'break'.a:type.' here'
         endif
@@ -169,73 +181,87 @@ endfu
 " break_setup {{{1
 
 fu! debug#break_setup() abort
-    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakadd Breakadd
-    \                                                               exe s:break('add',<q-args>)
-    com! -buffer -bar -nargs=? -complete=custom,s:complete_breakdel Breakdel
-    \                                                               exe s:break('del',<q-args>)
+    com! -buffer -bar -nargs=? -complete=customlist,s:complete_breakadd BreakAdd
+    \                                                                   exe s:break('add', <q-args>)
+    com! -buffer -bar -nargs=? -complete=customlist,s:complete_breakdel BreakDel
+    \                                                                   exe s:break('del', <q-args>)
+
+    cnorea <expr> <buffer> breakadd  getcmdtype() ==# ':' && getcmdline() ==# 'breakadd'
+    \                                ?    'BreakAdd'
+    \                                :    'breakadd'
+
+    cnorea <expr> <buffer> breakdel  getcmdtype() ==# ':' && getcmdline() ==# 'breakdel'
+    \                                ?    'BreakDel'
+    \                                :    'breakdel'
+
+    let b:undo_ftplugin =         get(b:, 'undo_ftplugin', '')
+    \                     .(empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+    \                     ."
+    \                          exe 'cuna   <buffer> breakadd'
+    \                        | exe 'cuna   <buffer> breakdel'
+    \                        | delc BreakAdd
+    \                        | delc BreakDel
+    \                      "
 endfu
 
 " break_snr {{{1
 
 fu! s:break_snr(arg) abort
     let id = s:script_id('%')
-    if id
-        return s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
-    else
-        return a:arg
-    endif
+    return id
+    \?         s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
+    \:         a:arg
 endfu
 
 " complete_breakadd {{{1
 
 fu! s:complete_breakadd(arglead, cmdline, _p) abort
-    let functions = join(sort(map(split(execute('function'), '\n'), 'matchstr(v:val, " \\zs[^(]*")')), '\n')
-    if a:cmdline =~# '^\w\+\s\+\w*$'
-        return "here\nfile\nfunc"
+    let functions = sort(map(split(execute('function'), '\n'),
+    \                              { k,v -> matchstr(v, ' \zs[^(]*') }
+    \                       )
+    \                   )
 
-    elseif a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-        let id = s:script_id('%')
-        return s:gsub(functions,'\<SNR\>'.id.'_', 's:')
-
-    elseif a:cmdline =~# '^\w\+\s\+func '
-        return functions
-
-    elseif a:cmdline =~# '^\w\+\s\+file '
-        return glob(a:arglead.'*')
-    else
-        return ''
-    endif
+    return a:cmdline =~# '^\w\+\s\+\w*$'
+    \?         [ 'here', 'file', 'func' ]
+    \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
+    \?         map(functions, { k,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
+    \:     a:cmdline =~# '^\w\+\s\+func '
+    \?         functions
+    \:     a:cmdline =~# '^\w\+\s\+file '
+    \?         glob(a:arglead.'*', 0, 1)
+    \:         ''
 endfu
 
 " complete_breakdel {{{1
 
-fu! s:complete_breakdel(arglead, cmdline, _pos) abort
+fu! s:complete_breakdel(_a, cmdline, _p) abort
     let args = matchstr(a:cmdline, '\s\zs\S.*')
     let list = split(execute('breaklist'), '\n')
-    call map(list, 's:sub(v:val, ''^\s*\d+\s*(\w+) (.*)  line (\d+)$'', ''\1 \3 \2'')')
+    call map(list, { k,v -> s:sub(v,
+   \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
+   \                              '\1 \3 \2'
+   \                             )
+   \               })
 
-    if a:cmdline =~# '^\w\+\s\+\w*$'
-        return "*\nhere\nfile\nfunc"
-
-    elseif a:cmdline =~# '\v^\w+\s+func\s'
-        return join(map(filter(list, 'v:val =~# "^func"'), 'v:val[5 : -1]'), '\n')
-
-    elseif a:cmdline =~# '\v^\w+\s+file\s'
-        return join(map(filter(list, 'v:val =~# "^file"'), 'v:val[5 : -1]'), '\n')
-
-    else
-        return ''
-    endif
+    return a:cmdline =~# '^\w\+\s\+\w*$'
+    \?         [ '*', 'here', 'file', 'func' ]
+    \:     a:cmdline =~# '\v^\w+\s+func\s'
+    \?         map(filter(list, { k,v -> v =~# '^func' }),
+    \              { k,v -> v[5:-1] })
+    \:     a:cmdline =~# '\v^\w+\s+file\s'
+    \?         map(filter(list, { k,v -> v =~# '^file' }),
+    \              { k,v -> v[5:-1] })
+    \:         ''
 endfu
 
 fu! debug#complete_runtime(arglead, _c, _p) abort "{{{1
     let cheats = {
-    \              'a': 'autoload',
-    \              'd': 'doc',
-    \              'f': 'ftplugin',
-    \              'i': 'indent',
-    \              'p': 'plugin',
-    \              's': 'syntax',
+    \              'a' : 'autoload',
+    \              'd' : 'doc',
+    \              'f' : 'ftplugin',
+    \              'i' : 'indent',
+    \              'p' : 'plugin',
+    \              's' : 'syntax',
     \            }
 
     " Purpose:
@@ -254,17 +280,17 @@ fu! debug#complete_runtime(arglead, _c, _p) abort "{{{1
     let pat = substitute(request,'/','*/','g').'*'
     let found = {}
     for path in split(&rtp, ',')
-        let matches = glob(path.'/'.pat, 0, 1, 1)
+        let matches = glob(path.'/'.pat, 0, 1)
         " append a slash for every match which is a directory
-        call map(matches,'isdirectory(v:val) ? v:val."/" : v:val')
+        call map(matches, { k,v -> isdirectory(v) ? v.'/' : v })
         " remove the path (the one in the rtp) from the match
-        call map(matches,'fnamemodify(v:val, ":p")[strlen(path)+1:-1]')
-        "                                          └────────────┤
-        "                                                       └ `strlen(path) - 1`
-        "                                                          would include the last character in the path
+        call map(matches, { k,v -> fnamemodify(v, ':p')[strlen(path)+1:-1] })
+        "                                               └────────────┤
+        "             `strlen(path) - 1`                             ┘
+        "              would include the last character in the path
         "
-        "                                                         `strlen(path)`
-        "                                                          would include the slash after the path
+        "             `strlen(path)`
+        "              would include the slash after the path
 
         for a_match in matches
             let found[a_match] = 1
@@ -276,7 +302,7 @@ endfu
 " gsub {{{1
 
 fu! s:gsub(str,pat,rep) abort
-    return substitute(a:str,'\v\C'.a:pat,a:rep,'g')
+    return substitute(a:str, '\v\C'.a:pat, a:rep, 'g')
 endfu
 
 " messages {{{1
@@ -290,32 +316,32 @@ fu! debug#messages() abort
     setl ma noro
 
     let noises = {
-                 \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; %(before|after) #\d+.*)?',
-                 \ '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
-                 \ 'change':             'Already at %(new|old)est change',
-                 \ 'changes':            '\d+ changes?; %(before|after) #\d+.*' ,
-                 \ 'E21':                "E21: Cannot make changes, 'modifiable' is off",
-                 \ 'E387':               'E387: Match is on current line',
-                 \ 'E486':               'E486: Pattern not found: \S*',
-                 \ 'E492':               'E492: Not an editor command: \S+',
-                 \ 'E501':               'E501: At end-of-file',
-                 \ 'E553':               'E553: No more items',
-                 \ 'E663':               'E663: At end of changelist',
-                 \ 'E664':               'E664: changelist is empty',
-                 \ 'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
-                 \ 'empty lines':        '\s*' ,
-                 \ 'lines filtered':     '\d+ lines filtered' ,
-                 \ 'lines indented':     '\d+ lines [><]ed \d+ times?',
-                 \ 'file loaded':        '".{-}"%( \[RO\])? line \d+ of \d+ --\d+\%-- col \d+%(-\d+)?',
-                 \ 'file reloaded':      '".{-}".*\d+L, \d+C',
-                 \ 'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
-                 \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
-                 \ 'Scanning':           'Scanning:.*',
-                 \ 'substitutions':      '\d+ substitutions? on \d+ lines?',
-                 \ 'verbose':            ':0Verbose messages',
-                 \ 'W10':                'W10: Warning: Changing a readonly file',
-                 \ 'yanked lines':       '%(block of )?\d+ lines yanked',
-                 \ }
+    \              '[fewer|more] lines': '\d+ %(fewer|more) lines%(; %(before|after) #\d+.*)?',
+    \              '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
+    \              'change':             'Already at %(new|old)est change',
+    \              'changes':            '\d+ changes?; %(before|after) #\d+.*' ,
+    \              'E21':                "E21: Cannot make changes, 'modifiable' is off",
+    \              'E387':               'E387: Match is on current line',
+    \              'E486':               'E486: Pattern not found: \S*',
+    \              'E492':               'E492: Not an editor command: \S+',
+    \              'E501':               'E501: At end-of-file',
+    \              'E553':               'E553: No more items',
+    \              'E663':               'E663: At end of changelist',
+    \              'E664':               'E664: changelist is empty',
+    \              'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
+    \              'empty lines':        '\s*' ,
+    \              'lines filtered':     '\d+ lines filtered' ,
+    \              'lines indented':     '\d+ lines [><]ed \d+ times?',
+    \              'file loaded':        '".{-}"%( \[RO\])? line \d+ of \d+ --\d+\%-- col \d+%(-\d+)?',
+    \              'file reloaded':      '".{-}".*\d+L, \d+C',
+    \              'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
+    \              'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
+    \              'Scanning':           'Scanning:.*',
+    \              'substitutions':      '\d+ substitutions? on \d+ lines?',
+    \              'verbose':            ':0Verbose messages',
+    \              'W10':                'W10: Warning: Changing a readonly file',
+    \              'yanked lines':       '%(block of )?\d+ lines yanked',
+    \            }
 
     for noise in values(noises)
         sil! exe 'g/\v^'.noise.'$/d_'
@@ -408,10 +434,10 @@ fu! debug#messages_old() abort
             let code = definition[2:-2]
             let leading_address = len(matchstr(definition[-1], '^ *'))
             " remove leading address in front of each line
-            let code = map(code, 'v:val[leading_address : -1]')
+            let code = map(code, { k,v -> v[leading_address : -1] })
             " FIXME:
             " what's the point?
-            call map(code, 'v:val ==# " " ? "" : v:val')
+            call map(code, { k,v -> v ==# ' ' ? '' : v })
 
             let body = []
             let offset = 0
@@ -448,7 +474,7 @@ fu! debug#messages_old() abort
 
                 if body[j][0] =~# '\C^\s*fu\%[nction]!\=\s*'.pat
              \ && (body[j + len(code) + 1][0] =~# '\C^\s*endf'
-             \ && map(body[j+1 : j+len(code)], 'v:val[0]') ==# code
+             \ && map(body[j+1 : j+len(code)], { k,v -> v[0] }) ==# code
              \ || pat !~# '\*')
                     let qfl[-1].filename = filename
                     let qfl[-1].lnum = j + body[j][1] + l:lnum + 1
@@ -486,8 +512,8 @@ fu! debug#scriptnames() abort
     for line in lines
         if line =~# ':'
             call add(list, { 'text':     matchstr(line, '\d\+'),
-                           \ 'filename': expand(matchstr(line, ': \zs.*')),
-                           \ })
+            \                'filename': expand(matchstr(line, ': \zs.*')),
+            \              })
         endif
     endfor
 
@@ -499,7 +525,7 @@ endfu
 " sub {{{1
 
 fu! s:sub(str,pat,rep) abort
-    return substitute(a:str,'\v\C'.a:pat,a:rep,'')
+    return substitute(a:str, '\v\C'.a:pat, a:rep, '')
 endfu
 
 " time {{{1
@@ -547,18 +573,18 @@ endfu
 
 fu! debug#synnames(...) abort
     "                     The syntax element under the cursor is part of
-    "                     a group, which can be contained in another one, and
-    "                     so on.
+    "                     a group, which can be contained in another one,
+    "                     and so on.
     "
     "                     This imbrication of syntax groups can be seen as a stack.
     "                     `synstack()` returns the list of IDs for all syntax groups
     "                     in the stack, at the position given.
     "
-    "                     They are sorted from the outer syntax group, to the innermost.
+    "                     They are sorted from the outermost syntax group, to the innermost.
     "
     "                  ┌─ The last one is what `synID()` returns.
     "                  │
-    return reverse(map(synstack(line('.'), col('.')), 'synIDattr(v:val,"name")'))
+    return reverse(map(synstack(line('.'), col('.')), { k,v -> synIDattr(v, 'name') }))
 endfu
 
 fu! debug#synnames_map(count) abort
