@@ -32,6 +32,10 @@ augroup END
 "}}}
 com! -bar -nargs=1 Debug exe debug#wrapper(<q-args>)
 
+" Purpose:
+" Automate the process of finding a bug in our vimrc through a binary search.
+com! -bar DebugVimrc exe debug#vimrc()
+
 com! -bang -bar -nargs=* -complete=customlist,debug#complete_runtime Runtime
 \                                                                    exe debug#runtime_command(<bang>0, <f-args>)
 
@@ -57,7 +61,7 @@ com! -bar -nargs=1 -complete=option Vo echo 'local: '
 
 " mappings {{{1
 
-nno <silent>  g?   :<c-u>call debug#messages()<cr>
+nno <silent><unique>  g?   :<c-u>call debug#messages()<cr>
 
 " Usage:
 " all these commands apply to the character under the cursor
@@ -66,7 +70,7 @@ nno <silent>  g?   :<c-u>call debug#messages()<cr>
 "     1zs    show the definition of the innermost syntax group
 "     3zs    show the definition of the 3rd syntax group
 
-nno <silent>  zs   :<c-u>call debug#synnames_map(v:count)<cr>
+nno <silent><unique>  zs   :<c-u>call debug#synnames_map(v:count)<cr>
 
 " By default, what do `zs` and `ze` do?{{{
 "
@@ -77,6 +81,6 @@ nno <silent>  zs   :<c-u>call debug#synnames_map(v:count)<cr>
 " near the end of the line.
 "}}}
 " We've just lost the default `zs` command. Restore it on `zS`.
-nno zS zs
+nno <unique> zS zs
 " For consistency's sake, do the same for `ze`.
-nno zE ze
+nno <unique> zE ze

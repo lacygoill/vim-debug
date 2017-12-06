@@ -36,7 +36,7 @@
 "                                                                  │ do we need `\t` to be translated into a tab,
 "                                                                  │ or do we need `\` and `t`?
 "                                                                  │
-"             let do += map(copy(unlets), { k,v -> 'so '.escape(v, " \t|!"))
+"             let do += map(copy(unlets), { i,v -> 'so '.escape(v, " \t|!"))
 "         else
 "             if get(do, 0, [''])[0] !~# '^runtime!'
 "                 let do += ['runtime!']
@@ -84,7 +84,7 @@
 "     if empty(guards)
 "         return ''
 "     else
-"       return 'unlet! '.join(map(guards, { k,v -> 'g:'.v }), ' ')
+"       return 'unlet! '.join(map(guards, { i,v -> 'g:'.v }), ' ')
 "     endif
 " endfu
 
@@ -92,7 +92,7 @@
 "     let path = fnamemodify(a:path, ':p')
 "     let candidates = []
 "     for glob in split(&runtimepath, ',')
-"       let candidates += filter(glob(glob, 0, 1), { k,v -> path[0 : len(v)-1] ==# v && path[len(v)] =~# '[\/]' })
+"       let candidates += filter(glob(glob, 0, 1), { i,v -> path[0 : len(v)-1] ==# v && path[len(v)] =~# '[\/]' })
 "     endfor
 "     if empty(candidates)
 "         return ['', '']
@@ -215,21 +215,34 @@ endfu
 
 " complete_breakadd {{{1
 
+fu! s:capture(excmd) abort
+    redir => out
+    exe 'sil! '.a:excmd
+    redir END
+    " return execute(a:excmd, 'silent!')
+    return out
+endfu
+
 fu! s:complete_breakadd(arglead, cmdline, _p) abort
-    let functions = sort(map(split(execute('function'), '\n'),
-    \                              { k,v -> matchstr(v, ' \zs[^(]*') }
+    " let functions = sort(map(split(execute('function'), '\n'),
+    " \                              { i,v -> matchstr(v, ' \zs[^(]*') }
+    " \                       )
+    " \                   )
+    let functions = sort(map(split(s:capture('function'), '\n'),
+    \                              { i,v -> matchstr(v, ' \zs[^(]*') }
     \                       )
     \                   )
 
-    return a:cmdline =~# '^\w\+\s\+\w*$'
+    let g:debug = a:cmdline =~# '^\w\+\s\+\w*$'
     \?         [ 'here', 'file', 'func' ]
     \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    \?         map(functions, { k,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
+    \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
     \:     a:cmdline =~# '^\w\+\s\+func '
     \?         functions
     \:     a:cmdline =~# '^\w\+\s\+file '
     \?         glob(a:arglead.'*', 0, 1)
-    \:         ''
+    \:         []
+    return []
 endfu
 
 " complete_breakdel {{{1
@@ -237,7 +250,7 @@ endfu
 fu! s:complete_breakdel(_a, cmdline, _p) abort
     let args = matchstr(a:cmdline, '\s\zs\S.*')
     let list = split(execute('breaklist'), '\n')
-    call map(list, { k,v -> s:sub(v,
+    call map(list, { i,v -> s:sub(v,
    \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
    \                              '\1 \3 \2'
    \                             )
@@ -246,11 +259,11 @@ fu! s:complete_breakdel(_a, cmdline, _p) abort
     return a:cmdline =~# '^\w\+\s\+\w*$'
     \?         [ '*', 'here', 'file', 'func' ]
     \:     a:cmdline =~# '\v^\w+\s+func\s'
-    \?         map(filter(list, { k,v -> v =~# '^func' }),
-    \              { k,v -> v[5:-1] })
+    \?         map(filter(list, { i,v -> v =~# '^func' }),
+    \              { i,v -> v[5:-1] })
     \:     a:cmdline =~# '\v^\w+\s+file\s'
-    \?         map(filter(list, { k,v -> v =~# '^file' }),
-    \              { k,v -> v[5:-1] })
+    \?         map(filter(list, { i,v -> v =~# '^file' }),
+    \              { i,v -> v[5:-1] })
     \:         ''
 endfu
 
@@ -282,9 +295,9 @@ fu! debug#complete_runtime(arglead, _c, _p) abort "{{{1
     for path in split(&rtp, ',')
         let matches = glob(path.'/'.pat, 0, 1)
         " append a slash for every match which is a directory
-        call map(matches, { k,v -> isdirectory(v) ? v.'/' : v })
+        call map(matches, { i,v -> isdirectory(v) ? v.'/' : v })
         " remove the path (the one in the rtp) from the match
-        call map(matches, { k,v -> fnamemodify(v, ':p')[strlen(path)+1:-1] })
+        call map(matches, { i,v -> fnamemodify(v, ':p')[strlen(path)+1:-1] })
         "                                               └────────────┤
         "             `strlen(path) - 1`                             ┘
         "              would include the last character in the path
@@ -354,7 +367,6 @@ fu! debug#messages() abort
 endfu
 
 fu! debug#messages_old() abort
-
     " `qfl` is a list of dictionaries
     " each one has the key:
     "
@@ -434,10 +446,10 @@ fu! debug#messages_old() abort
             let code = definition[2:-2]
             let leading_address = len(matchstr(definition[-1], '^ *'))
             " remove leading address in front of each line
-            let code = map(code, { k,v -> v[leading_address : -1] })
+            let code = map(code, { i,v -> v[leading_address : -1] })
             " FIXME:
             " what's the point?
-            call map(code, { k,v -> v ==# ' ' ? '' : v })
+            call map(code, { i,v -> v ==# ' ' ? '' : v })
 
             let body = []
             let offset = 0
@@ -474,7 +486,7 @@ fu! debug#messages_old() abort
 
                 if body[j][0] =~# '\C^\s*fu\%[nction]!\=\s*'.pat
              \ && (body[j + len(code) + 1][0] =~# '\C^\s*endf'
-             \ && map(body[j+1 : j+len(code)], { k,v -> v[0] }) ==# code
+             \ && map(body[j+1 : j+len(code)], { i,v -> v[0] }) ==# code
              \ || pat !~# '\*')
                     let qfl[-1].filename = filename
                     let qfl[-1].lnum = j + body[j][1] + l:lnum + 1
@@ -485,9 +497,14 @@ fu! debug#messages_old() abort
         endfor
     endfor
 
+    " make sure there's at  least 1 valid entry so that  `:cwindow` opens the qf
+    " window; probably not useful here …
+    call map(qfl, { i,v -> extend(v, {'valid': 1}) })
+
     call setqflist(qfl)
     call setqflist([], 'a', { 'title': ':Messages' })
-    copen
+    " necessary to open qf window with `vim-qf` autocmd
+    doautocmd QuickFixCmdPost grep
     $
     call search('^[^|]', 'bWc')
 endfu
@@ -517,9 +534,10 @@ fu! debug#scriptnames() abort
         endif
     endfor
 
+    call map(list, { i,v -> extend(v, {'valid': 1}) })
     call setqflist(list)
     call setqflist([], 'a', { 'title': ':Scriptnames'})
-    copen
+    doautocmd QuickFixCmdPost grep
 endfu
 
 " sub {{{1
@@ -557,6 +575,63 @@ fu! debug#time(cmd, cnt)
     return ''
 endfu
 
+fu! debug#vimrc() abort "{{{1
+    if !exists('$TMUX')
+        return 'echoerr "Only works inside Tmux"'
+    endif
+
+    " open a new file to use as a temporary vimrc
+    new /tmp/debug_vimrc
+    " wipe the buffer when it becomes hidden
+    " useful to not have to remove the next buffer-local autocmd
+    setl bh=wipe nobl
+    " disable automatic saving
+    norm [oa
+    " make sure the file is empty
+    %d_
+    " import our current vimrc
+    sil 0r $MYVIMRC
+    " write the file
+    sil update
+    " Every time  we'll change  and write  our temporary vimrc,  we want  Vim to
+    " start a new Vim  instance, in a new tmux pane, so that  we can begin a new
+    " test. We build the necessary tmux command.
+    let s:vimrc = {}
+    let s:vimrc.cmd  = 'tmux split-window -c /tmp'
+    let s:vimrc.cmd .= ' -v -p 50'
+    let s:vimrc.cmd .= ' -PF "#D"'
+    let s:vimrc.cmd .= ' vim -Nu /tmp/debug_vimrc'
+
+    augroup my_debug_vimrc
+        au! * <buffer>
+        " start a Vim session sourcing the new temporary vimrc in a tmux pane
+        au BufWritePost <buffer> call s:vimrc_act_on_pane(1)
+        " Warning:
+        " don't call `s:vimrc_act_on_pane()` AFTER destroying `s:vimrc`
+        " the function needs this variable
+        au BufWipeOut   <buffer> exe 'norm ]oa'
+        \|                       call s:vimrc_act_on_pane(0)
+        \|                       unlet s:vimrc
+        " close pane when we leave (useful if we restart with SPC R)
+        au VimLeave * call s:vimrc_act_on_pane(0)
+    augroup END
+    return ''
+endfu
+
+fu! s:vimrc_act_on_pane(open) abort "{{{1
+    " if there's already a tmux pane opened to debug Vim, kill it
+    if    get(get(s:, 'vimrc', ''), 'pane_id', -1) != -1
+    \&&   stridx(system('tmux list-pane -t %'.s:vimrc.pane_id),
+    \            "can't find pane %".s:vimrc.pane_id) == -1
+        call system('tmux kill-pane -t %'.s:vimrc.pane_id)
+    endif
+    if a:open
+        " open  a tmux  pane, and  start a  Vim instance  with the  new modified
+        " minimal vimrc
+        let s:vimrc.pane_id = systemlist(s:vimrc.cmd)[0][1:]
+    endif
+endfu
+
 fu! debug#wrapper(cmd) abort "{{{1
     try
         ToggleEditingCommands 0
@@ -584,7 +659,7 @@ fu! debug#synnames(...) abort
     "
     "                  ┌─ The last one is what `synID()` returns.
     "                  │
-    return reverse(map(synstack(line('.'), col('.')), { k,v -> synIDattr(v, 'name') }))
+    return reverse(map(synstack(line('.'), col('.')), { i,v -> synIDattr(v, 'name') }))
 endfu
 
 fu! debug#synnames_map(count) abort
