@@ -565,7 +565,7 @@ fu! debug#time(cmd, cnt)
             exe a:cmd
         endif
     catch
-        exe my_lib#catch_error()
+        call my_lib#catch_error()
     finally
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
