@@ -565,7 +565,7 @@ fu! debug#time(cmd, cnt)
             exe a:cmd
         endif
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     finally
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
@@ -636,7 +636,7 @@ fu! debug#wrapper(cmd) abort "{{{1
         ToggleEditingCommands 0
         exe 'debug '.a:cmd
     catch
-        call my_lib#catch_error()
+        return my_lib#catch_error()
     finally
         ToggleEditingCommands 1
     endtry
