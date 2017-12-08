@@ -361,7 +361,7 @@ fu! debug#messages() abort
     endfor
 
     call matchadd('ErrorMsg', '\v^E\d+:\s+.*')
-    call matchadd('ErrorMsg', '\v^Vim\(.{-}\):E\d+:\s+.*')
+    call matchadd('ErrorMsg', '\v^Vim.{-}:E\d+:\s+.*')
     call matchadd('ErrorMsg', '^Error detected while processing.*')
     call matchadd('LineNr', '\v^line\s+\d+:$')
 endfu
