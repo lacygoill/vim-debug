@@ -636,7 +636,7 @@ fu! debug#wrapper(cmd) abort "{{{1
         ToggleEditingCommands 0
         exe 'debug '.a:cmd
     catch
-        return 'echoerr '.string(v:exception)
+        call my_lib#catch_error()
     finally
         ToggleEditingCommands 1
     endtry
