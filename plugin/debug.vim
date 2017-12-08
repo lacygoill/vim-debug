@@ -30,7 +30,7 @@ augroup END
 " If you have used one of our custom editing command several times, you'll
 " have to re-execute `cont` as many times as needed.
 "}}}
-com! -bar -nargs=1 Debug exe debug#wrapper(<q-args>)
+com! -bar -nargs=1 Debug call debug#wrapper(<q-args>)
 
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
@@ -41,7 +41,7 @@ com! -bang -bar -nargs=* -complete=customlist,debug#complete_runtime Runtime
 
 com! -bar Scriptnames  call debug#scriptnames()
 
-com! -range=1 -nargs=+ -complete=command Time exe debug#time(<q-args>, <count>)
+com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "    │
 "    └─ tpope uses `-count=1` instead of `-range=1`
 "
