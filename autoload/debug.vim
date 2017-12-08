@@ -213,17 +213,6 @@ fu! s:break_snr(arg) abort
     \:         a:arg
 endfu
 
-fu! debug#catch_error() abort "{{{1
-    if get(g:, 'my_verbose_errors', 0)
-        return 'echoerr '.string(v:exception.'    @@@ '.v:throwpoint)
-    else
-        echohl ErrorMsg
-        echom v:exception
-        echohl NONE
-    endif
-    return ''
-endfu
-
 " complete_breakadd {{{1
 
 fu! s:capture(excmd) abort
