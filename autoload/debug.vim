@@ -233,15 +233,15 @@ fu! s:complete_breakadd(arglead, cmdline, _p) abort
     \                       )
     \                   )
 
-    let g:debug = a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         [ 'here', 'file', 'func' ]
-    \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
-    \:     a:cmdline =~# '^\w\+\s\+func '
-    \?         functions
-    \:     a:cmdline =~# '^\w\+\s\+file '
-    \?         glob(a:arglead.'*', 0, 1)
-    \:         []
+    " let g:debug = a:cmdline =~# '^\w\+\s\+\w*$'
+    " \?         [ 'here', 'file', 'func' ]
+    " \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
+    " \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
+    " \:     a:cmdline =~# '^\w\+\s\+func '
+    " \?         functions
+    " \:     a:cmdline =~# '^\w\+\s\+file '
+    " \?         glob(a:arglead.'*', 0, 1)
+    " \:         []
     return []
 endfu
 
