@@ -504,7 +504,7 @@ fu! debug#messages_old() abort
     call setqflist(qfl)
     call setqflist([], 'a', { 'title': ':Messages' })
     " necessary to open qf window with `vim-qf` autocmd
-    doautocmd QuickFixCmdPost grep
+    doautocmd <nomodeline> QuickFixCmdPost grep
     $
     call search('^[^|]', 'bWc')
 endfu
@@ -537,7 +537,7 @@ fu! debug#scriptnames() abort
     call map(list, { i,v -> extend(v, {'valid': 1}) })
     call setqflist(list)
     call setqflist([], 'a', { 'title': ':Scriptnames'})
-    doautocmd QuickFixCmdPost grep
+    doautocmd <nomodeline> QuickFixCmdPost grep
 endfu
 
 " sub {{{1
