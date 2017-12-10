@@ -128,11 +128,6 @@
 "     endif
 " endfu
 
-if exists('g:autoloaded_debug')
-    finish
-endif
-let g:autoloaded_debug = 1
-
 " break {{{1
 
 fu! s:break(type, arg) abort
