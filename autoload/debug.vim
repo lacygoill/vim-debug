@@ -492,14 +492,10 @@ fu! debug#messages_old() abort
         endfor
     endfor
 
-    " make sure there's at  least 1 valid entry so that  `:cwindow` opens the qf
-    " window; probably not useful here …
-    call map(qfl, { i,v -> extend(v, {'valid': 1}) })
-
     call setqflist(qfl)
     call setqflist([], 'a', { 'title': ':Messages' })
     " necessary to open qf window with `vim-qf` autocmd
-    doautocmd <nomodeline> QuickFixCmdPost grep
+    doautocmd <nomodeline> QuickFixCmdPost copen
     $
     call search('^[^|]', 'bWc')
 endfu
@@ -529,10 +525,9 @@ fu! debug#scriptnames() abort
         endif
     endfor
 
-    call map(list, { i,v -> extend(v, {'valid': 1}) })
     call setqflist(list)
     call setqflist([], 'a', { 'title': ':Scriptnames'})
-    doautocmd <nomodeline> QuickFixCmdPost grep
+    doautocmd <nomodeline> QuickFixCmdPost copen
 endfu
 
 " sub {{{1
