@@ -314,16 +314,17 @@ fu! s:gsub(str,pat,rep) abort
 endfu
 
 fu! debug#help_about_last_errors() abort "{{{1
-    if v:errmsg != ''
+    if v:errmsg != '' && v:errmsg !~# '^E664'
         let v:errmsg = ''
         let messages = reverse(split(execute('messages'), '\n'))
         let i = match(messages, '^E\d\+')
-        let j = match(messages, '^\%(E\d\+\)\@!', i+1)
+        let j = match(messages, '^\%(E\d\+\|Error\|line\)\@!', i+1)
         if j == -1
             let j = i+1
         endif
         let s:last_errors = {'taglist' : [], 'pos': -1}
         let s:last_errors.taglist = map(messages[i:j-1], {idx,v -> matchstr(v, '^\E\d\+')})
+        call filter(s:last_errors.taglist, {i,v -> !empty(v)})
     endif
     if !exists('s:last_errors') || get(get(s:last_errors, 'taglist', []), 0, '') == ''
         echo 'No last errors'
