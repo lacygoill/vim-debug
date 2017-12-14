@@ -326,7 +326,7 @@ fu! debug#help_about_last_errors() abort "{{{1
         let s:last_errors.taglist = map(messages[i:j-1], {idx,v -> matchstr(v, '^\E\d\+')})
         call filter(s:last_errors.taglist, {i,v -> !empty(v)})
     endif
-    if !exists('s:last_errors') || get(get(s:last_errors, 'taglist', []), 0, '') == ''
+    if get(get(get(s:, 'last_errors', {}), 'taglist', []), 0, '') == ''
         echo 'No last errors'
         return
     endif
