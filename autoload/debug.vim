@@ -313,6 +313,28 @@ fu! s:gsub(str,pat,rep) abort
     return substitute(a:str, '\v\C'.a:pat, a:rep, 'g')
 endfu
 
+fu! debug#help_about_last_errors() abort "{{{1
+    if v:errmsg != ''
+        let v:errmsg = ''
+        let messages = reverse(split(execute('messages'), '\n'))
+        let i = match(messages, '^E\d\+')
+        let j = match(messages, '^\%(E\d\+\)\@!', i+1)
+        if j == -1
+            let j = i+1
+        endif
+        let s:last_errors = {'taglist' : [], 'pos': -1}
+        let s:last_errors.taglist = map(messages[i:j-1], {idx,v -> matchstr(v, '^\E\d\+')})
+    endif
+    if !exists('s:last_errors') || get(get(s:last_errors, 'taglist', []), 0, '') == ''
+        echo 'No last errors'
+        return
+    endif
+    let s:last_errors.pos = (s:last_errors.pos + 1)%len(s:last_errors.taglist)
+    exe 'h '.s:last_errors.taglist[s:last_errors.pos]
+    setl cole=0
+    let g:motion_to_repeat = '-e'
+endfu
+
 " messages {{{1
 
 fu! debug#messages() abort

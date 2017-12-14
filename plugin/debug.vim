@@ -60,8 +60,23 @@ com! -bar -nargs=1 -complete=option Vo echo 'local: '
 \|                                     verb setg <args>?
 
 " mappings {{{1
+" -e        show help about last error {{{2
+
+" Description:
+" You execute some function/command which raises one or several errors.
+" Press `-e` to open the help topic explaining the last one.
+" Repeat to cycle through all the help topics related to the rest of the errors.
+
+"                      ┌ info
+"                      │┌ error
+"                      ││
+nno  <silent><unique>  -e  :<c-u>call debug#help_about_last_errors()<cr>
+
+" g?        show messages {{{2
 
 nno  <silent><unique>  g?  :<c-u>call debug#messages()<cr>
+
+" zs        show syntax groups under cursor {{{2
 
 " Usage:
 " all these commands apply to the character under the cursor
