@@ -593,7 +593,7 @@ fu! debug#vimrc() abort "{{{1
     endif
 
     " open a new file to use as a temporary vimrc
-    new /tmp/debug_vimrc
+    new $XDG_RUNTIME_DIR/debug_vimrc
     " wipe the buffer when it becomes hidden
     " useful to not have to remove the next buffer-local autocmd
     setl bh=wipe nobl
@@ -609,10 +609,10 @@ fu! debug#vimrc() abort "{{{1
     " start a new Vim  instance, in a new tmux pane, so that  we can begin a new
     " test. We build the necessary tmux command.
     let s:vimrc = {}
-    let s:vimrc.cmd  = 'tmux split-window -c /tmp'
+    let s:vimrc.cmd  = 'tmux split-window -c $XDG_RUNTIME_DIR'
     let s:vimrc.cmd .= ' -v -p 50'
     let s:vimrc.cmd .= ' -PF "#D"'
-    let s:vimrc.cmd .= ' vim -Nu /tmp/debug_vimrc'
+    let s:vimrc.cmd .= ' vim -Nu $XDG_RUNTIME_DIR/debug_vimrc'
 
     augroup my_debug_vimrc
         au! * <buffer>
