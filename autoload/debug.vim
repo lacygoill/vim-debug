@@ -176,9 +176,9 @@ endfu
 " break_setup {{{1
 
 fu! debug#break_setup() abort
-    com! -buffer -bar -nargs=? -complete=customlist,s:complete_breakadd BreakAdd
+    com! -buffer -bar -nargs=? -complete=customlist,s:breakadd_complete BreakAdd
     \                                                                   exe s:break('add', <q-args>)
-    com! -buffer -bar -nargs=? -complete=customlist,s:complete_breakdel BreakDel
+    com! -buffer -bar -nargs=? -complete=customlist,s:breakdel_complete BreakDel
     \                                                                   exe s:break('del', <q-args>)
 
     cnorea <expr> <buffer> breakadd  getcmdtype() ==# ':' && getcmdline() ==# 'breakadd'
@@ -208,41 +208,33 @@ fu! s:break_snr(arg) abort
     \:         a:arg
 endfu
 
-" complete_breakadd {{{1
+" breakadd_complete {{{1
 
 fu! s:capture(excmd) abort
-    redir => out
-    exe 'sil! '.a:excmd
-    redir END
-    " return execute(a:excmd, 'silent!')
+    return execute(a:excmd, 'silent!')
     return out
 endfu
 
-fu! s:complete_breakadd(arglead, cmdline, _p) abort
-    " let functions = sort(map(split(execute('function'), '\n'),
-    " \                              { i,v -> matchstr(v, ' \zs[^(]*') }
-    " \                       )
-    " \                   )
+fu! s:breakadd_complete(arglead, cmdline, _p) abort
     let functions = sort(map(split(s:capture('function'), '\n'),
     \                              { i,v -> matchstr(v, ' \zs[^(]*') }
     \                       )
     \                   )
 
-    " let g:debug = a:cmdline =~# '^\w\+\s\+\w*$'
-    " \?         [ 'here', 'file', 'func' ]
-    " \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    " \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
-    " \:     a:cmdline =~# '^\w\+\s\+func '
-    " \?         functions
-    " \:     a:cmdline =~# '^\w\+\s\+file '
-    " \?         glob(a:arglead.'*', 0, 1)
-    " \:         []
-    return []
+    return a:cmdline =~# '^\w\+\s\+\w*$'
+    \?         [ 'here', 'file', 'func' ]
+    \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
+    \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
+    \:     a:cmdline =~# '^\w\+\s\+func '
+    \?         functions
+    \:     a:cmdline =~# '^\w\+\s\+file '
+    \?         glob(a:arglead.'*', 0, 1)
+    \:         []
 endfu
 
-" complete_breakdel {{{1
+" breakdel_complete {{{1
 
-fu! s:complete_breakdel(_a, cmdline, _p) abort
+fu! s:breakdel_complete(_a, cmdline, _p) abort
     let args = matchstr(a:cmdline, '\s\zs\S.*')
     let list = split(execute('breaklist'), '\n')
     call map(list, { i,v -> s:sub(v,
@@ -262,7 +254,7 @@ fu! s:complete_breakdel(_a, cmdline, _p) abort
     \:         ''
 endfu
 
-fu! debug#complete_runtime(arglead, _c, _p) abort "{{{1
+fu! debug#runtime_complete(arglead, _c, _p) abort "{{{1
     let cheats = {
     \              'a' : 'autoload',
     \              'd' : 'doc',

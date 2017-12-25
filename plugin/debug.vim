@@ -36,7 +36,7 @@ com! -bar -nargs=1 Debug call debug#wrapper(<q-args>)
 " Automate the process of finding a bug in our vimrc through a binary search.
 com! -bar DebugVimrc exe debug#vimrc()
 
-com! -bang -bar -nargs=* -complete=customlist,debug#complete_runtime Runtime
+com! -bang -bar -nargs=* -complete=customlist,debug#runtime_complete Runtime
 \                                                                    exe debug#runtime_command(<bang>0, <f-args>)
 
 com! -bar Scriptnames  call debug#scriptnames()
