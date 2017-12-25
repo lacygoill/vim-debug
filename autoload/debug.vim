@@ -128,9 +128,7 @@
 "     endif
 " endfu
 
-" break {{{1
-
-fu! s:break(type, arg) abort
+fu! s:break(type, arg) abort "{{{1
     if a:arg ==# 'here' || a:arg ==# ''
         " Search for `fu!` backward.
         " Why use `searchpair()` instead of `search()`?{{{
@@ -173,9 +171,44 @@ fu! s:break(type, arg) abort
     return 'break'.a:type.' '.s:break_snr(a:arg)
 endfu
 
-" break_setup {{{1
+fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
+    let functions = sort(map(split(s:capture('function'), '\n'),
+    \                              { i,v -> matchstr(v, ' \zs[^(]*') }
+    \                       )
+    \                   )
 
-fu! debug#break_setup() abort
+    return a:cmdline =~# '^\w\+\s\+\w*$'
+    \?         [ 'here', 'file', 'func' ]
+    \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
+    \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
+    \:     a:cmdline =~# '^\w\+\s\+func '
+    \?         functions
+    \:     a:cmdline =~# '^\w\+\s\+file '
+    \?         glob(a:arglead.'*', 0, 1)
+    \:         []
+endfu
+
+fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
+    let args = matchstr(a:cmdline, '\s\zs\S.*')
+    let list = split(execute('breaklist'), '\n')
+    call map(list, { i,v -> s:sub(v,
+   \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
+   \                              '\1 \3 \2'
+   \                             )
+   \               })
+
+    return a:cmdline =~# '^\w\+\s\+\w*$'
+    \?         [ '*', 'here', 'file', 'func' ]
+    \:     a:cmdline =~# '\v^\w+\s+func\s'
+    \?         map(filter(list, { i,v -> v =~# '^func' }),
+    \              { i,v -> v[5:-1] })
+    \:     a:cmdline =~# '\v^\w+\s+file\s'
+    \?         map(filter(list, { i,v -> v =~# '^file' }),
+    \              { i,v -> v[5:-1] })
+    \:         ''
+endfu
+
+fu! debug#break_setup() abort "{{{1
     com! -buffer -bar -nargs=? -complete=customlist,s:breakadd_complete BreakAdd
     \                                                                   exe s:break('add', <q-args>)
     com! -buffer -bar -nargs=? -complete=customlist,s:breakdel_complete BreakDel
@@ -199,109 +232,32 @@ fu! debug#break_setup() abort
     \                      "
 endfu
 
-" break_snr {{{1
-
-fu! s:break_snr(arg) abort
+fu! s:break_snr(arg) abort "{{{1
     let id = s:script_id('%')
     return id
     \?         s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
     \:         a:arg
 endfu
 
-" breakadd_complete {{{1
-
-fu! s:capture(excmd) abort
+fu! s:capture(excmd) abort "{{{1
     return execute(a:excmd, 'silent!')
     return out
 endfu
 
-fu! s:breakadd_complete(arglead, cmdline, _p) abort
-    let functions = sort(map(split(s:capture('function'), '\n'),
-    \                              { i,v -> matchstr(v, ' \zs[^(]*') }
-    \                       )
-    \                   )
-
-    return a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         [ 'here', 'file', 'func' ]
-    \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
-    \:     a:cmdline =~# '^\w\+\s\+func '
-    \?         functions
-    \:     a:cmdline =~# '^\w\+\s\+file '
-    \?         glob(a:arglead.'*', 0, 1)
-    \:         []
-endfu
-
-" breakdel_complete {{{1
-
-fu! s:breakdel_complete(_a, cmdline, _p) abort
-    let args = matchstr(a:cmdline, '\s\zs\S.*')
-    let list = split(execute('breaklist'), '\n')
-    call map(list, { i,v -> s:sub(v,
-   \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
-   \                              '\1 \3 \2'
-   \                             )
-   \               })
-
-    return a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         [ '*', 'here', 'file', 'func' ]
-    \:     a:cmdline =~# '\v^\w+\s+func\s'
-    \?         map(filter(list, { i,v -> v =~# '^func' }),
-    \              { i,v -> v[5:-1] })
-    \:     a:cmdline =~# '\v^\w+\s+file\s'
-    \?         map(filter(list, { i,v -> v =~# '^file' }),
-    \              { i,v -> v[5:-1] })
-    \:         ''
-endfu
-
-fu! debug#runtime_complete(arglead, _c, _p) abort "{{{1
-    let cheats = {
-    \              'a' : 'autoload',
-    \              'd' : 'doc',
-    \              'f' : 'ftplugin',
-    \              'i' : 'indent',
-    \              'p' : 'plugin',
-    \              's' : 'syntax',
-    \            }
-
-    " Purpose:
-    " If the lead of the argument begins with `a/` replace it with `autoload/`.
-    " Same thing for other kind of idiomatic directories.
-    "
-    "                                ┌ the lead of the argument begins with a word character
-    "                                │ followed by a slash
-    "                                │                               ┌ and this character is in `cheats`
-    "             ┌──────────────────┤    ┌──────────────────────────┤
-    let request = a:arglead =~# '^\w/' && has_key(cheats,a:arglead[0])
-    \?                cheats[a:arglead[0]].a:arglead[1:-1]
-    \:                a:arglead
-
-    " put a wildcard before every slash, and one at the end
-    let pat = substitute(request,'/','*/','g').'*'
-    let found = {}
-    for path in split(&rtp, ',')
-        let matches = glob(path.'/'.pat, 0, 1)
-        " append a slash for every match which is a directory
-        call map(matches, { i,v -> isdirectory(v) ? v.'/' : v })
-        " remove the path (the one in the rtp) from the match
-        call map(matches, { i,v -> fnamemodify(v, ':p')[strlen(path)+1:-1] })
-        "                                               └────────────┤
-        "             `strlen(path) - 1`                             ┘
-        "              would include the last character in the path
-        "
-        "             `strlen(path)`
-        "              would include the slash after the path
-
-        for a_match in matches
-            let found[a_match] = 1
-        endfor
+fu! s:get_scriptnames() abort "{{{1
+    let lines = split(execute('scriptnames'), '\n')
+    let list = []
+    for line in lines
+        if line =~# ':'
+            call add(list, { 'text':     matchstr(line, '\d\+'),
+            \                'filename': expand(matchstr(line, ': \zs.*')),
+            \              })
+        endif
     endfor
-    return sort(keys(found))
+    return list
 endfu
 
-" gsub {{{1
-
-fu! s:gsub(str,pat,rep) abort
+fu! s:gsub(str,pat,rep) abort "{{{1
     return substitute(a:str, '\v\C'.a:pat, a:rep, 'g')
 endfu
 
@@ -334,9 +290,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     let g:motion_to_repeat = '-e'
 endfu
 
-" messages {{{1
-
-fu! debug#messages() abort
+fu! debug#messages() abort "{{{1
     0Verbose messages
 
     " From a help buffer, the buffer displayed in a newly opened preview
@@ -382,7 +336,7 @@ fu! debug#messages() abort
     call matchadd('LineNr', '\v^line\s+\d+:$')
 endfu
 
-fu! debug#messages_old() abort
+fu! debug#messages_old() abort "{{{1
     " `qfl` is a list of dictionaries
     " each one has the key:
     "
@@ -521,11 +475,54 @@ fu! debug#messages_old() abort
     call search('^[^|]', 'bWc')
 endfu
 
-" script_id {{{1
+fu! debug#runtime_complete(arglead, _c, _p) abort "{{{1
+    let cheats = {
+    \              'a' : 'autoload',
+    \              'd' : 'doc',
+    \              'f' : 'ftplugin',
+    \              'i' : 'indent',
+    \              'p' : 'plugin',
+    \              's' : 'syntax',
+    \            }
 
-fu! s:script_id(filename) abort
+    " Purpose:
+    " If the lead of the argument begins with `a/` replace it with `autoload/`.
+    " Same thing for other kind of idiomatic directories.
+    "
+    "                                ┌ the lead of the argument begins with a word character
+    "                                │ followed by a slash
+    "                                │                               ┌ and this character is in `cheats`
+    "             ┌──────────────────┤    ┌──────────────────────────┤
+    let request = a:arglead =~# '^\w/' && has_key(cheats,a:arglead[0])
+    \?                cheats[a:arglead[0]].a:arglead[1:-1]
+    \:                a:arglead
+
+    " put a wildcard before every slash, and one at the end
+    let pat = substitute(request,'/','*/','g').'*'
+    let found = {}
+    for path in split(&rtp, ',')
+        let matches = glob(path.'/'.pat, 0, 1)
+        " append a slash for every match which is a directory
+        call map(matches, { i,v -> isdirectory(v) ? v.'/' : v })
+        " remove the path (the one in the rtp) from the match
+        call map(matches, { i,v -> fnamemodify(v, ':p')[strlen(path)+1:-1] })
+        "                                               └────────────┤
+        "             `strlen(path) - 1`                             ┘
+        "              would include the last character in the path
+        "
+        "             `strlen(path)`
+        "              would include the slash after the path
+
+        for a_match in matches
+            let found[a_match] = 1
+        endfor
+    endfor
+    return sort(keys(found))
+endfu
+
+fu! s:script_id(filename) abort "{{{1
     let filename = fnamemodify(expand(a:filename), ':p')
-    for script in debug#scriptnames()
+    for script in s:get_scriptnames()
         if script.filename ==# filename
             return +script.text
         endif
@@ -533,33 +530,44 @@ fu! s:script_id(filename) abort
     return ''
 endfu
 
-" scriptnames {{{1
-
-fu! debug#scriptnames() abort
-    let lines = split(execute('scriptnames'), '\n')
-    let list = []
-    for line in lines
-        if line =~# ':'
-            call add(list, { 'text':     matchstr(line, '\d\+'),
-            \                'filename': expand(matchstr(line, ': \zs.*')),
-            \              })
-        endif
-    endfor
-
+fu! debug#scriptnames() abort "{{{1
+    let list = s:get_scriptnames()
     call setqflist(list)
     call setqflist([], 'a', { 'title': ':Scriptnames'})
     doautocmd <nomodeline> QuickFixCmdPost copen
 endfu
 
-" sub {{{1
-
-fu! s:sub(str,pat,rep) abort
+fu! s:sub(str,pat,rep) abort "{{{1
     return substitute(a:str, '\v\C'.a:pat, a:rep, '')
 endfu
 
-" time {{{1
+fu! debug#synnames(...) abort "{{{1
+    "                     The syntax element under the cursor is part of
+    "                     a group, which can be contained in another one,
+    "                     and so on.
+    "
+    "                     This imbrication of syntax groups can be seen as a stack.
+    "                     `synstack()` returns the list of IDs for all syntax groups
+    "                     in the stack, at the position given.
+    "
+    "                     They are sorted from the outermost syntax group, to the innermost.
+    "
+    "                  ┌─ The last one is what `synID()` returns.
+    "                  │
+    return reverse(map(synstack(line('.'), col('.')), { i,v -> synIDattr(v, 'name') }))
+endfu
 
-fu! debug#time(cmd, cnt)
+fu! debug#synnames_map(count) abort "{{{1
+    if a:count
+        let name = get(debug#synnames(), a:count-1, '')
+        if !empty(name)
+            exe 'syntax list '.name
+        endif
+    else
+        echo join(debug#synnames())
+    endif
+endfu
+fu! debug#time(cmd, cnt) "{{{1
     let time = reltime()
     try
         " We could get rid of the if/else/endif, and shorten the code, but we
@@ -653,31 +661,3 @@ fu! debug#wrapper(cmd) abort "{{{1
     endtry
 endfu
 
-" zS {{{1
-
-fu! debug#synnames(...) abort
-    "                     The syntax element under the cursor is part of
-    "                     a group, which can be contained in another one,
-    "                     and so on.
-    "
-    "                     This imbrication of syntax groups can be seen as a stack.
-    "                     `synstack()` returns the list of IDs for all syntax groups
-    "                     in the stack, at the position given.
-    "
-    "                     They are sorted from the outermost syntax group, to the innermost.
-    "
-    "                  ┌─ The last one is what `synID()` returns.
-    "                  │
-    return reverse(map(synstack(line('.'), col('.')), { i,v -> synIDattr(v, 'name') }))
-endfu
-
-fu! debug#synnames_map(count) abort
-    if a:count
-        let name = get(debug#synnames(), a:count-1, '')
-        if !empty(name)
-            exe 'syntax list '.name
-        endif
-    else
-        echo join(debug#synnames())
-    endif
-endfu
