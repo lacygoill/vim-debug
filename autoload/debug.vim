@@ -172,7 +172,9 @@ fu! s:break(type, arg) abort "{{{1
 endfu
 
 fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
-    let functions = sort(map(split(s:capture('function'), '\n'),
+    " Warning: `execute()` doesn't work in a completion function,
+    " for Vim < v8.0.1425.
+    let functions = sort(map(split(execute('function'), '\n'),
     \                              { i,v -> matchstr(v, ' \zs[^(]*') }
     \                       )
     \                   )
@@ -215,6 +217,8 @@ endfu
 
 fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
     let args = matchstr(a:cmdline, '\s\zs\S.*')
+    " Warning: `execute()` doesn't work in a completion function,
+    " for Vim < v8.0.1425.
     let list = split(execute('breaklist'), '\n')
     call map(list, { i,v -> s:sub(v,
    \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
@@ -264,12 +268,9 @@ fu! s:break_snr(arg) abort "{{{1
     \:         a:arg
 endfu
 
-fu! s:capture(excmd) abort "{{{1
-    return execute(a:excmd, 'silent!')
-    return out
-endfu
-
 fu! s:get_scriptnames() abort "{{{1
+    " Warning: `execute()` doesn't work in a completion function,
+    " for Vim < v8.0.1425.
     let lines = split(execute('scriptnames'), '\n')
     let list = []
     for line in lines
@@ -688,4 +689,3 @@ fu! debug#wrapper(cmd) abort "{{{1
         ToggleEditingCommands 1
     endtry
 endfu
-
