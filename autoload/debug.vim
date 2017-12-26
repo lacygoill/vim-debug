@@ -175,9 +175,7 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     " Warning: `execute()` doesn't work in a completion function,
     " for Vim < v8.0.1425.
     let functions = sort(map(split(execute('function'), '\n'),
-    \                              { i,v -> matchstr(v, ' \zs[^(]*') }
-    \                       )
-    \                   )
+    \                              { i,v -> matchstr(v, ' \zs[^(]*') }))
 
     " What's the purpose of `id`?{{{
     "
