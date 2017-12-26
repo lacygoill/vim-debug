@@ -219,7 +219,7 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     " This is a basic filtering over which we have no control:
     "
     "     • each candidate must begin with `a:arglead`
-    "     • the comparison is case-insensitive
+    "     • the comparison respects 'ic' and 'scs'
     "
     " So,  if  you need  a  custom  filtering, `-complete=customlist`  is  still
     " useful. Here, we don't need a custom filtering.
