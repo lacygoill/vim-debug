@@ -177,15 +177,40 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     \                       )
     \                   )
 
+    " What's the purpose of `id`?{{{
+    "
+    " In the output of `:function`, the script-local functions, have a name such as:
+    "
+    "         <SNR>123_func
+    "
+    " But if one of them is local to the CURRRENT script, it could be simplified:
+    "
+    "         s:func
+    "
+    " To perform this substitution, we need to know the id of the current script.
+    " That's what `id` is for. We pass it to `s:gsub()`:
+    "
+    "         s:gsub('func', '\<SNR\>'.id.'_', 's:')
+    "                                  │
+    "                                  └ id of the current script
+    "}}}
+    " In the returned value, don't replace `id` with `s:script_id('%')`.{{{
+    "
+    " It would  cause `s:script_id()` to  be called for every  defined function.
+    " This  is  unnecessary  (the  value of  `s:script_id('%')`  doesn't  change
+    " according  to a  function name),  and  would make  the current  completion
+    " function extremely slow.
+    "}}}
+    let id = s:script_id('%')
     return a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         [ 'here', 'file', 'func' ]
+    \?         "here\nfile\nfunc"
     \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    \?         map(functions, { i,v -> s:gsub(v, '\<SNR\>'.s:script_id('%').'_', 's:') })
+    \?         join(map(functions, { i,v -> s:gsub(v, '\<SNR\>'.id.'_', 's:') }), "\n")
     \:     a:cmdline =~# '^\w\+\s\+func '
-    \?         functions
+    \?         join(functions, "\n")
     \:     a:cmdline =~# '^\w\+\s\+file '
-    \?         glob(a:arglead.'*', 0, 1)
-    \:         []
+    \?         glob(a:arglead.'*')
+    \:         ''
 endfu
 
 fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
@@ -209,7 +234,7 @@ fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
 endfu
 
 fu! debug#break_setup() abort "{{{1
-    com! -buffer -bar -nargs=? -complete=customlist,s:breakadd_complete BreakAdd
+    com! -buffer -bar -nargs=? -complete=custom,s:breakadd_complete BreakAdd
     \                                                                   exe s:break('add', <q-args>)
     com! -buffer -bar -nargs=? -complete=customlist,s:breakdel_complete BreakDel
     \                                                                   exe s:break('del', <q-args>)
@@ -525,6 +550,9 @@ fu! s:script_id(filename) abort "{{{1
     for script in s:get_scriptnames()
         if script.filename ==# filename
             return +script.text
+            "      │
+            "      └ probably to make Vim coerce the string stored in
+            "        `script.text` into a number
         endif
     endfor
     return ''
