@@ -174,8 +174,8 @@ endfu
 fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     " Warning: `execute()` doesn't work in a completion function,
     " for Vim < v8.0.1425.
-    let functions = sort(map(split(execute('function'), '\n'),
-    \                              { i,v -> matchstr(v, ' \zs[^(]*') }))
+    let functions = join(sort(map(split(execute('function'), '\n'),
+    \                             { i,v -> matchstr(v, ' \zs[^(]*') })), "\n")
 
     " What's the purpose of `id`?{{{
     "
@@ -201,13 +201,28 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     " according  to a  function name),  and  would make  the current  completion
     " function extremely slow.
     "}}}
+    " Why don't you filter the candidates?{{{
+    "
+    " Filtering the candidates is only necessary when your completion function
+    " is used with the argument `-complete=customlist`.
+    "                                            ^^^^
+    " It's not needed with `-complete=custom`, because Vim does the filtering
+    " automatically. From `:command-completion-custom`:
+    "
+    "     For the  "custom" argument, it  is not necessary to  filter candidates
+    "     against  the  (implicit pattern  in)  ArgLead.   Vim will  filter  the
+    "     candidates with its  regexp engine after function return,  and this is
+    "     probably more efficient in  most cases. For the "customlist" argument,
+    "     Vim will  not filter the  returned completion candidates and  the user
+    "     supplied function should filter the candidates.
+    "}}}
     let id = s:script_id('%')
     return a:cmdline =~# '^\w\+\s\+\w*$'
     \?         "here\nfile\nfunc"
     \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    \?         join(map(functions, { i,v -> s:gsub(v, '\<SNR\>'.id.'_', 's:') }), "\n")
+    \?         s:gsub(functions, '\<SNR\>'.id.'_', 's:')
     \:     a:cmdline =~# '^\w\+\s\+func '
-    \?         join(functions, "\n")
+    \?         functions
     \:     a:cmdline =~# '^\w\+\s\+file '
     \?         glob(a:arglead.'*')
     \:         ''
@@ -225,20 +240,20 @@ fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
    \               })
 
     return a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         [ '*', 'here', 'file', 'func' ]
+    \?         "*\nhere\nfile\nfunc"
     \:     a:cmdline =~# '\v^\w+\s+func\s'
-    \?         map(filter(list, { i,v -> v =~# '^func' }),
-    \              { i,v -> v[5:-1] })
+    \?         join(map(filter(list, { i,v -> v =~# '^func' }),
+    \                   { i,v -> v[5:-1] }), "\n")
     \:     a:cmdline =~# '\v^\w+\s+file\s'
-    \?         map(filter(list, { i,v -> v =~# '^file' }),
-    \              { i,v -> v[5:-1] })
+    \?         join(map(filter(list, { i,v -> v =~# '^file' }),
+    \                   { i,v -> v[5:-1] }), "\n")
     \:         ''
 endfu
 
 fu! debug#break_setup() abort "{{{1
     com! -buffer -bar -nargs=? -complete=custom,s:breakadd_complete BreakAdd
     \                                                                   exe s:break('add', <q-args>)
-    com! -buffer -bar -nargs=? -complete=customlist,s:breakdel_complete BreakDel
+    com! -buffer -bar -nargs=? -complete=custom,s:breakdel_complete BreakDel
     \                                                                   exe s:break('del', <q-args>)
 
     cnorea <expr> <buffer> breakadd  getcmdtype() ==# ':' && getcmdline() ==# 'breakadd'
