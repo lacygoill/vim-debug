@@ -216,10 +216,13 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     "     Vim will  not filter the  returned completion candidates and  the user
     "     supplied function should filter the candidates.
     "
-    " This is  probably a  basic filtering  over which we  have no  control.  It
-    " probably only checks  whether each received candidate  begins exactly like
-    " `a:arglead`. So, if you need a different filtering, `-complete=customlist`
-    " is still useful. Here, we don't need another kind of filtering.
+    " This is a basic filtering over which we have no control:
+    "
+    "     • each candidate must begin with `a:arglead`
+    "     • the comparison is case-insensitive
+    "
+    " So,  if  you need  a  custom  filtering, `-complete=customlist`  is  still
+    " useful. Here, we don't need a custom filtering.
     "}}}
     let id = s:script_id('%')
     return a:cmdline =~# '^\w\+\s\+\w*$'
