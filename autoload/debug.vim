@@ -204,9 +204,9 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     " Why don't you filter the candidates?{{{
     "
     " Filtering the candidates is only necessary when your completion function
-    " is used with the argument `-complete=customlist`.
-    "                                            ^^^^
-    " It's not needed with `-complete=custom`, because Vim does the filtering
+    " is defined with the attribute `-complete=customlist`.
+    "                                                ^^^^
+    " It's  not needed  with `-complete=custom`,  because Vim  does a  filtering
     " automatically. From `:command-completion-custom`:
     "
     "     For the  "custom" argument, it  is not necessary to  filter candidates
@@ -215,6 +215,11 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     "     probably more efficient in  most cases. For the "customlist" argument,
     "     Vim will  not filter the  returned completion candidates and  the user
     "     supplied function should filter the candidates.
+    "
+    " This is  probably a  basic filtering  over which we  have no  control.  It
+    " probably only checks  whether each received candidate  begins exactly like
+    " `a:arglead`. So, if you need a different filtering, `-complete=customlist`
+    " is still useful. Here, we don't need another kind of filtering.
     "}}}
     let id = s:script_id('%')
     return a:cmdline =~# '^\w\+\s\+\w*$'
