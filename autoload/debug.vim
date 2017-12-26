@@ -244,8 +244,7 @@ fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
     call map(list, { i,v -> s:sub(v,
    \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
    \                              '\1 \3 \2'
-   \                             )
-   \               })
+   \                             )})
 
     return a:cmdline =~# '^\w\+\s\+\w*$'
     \?         "*\nhere\nfile\nfunc"
