@@ -316,6 +316,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     "                                 │ … when the error occurs inside a try conditional
     "                     ┌───────────┤
     let pat_error = '\v^%(Vim%(\(\a+\))?:)?\zsE\d+'
+
     " index of most recent error
     let i = match(messages, pat_error)
     " index of next line which isn't an error, nor belongs to a stack trace
@@ -323,17 +324,31 @@ fu! debug#help_about_last_errors() abort "{{{1
     if j == -1
         let j = i+1
     endif
-    let s:last_errors = {'taglist' : [], 'pos': -1}
-    let s:last_errors.taglist = map(messages[i:j-1], {idx,v -> matchstr(v, pat_error)})
-    call filter(s:last_errors.taglist, {i,v -> !empty(v)})
-    if get(get(get(s:, 'last_errors', {}), 'taglist', []), 0, '') == ''
+
+    let errors = map(messages[i:j-1], {idx,v -> matchstr(v, pat_error)})
+    " remove lines  which don't contain  an error,  or which contain  the errors
+    " E662 / E663 (they aren't interesting and come frequently)
+    call filter(errors, {i,v -> !empty(v) && v !~# '^E66[23]$'})
+    if empty(errors)
         echo 'No last errors'
         return
     endif
-    let s:last_errors.pos = (s:last_errors.pos + 1)%len(s:last_errors.taglist)
-    exe 'h '.s:last_errors.taglist[s:last_errors.pos]
+
+    let s:last_errors = get(s:, 'last_errors', {'taglist' : [], 'pos': -1})
+    " the current latest errors are identical to the ones we saved the last time
+    " we invoked this function
+    if errors == s:last_errors.taglist
+        " just update our position in the list of visited errors
+        let s:last_errors.pos = (s:last_errors.pos + 1)%len(s:last_errors.taglist)
+    else
+        " reset our position in the list of visited errors
+        let s:last_errors.pos = 0
+        " reset the list of errors
+        let s:last_errors.taglist = errors
+    endif
+
+    exe 'h '.get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
     setl cole=0
-    let g:motion_to_repeat = '-e'
 endfu
 
 fu! debug#messages() abort "{{{1
