@@ -724,7 +724,6 @@ fu! debug#verbose(level, excmd) abort "{{{1
     wincmd P
     " if we really get there...
     if &previewwindow
-        " We use our custom `quit()` function to be able to undo the closing.
         nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
         setl bh=wipe bt=nofile nobl nowrap noswf
     endif
