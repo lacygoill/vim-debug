@@ -54,9 +54,6 @@ com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "       I prefer `-range=1`: only works as a prefix. I will never use the
 "       other syntax anyway.
 
-com! -bar -range=1 -nargs=1 -complete=command Verbose
-\                                             call debug#verbose(<count>, <q-args>)
-
 com! -bar -nargs=1 -complete=option Vo echo 'local: '
 \|                                     verb setl <args>?
 \|                                     echo "\nglobal: "
