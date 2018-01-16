@@ -330,8 +330,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     " E662 / E663 / E664 (they aren't interesting and come frequently)
     call filter(errors, {i,v -> !empty(v) && v !~# '^E66[234]$'})
     if empty(errors)
-        echo 'No last errors'
-        return
+        return 'echo "no last errors"'
     endif
 
     let s:last_errors = get(s:, 'last_errors', {'taglist' : [], 'pos': -1})
@@ -347,8 +346,8 @@ fu! debug#help_about_last_errors() abort "{{{1
         let s:last_errors.taglist = errors
     endif
 
-    exe 'h '.get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
-    setl cole=0
+    call timer_start(0, {-> execute('setl cole=0')})
+    return 'h '.get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
 endfu
 
 fu! debug#messages() abort "{{{1

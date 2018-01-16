@@ -70,7 +70,7 @@ com! -bar -nargs=1 -complete=option Vo echo 'local: '
 "                      ┌ info
 "                      │┌ error
 "                      ││
-nno  <silent><unique>  -e  :<c-u>call debug#help_about_last_errors()<cr>
+nno  <silent><unique>  -e  :<c-u>exe debug#help_about_last_errors()<cr>
 
 " g?        show messages {{{2
 
