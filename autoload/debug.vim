@@ -667,7 +667,7 @@ fu! debug#vimrc() abort "{{{1
     " useful to not have to remove the next buffer-local autocmd
     setl bh=wipe nobl
     " disable automatic saving
-    norm [oa
+    sil call save#toggle_auto(0)
     " make sure the file is empty
     %d_
     " import our current vimrc
@@ -690,7 +690,7 @@ fu! debug#vimrc() abort "{{{1
         " Warning:
         " don't call `s:vimrc_act_on_pane()` AFTER destroying `s:vimrc`
         " the function needs this variable
-        au BufWipeOut   <buffer> exe 'norm ]oa'
+        au BufWipeOut   <buffer> sil call save#toggle_auto(1)
         \|                       call s:vimrc_act_on_pane(0)
         \|                       unlet s:vimrc
         " close pane when we leave (useful if we restart with SPC R)
