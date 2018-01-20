@@ -346,7 +346,6 @@ fu! debug#help_about_last_errors() abort "{{{1
         let s:last_errors.taglist = errors
     endif
 
-    call timer_start(0, {-> execute('setl cole=0')})
     return 'h '.get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
 endfu
 
