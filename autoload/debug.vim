@@ -20,7 +20,7 @@
 "             endfor
 "         endfor
 "         let run = s:unlet_for(unlets)
-"         if run !=# ''
+"         if run isnot# ''
 "             let run .= '|'
 "         endif
 "         let run .= 'filetype detect'
@@ -52,7 +52,7 @@
 "         call extend(do, ['filetype detect'])
 "     endif
 "     let run = s:unlet_for(unlets)
-"     if run !=# ''
+"     if run isnot# ''
 "         let run .= '|'
 "     endif
 "     let run .= join(do, '|')
@@ -69,7 +69,7 @@
 "                 for i in range(len(lines)-1)
 "                     let unlet = matchstr(lines[i],
 "                     \                    '^if .*\<exists *( *[''"]\%(\g:\)\=\zs[0-9A-Za-z_#]\+\ze[''"]')
-"                     if unlet !=# '' && index(guards, unlet) == -1
+"                     if unlet isnot# '' && index(guards, unlet) == -1
 "                         for j in range(0, 4)
 "                             if get(lines, i+j, '') =~# '^\s*finish\>'
 "                                 call extend(guards, [unlet])
