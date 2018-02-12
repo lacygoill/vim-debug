@@ -5,7 +5,7 @@
 "
 "     if a:0
 "         let files = a:000
-"     elseif &filetype ==# 'vim' || expand('%:e') ==# 'vim'
+"     elseif &ft is# 'vim' || expand('%:e') is# 'vim'
 "         let files = [debug#locate(expand('%:p'))[1]]
 "         if empty(files[0])
 "             let files = ['%']
@@ -92,7 +92,7 @@
 "     let path = fnamemodify(a:path, ':p')
 "     let candidates = []
 "     for glob in split(&runtimepath, ',')
-"       let candidates += filter(glob(glob, 0, 1), { i,v -> path[0 : len(v)-1] ==# v && path[len(v)] =~# '[\/]' })
+"       let candidates += filter(glob(glob, 0, 1), { i,v -> path[0 : len(v)-1] is# v && path[len(v)] =~# '[\/]' })
 "     endfor
 "     if empty(candidates)
 "         return ['', '']
@@ -129,7 +129,7 @@
 " endfu
 
 fu! s:break(type, arg) abort "{{{1
-    if a:arg ==# 'here' || a:arg ==# ''
+    if a:arg is# 'here' || a:arg is# ''
         " Search for `fu!` backward.
         " Why use `searchpair()` instead of `search()`?{{{
         "
@@ -263,11 +263,11 @@ fu! debug#break_setup() abort "{{{1
     com! -buffer -bar -nargs=? -complete=custom,s:breakdel_complete BreakDel
     \                                                                   exe s:break('del', <q-args>)
 
-    cnorea <expr> <buffer> breakadd  getcmdtype() ==# ':' && getcmdline() ==# 'breakadd'
+    cnorea <expr> <buffer> breakadd  getcmdtype() is# ':' && getcmdline() is# 'breakadd'
     \                                ?    'BreakAdd'
     \                                :    'breakadd'
 
-    cnorea <expr> <buffer> breakdel  getcmdtype() ==# ':' && getcmdline() ==# 'breakdel'
+    cnorea <expr> <buffer> breakdel  getcmdtype() is# ':' && getcmdline() is# 'breakdel'
     \                                ?    'BreakDel'
     \                                :    'breakdel'
 
@@ -478,7 +478,7 @@ fu! debug#messages_old() abort "{{{1
             let code = map(code, { i,v -> v[leading_address : -1] })
             " FIXME:
             " what's the point?
-            call map(code, { i,v -> v ==# ' ' ? '' : v })
+            call map(code, { i,v -> v is# ' ' ? '' : v })
 
             let body = []
             let offset = 0
@@ -582,7 +582,7 @@ endfu
 fu! s:script_id(filename) abort "{{{1
     let filename = fnamemodify(expand(a:filename), ':p')
     for script in s:get_scriptnames()
-        if script.filename ==# filename
+        if script.filename is# filename
             return +script.text
             "      │
             "      └ probably to make Vim coerce the string stored in
