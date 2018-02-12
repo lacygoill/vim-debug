@@ -69,7 +69,7 @@
 "                 for i in range(len(lines)-1)
 "                     let unlet = matchstr(lines[i],
 "                     \                    '^if .*\<exists *( *[''"]\%(\g:\)\=\zs[0-9A-Za-z_#]\+\ze[''"]')
-"                     if unlet isnot# '' && index(guards, unlet) == -1
+"                     if unlet isnot# '' && index(guards, unlet) ==# -1
 "                         for j in range(0, 4)
 "                             if get(lines, i+j, '') =~# '^\s*finish\>'
 "                                 call extend(guards, [unlet])
@@ -162,7 +162,7 @@ fu! s:break(type, arg) abort "{{{1
             endif
             return printf('break%s func %d %s',
             \                  a:type,
-            \                  line('.') == l:lnum ? '' : line('.') - l:lnum,
+            \                  line('.') ==# l:lnum ? '' : line('.') - l:lnum,
             \                  function )
         else
             return 'break'.a:type.' here'
@@ -321,7 +321,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     let i = match(messages, pat_error)
     " index of next line which isn't an error, nor belongs to a stack trace
     let j = match(messages, '\v^%('.pat_error.'|Error|line)@!', i+1)
-    if j == -1
+    if j ==# -1
         let j = i+1
     endif
 
@@ -336,7 +336,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     let s:last_errors = get(s:, 'last_errors', {'taglist' : [], 'pos': -1})
     " the current latest errors are identical to the ones we saved the last time
     " we invoked this function
-    if errors == s:last_errors.taglist
+    if errors ==# s:last_errors.taglist
         " just update our position in the list of visited errors
         let s:last_errors.pos = (s:last_errors.pos + 1)%len(s:last_errors.taglist)
     else
@@ -702,7 +702,7 @@ fu! s:vimrc_act_on_pane(open) abort "{{{1
     " if there's already a tmux pane opened to debug Vim, kill it
     if    get(get(s:, 'vimrc', ''), 'pane_id', -1) != -1
     \&&   stridx(system('tmux list-pane -t %'.s:vimrc.pane_id),
-    \            "can't find pane %".s:vimrc.pane_id) == -1
+    \            "can't find pane %".s:vimrc.pane_id) ==# -1
         call system('tmux kill-pane -t %'.s:vimrc.pane_id)
     endif
     if a:open
