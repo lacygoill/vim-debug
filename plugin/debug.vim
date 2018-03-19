@@ -72,6 +72,14 @@ com! -bar -nargs=1 -complete=option Vo echo 'local: '
 "                      ││
 nno  <silent><unique>  -e  :<c-u>exe debug#help_about_last_errors()<cr>
 
+" !c        capture variable {{{2
+
+" This mapping is useful to create a copy of a variable local to a function or a
+" script into the global namespace, for debugging purpose.
+
+nmap           !c                        <plug>(capture-variable)
+nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
+
 " g?        show messages {{{2
 
 nno  <silent><unique>  g?  :<c-u>call debug#messages()<cr>

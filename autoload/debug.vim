@@ -288,6 +288,12 @@ fu! s:break_snr(arg) abort "{{{1
     \:         a:arg
 endfu
 
+fu! debug#capture_variable() abort "{{{1
+    t.
+    sil keepj keepp s/\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*/g:\1\2= deepcopy(\1)/e
+    sil call repeat#set("\<plug>(capture-variable)")
+endfu
+
 fu! s:get_scriptnames() abort "{{{1
     " Warning: `execute()` doesn't work in a completion function,
     " for Vim < v8.0.1425.
