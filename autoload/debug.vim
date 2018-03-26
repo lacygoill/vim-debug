@@ -226,14 +226,14 @@ fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
     "}}}
     let id = s:script_id('%')
     return a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         "here\nfile\nfunc"
-    \:     a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
-    \?         s:gsub(functions, '\<SNR\>'.id.'_', 's:')
-    \:     a:cmdline =~# '^\w\+\s\+func '
-    \?         functions
-    \:     a:cmdline =~# '^\w\+\s\+file '
-    \?         glob(a:arglead.'*')
-    \:         ''
+       \ ?     "here\nfile\nfunc"
+       \ : a:cmdline =~# '^\w\+\s\+func\s*\d*\s\+s:'
+       \ ?     s:gsub(functions, '\<SNR\>'.id.'_', 's:')
+       \ : a:cmdline =~# '^\w\+\s\+func '
+       \ ?     functions
+       \ : a:cmdline =~# '^\w\+\s\+file '
+       \ ?     glob(a:arglead.'*')
+       \ :     ''
 endfu
 
 fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
@@ -242,19 +242,19 @@ fu! s:breakdel_complete(_a, cmdline, _p) abort "{{{1
     " for Vim < v8.0.1425.
     let list = split(execute('breaklist'), '\n')
     call map(list, { i,v -> s:sub(v,
-   \                              '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
-   \                              '\1 \3 \2'
-   \                             )})
+                          \       '^\s*\d+\s*(\w+) (.*)  line (\d+)$',
+                          \       '\1 \3 \2'
+                          \      )})
 
     return a:cmdline =~# '^\w\+\s\+\w*$'
-    \?         "*\nhere\nfile\nfunc"
-    \:     a:cmdline =~# '\v^\w+\s+func\s'
-    \?         join(map(filter(list, { i,v -> v =~# '^func' }),
-    \                   { i,v -> v[5:-1] }), "\n")
-    \:     a:cmdline =~# '\v^\w+\s+file\s'
-    \?         join(map(filter(list, { i,v -> v =~# '^file' }),
-    \                   { i,v -> v[5:-1] }), "\n")
-    \:         ''
+       \ ?     "*\nhere\nfile\nfunc"
+       \ : a:cmdline =~# '\v^\w+\s+func\s'
+       \ ?     join(map(filter(list, { i,v -> v =~# '^func' }),
+       \                { i,v -> v[5:-1] }), "\n")
+       \ : a:cmdline =~# '\v^\w+\s+file\s'
+       \ ?     join(map(filter(list, { i,v -> v =~# '^file' }),
+       \                { i,v -> v[5:-1] }), "\n")
+       \ :     ''
 endfu
 
 fu! debug#break_setup() abort "{{{1
@@ -284,8 +284,8 @@ endfu
 fu! s:break_snr(arg) abort "{{{1
     let id = s:script_id('%')
     return id
-    \?         s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
-    \:         a:arg
+       \ ?     s:gsub(a:arg, '^func.*\zs%(<s:|\<SID\>)', '<SNR>'.id.'_')
+       \ :     a:arg
 endfu
 
 fu! debug#capture_variable() abort "{{{1
@@ -559,8 +559,8 @@ fu! debug#runtime_complete(arglead, _c, _p) abort "{{{1
     "                                │                               ┌ and this character is in `cheats`
     "             ┌──────────────────┤    ┌──────────────────────────┤
     let request = a:arglead =~# '^\w/' && has_key(cheats,a:arglead[0])
-    \?                cheats[a:arglead[0]].a:arglead[1:-1]
-    \:                a:arglead
+              \ ?     cheats[a:arglead[0]].a:arglead[1:-1]
+              \ :     a:arglead
 
     " put a wildcard before every slash, and one at the end
     let pat = substitute(request,'/','*/','g').'*'
