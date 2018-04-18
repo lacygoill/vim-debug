@@ -383,6 +383,7 @@ fu! debug#messages() abort "{{{1
     \              'file loaded':        '".{-}"%( \[RO\])? line \d+ of \d+ --\d+\%-- col \d+%(-\d+)?',
     \              'file reloaded':      '".{-}".*\d+L, \d+C',
     \              'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
+    \              'C-c':                'Type\s*:qa!\s*and press \<Enter\> to abandon all changes and exit Vim',
     \              'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
     \              'Scanning':           'Scanning:.*',
     \              'substitutions':      '\d+ substitutions? on \d+ lines?',
