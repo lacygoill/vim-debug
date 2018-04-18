@@ -84,6 +84,17 @@ nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
 
 nno  <silent><unique>  g?  :<c-u>call debug#messages()<cr>
 
+" gN        cleaN messages {{{2
+
+" Why not `SPC c`?{{{
+"
+" Because in filetype  plugins (latex, shell), we often use  `bar c` for various
+" purposes, like compiling or checking errors.
+" And so, we use `bar n` or `bar N` to cleaN things.
+" And so, here, to stay consistent with our mappings in filetype plugins, we use `N`.
+"}}}
+nno  <silent><unique>  gN  :<c-u>messages clear <bar> echo 'messages cleared'<cr>
+
 " zs        show syntax groups under cursor {{{2
 
 " Usage:
