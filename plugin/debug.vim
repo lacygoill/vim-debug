@@ -80,6 +80,16 @@ nno  <silent><unique>  -e  :<c-u>exe debug#help_about_last_errors()<cr>
 nmap           !c                        <plug>(capture-variable)
 nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
 
+
+" g!        last page in the output of last command {{{2
+
+" Why?{{{
+"
+" `g!` is easier to type.
+" `g<` could be used with `g>` to perform a pair of opposite actions.
+"}}}
+nno  <unique>  g!  g<
+
 " g?        show messages {{{2
 
 nno  <silent><unique>  g?  :<c-u>call debug#messages()<cr>
