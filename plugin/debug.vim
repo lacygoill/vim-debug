@@ -55,9 +55,9 @@ com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "       other syntax anyway.
 
 com! -bar -nargs=1 -complete=option Vo echo 'local: '
-\|                                     verb setl <args>?
-\|                                     echo "\nglobal: "
-\|                                     verb setg <args>?
+                                \ |    verb setl <args>?
+                                \ |    echo "\nglobal: "
+                                \ |    verb setg <args>?
 
 " mappings {{{1
 " -e        show help about last error {{{2

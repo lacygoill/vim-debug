@@ -697,8 +697,8 @@ fu! debug#vimrc() abort "{{{1
         " don't call `s:vimrc_act_on_pane()` AFTER destroying `s:vimrc`
         " the function needs this variable
         au BufWipeOut   <buffer> sil call save#toggle_auto(1)
-        \|                       call s:vimrc_act_on_pane(0)
-        \|                       unlet s:vimrc
+        \ |                      call s:vimrc_act_on_pane(0)
+        \ |                      unlet s:vimrc
         " close pane when we leave (useful if we restart with SPC R)
         au VimLeave * call s:vimrc_act_on_pane(0)
     augroup END
@@ -708,7 +708,7 @@ endfu
 fu! s:vimrc_act_on_pane(open) abort "{{{1
     " if there's already a tmux pane opened to debug Vim, kill it
     if    get(get(s:, 'vimrc', ''), 'pane_id', -1) !=# -1
-    \&&   stridx(system('tmux list-pane -t %'.s:vimrc.pane_id),
+    \ &&  stridx(system('tmux list-pane -t %'.s:vimrc.pane_id),
     \            "can't find pane %".s:vimrc.pane_id) ==# -1
         call system('tmux kill-pane -t %'.s:vimrc.pane_id)
     endif
