@@ -60,17 +60,14 @@ com! -bar -nargs=1 -complete=option Vo echo 'local: '
                                 \ |    verb setg <args>?
 
 " mappings {{{1
-" -e        show help about last error {{{2
+" g!        last page in the output of last command {{{2
 
-" Description:
-" You execute some function/command which raises one or several errors.
-" Press `-e` to open the help topic explaining the last one.
-" Repeat to cycle through all the help topics related to the rest of the errors.
-
-"                      ┌ info
-"                      │┌ error
-"                      ││
-nno  <silent><unique>  -e  :<c-u>exe debug#help_about_last_errors()<cr>
+" Why?{{{
+"
+" `g!` is easier to type.
+" `g<` could be used with `g>` to perform a pair of opposite actions.
+"}}}
+nno  <unique>  g!  g<
 
 " !c        capture variable {{{2
 
@@ -81,50 +78,38 @@ nmap           !c                        <plug>(capture-variable)
 nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
 
 
-" g!        last page in the output of last command {{{2
+" !e        show help about last error {{{2
 
-" Why?{{{
-"
-" `g!` is easier to type.
-" `g<` could be used with `g>` to perform a pair of opposite actions.
-"}}}
-nno  <unique>  g!  g<
+" Description:
+" You execute some function/command which raises one or several errors.
+" Press `-e` to open the help topic explaining the last one.
+" Repeat to cycle through all the help topics related to the rest of the errors.
 
-" g?        show messages {{{2
+"                       ┌ error
+"                       │
+nno  <silent><unique>  !e  :<c-u>exe debug#help_about_last_errors()<cr>
 
-nno  <silent><unique>  g?  :<c-u>call debug#messages()<cr>
+" !m        show messages {{{2
 
-" gN        cleaN messages {{{2
+nno  <silent><unique>  !m  :<c-u>call debug#messages()<cr>
+
+" !M        clean messages {{{2
 
 " Why not `SPC c`?{{{
 "
 " Because in filetype  plugins (latex, shell), we often use  `bar c` for various
 " purposes, like compiling or checking errors.
-" And so, we use `bar n` or `bar N` to cleaN things.
-" And so, here, to stay consistent with our mappings in filetype plugins, we use `N`.
 "}}}
-nno  <silent><unique>  gN  :<c-u>messages clear <bar> echo 'messages cleared'<cr>
+nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr>
 
-" zs        show syntax groups under cursor {{{2
+" !s        show syntax groups under cursor {{{2
 
 " Usage:
 " all these commands apply to the character under the cursor
 "
-"     zs     show the names of all syntax groups
-"     1zs    show the definition of the innermost syntax group
-"     3zs    show the definition of the 3rd syntax group
+"     !s     show the names of all syntax groups
+"     1!s    show the definition of the innermost syntax group
+"     3!s    show the definition of the 3rd syntax group
 
-nno  <silent><unique>  zs  :<c-u>call debug#synnames_map(v:count)<cr>
+nno  <silent><unique>  !s  :<c-u>call debug#synnames_map(v:count)<cr>
 
-" By default, what do `zs` and `ze` do?{{{
-"
-" When 'wrap' is off,  and the cursor is on a long line,  a few characters after
-" the beginning of the line (column 7?), `zs` will move the viewport so that the
-" current character is near the start of the line.
-" `ze` do the same,  but it moves the viewport so that  the current character is
-" near the end of the line.
-"}}}
-" We've just lost the default `zs` command. Restore it on `zS`.
-nno  <unique>  zS  zs
-" For consistency's sake, do the same for `ze`.
-nno  <unique>  zE  ze
