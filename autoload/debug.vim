@@ -289,8 +289,12 @@ fu! s:break_snr(arg) abort "{{{1
 endfu
 
 fu! debug#capture_variable() abort "{{{1
+    let pat = '\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*'
+    if match(getline('.'), pat) ==# -1
+        return
+    endif
     t.
-    sil keepj keepp s/\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*/g:\1\2= deepcopy(\1)/e
+    sil exe 'keepj keepp s/'.pat.'/g:\1\2= deepcopy(\1)/e'
     sil call repeat#set("\<plug>(capture-variable)")
 endfu
 
