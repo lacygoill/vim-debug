@@ -291,6 +291,7 @@ endfu
 fu! debug#capture_variable() abort "{{{1
     let pat = '\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*'
     if match(getline('.'), pat) ==# -1
+        echo 'No variable to capture on this line'
         return
     endif
     t.
