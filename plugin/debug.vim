@@ -123,3 +123,7 @@ nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr
 
 nno  <silent><unique>  !s  :<c-u>call debug#synnames_map(v:count)<cr>
 
+" !t        show info about running timers {{{2
+
+nno  <silent>  !t  :<c-u>call debug#timer#info()<cr>
+
