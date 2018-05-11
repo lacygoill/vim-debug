@@ -54,6 +54,16 @@ com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "       I prefer `-range=1`: only works as a prefix. I will never use the
 "       other syntax anyway.
 
+" Do NOT give the `-bar` attribute to `:Verbose`.{{{
+"
+" It would  prevent it  from working  correctly when  the command  which follows
+" contains a bar:
+"
+"         :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
+"}}}
+com! -range=1 -nargs=1 -complete=command  Verbose
+\                                         call debug#log#output({'level': <count>, 'excmd': <q-args>})
+
 com! -bar -nargs=1 -complete=option Vo echo 'local: '
                                 \ |    verb setl <args>?
                                 \ |    echo "\nglobal: "
