@@ -3,11 +3,16 @@ if exists('g:loaded_debug')
 endif
 let g:loaded_debug = 1
 
-" autocmd {{{1
+" autocmds {{{1
 
 augroup my_debug
     au!
     au FileType vim call debug#break_setup()
+augroup END
+
+augroup timer_info_populate
+    au!
+    au BufNewFile /tmp/*/timer_info call debug#timer#populate()
 augroup END
 
 " commands {{{1
@@ -87,6 +92,10 @@ nno  <unique>  g!  g<
 nmap           !c                        <plug>(capture-variable)
 nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
 
+" !d        echo g:debug {{{2
+
+" typing `:echo debug` gets old really fast
+nno  <silent>  !d  :<c-u>echo get(g:, 'debug', 'g:debug does not exist')<cr>
 
 " !e        show help about last error {{{2
 
@@ -125,5 +134,5 @@ nno  <silent><unique>  !s  :<c-u>call debug#synnames_map(v:count)<cr>
 
 " !t        show info about running timers {{{2
 
-nno  <silent>  !t  :<c-u>call debug#timer#info()<cr>
+nno  <silent>  !t  :<c-u>call debug#timer#info_open()<cr>
 

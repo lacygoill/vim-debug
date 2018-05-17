@@ -676,7 +676,7 @@ fu! debug#vimrc() abort "{{{1
     new $XDG_RUNTIME_VIM/debug_vimrc
     " wipe the buffer when it becomes hidden
     " useful to not have to remove the next buffer-local autocmd
-    setl bh=wipe nobl
+    setl bh=wipe nobl noswf
     " disable automatic saving
     sil call save#toggle_auto(0)
     " make sure the file is empty
@@ -698,12 +698,8 @@ fu! debug#vimrc() abort "{{{1
         au! * <buffer>
         " start a Vim session sourcing the new temporary vimrc in a tmux pane
         au BufWritePost <buffer> call s:vimrc_act_on_pane(1)
-        " Warning:
-        " don't call `s:vimrc_act_on_pane()` AFTER destroying `s:vimrc`
-        " the function needs this variable
         au BufWipeOut   <buffer> sil call save#toggle_auto(1)
         \ |                      call s:vimrc_act_on_pane(0)
-        \ |                      unlet s:vimrc
         " close pane when we leave (useful if we restart with SPC R)
         au VimLeave * call s:vimrc_act_on_pane(0)
     augroup END
@@ -721,6 +717,8 @@ fu! s:vimrc_act_on_pane(open) abort "{{{1
         " open  a tmux  pane, and  start a  Vim instance  with the  new modified
         " minimal vimrc
         let s:vimrc.pane_id = systemlist(s:vimrc.cmd)[0][1:]
+    else
+        unlet! s:vimrc
     endif
 endfu
 

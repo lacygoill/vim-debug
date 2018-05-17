@@ -71,7 +71,6 @@ fu! debug#log#output(what) abort "{{{1
     if &l:pvw
         setl bt=nofile nobl noswf nowrap
         nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
-        call lg#window#openable_anywhere()
         call search('Last set from \zs')
     endif
 endfu
