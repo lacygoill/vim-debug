@@ -296,7 +296,7 @@ fu! debug#capture_variable() abort "{{{1
     endif
     t.
     sil exe 'keepj keepp s/'.pat.'/g:\1\2= deepcopy(\1)/e'
-    sil call repeat#set("\<plug>(capture-variable)")
+    sil! call repeat#set("\<plug>(capture-variable)")
 endfu
 
 fu! s:get_scriptnames() abort "{{{1
