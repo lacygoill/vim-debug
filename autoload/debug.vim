@@ -1,6 +1,3 @@
-d_bar
-d_baz
-d_foo
 "     let predo = ''
 "
 "     if a:0
