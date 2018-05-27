@@ -310,6 +310,7 @@ fu! debug#dump_debugging_variables() abort "{{{1
         wincmd P
         if &l:pvw
             call setline(1, vars)
+            sil update
             nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
         endif
     endif
