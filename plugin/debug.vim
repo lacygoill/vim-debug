@@ -92,10 +92,10 @@ nno  <unique>  g!  g<
 nmap           !c                        <plug>(capture-variable)
 nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
 
-" !d        echo g:debug {{{2
+" !d        echo g:d_* {{{2
 
 " typing `:echo debug` gets old really fast
-nno  <silent>  !d  :<c-u>echo get(g:, 'debug', 'g:debug does not exist')<cr>
+nno  <silent>  !d  :<c-u>call debug#dump_debugging_variables()<cr>
 
 " !e        show help about last error {{{2
 

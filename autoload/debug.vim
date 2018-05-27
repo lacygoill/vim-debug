@@ -1,6 +1,6 @@
-" fu! debug#runtime_command(bang, ...) abort
-"     let unlets = []
-"     let do = []
+d_bar
+d_baz
+d_foo
 "     let predo = ''
 "
 "     if a:0
@@ -295,8 +295,24 @@ fu! debug#capture_variable() abort "{{{1
         return
     endif
     t.
-    sil exe 'keepj keepp s/'.pat.'/g:\1\2= deepcopy(\1)/e'
+    sil exe 'keepj keepp s/'.pat.'/g:d_\1\2= deepcopy(\1)/e'
     sil! call repeat#set("\<plug>(capture-variable)")
+endfu
+
+fu! debug#dump_debugging_variables() abort "{{{1
+    let vars = getcompletion('d_*', 'var')
+    if empty(vars)
+        echo 'there are no debugging variables'
+    else
+        let tempfile = tempname()
+        exe 'pedit '.tempfile
+        call map(vars, {i,v -> v.' = '.string(g:{v})})
+        wincmd P
+        if &l:pvw
+            call setline(1, vars)
+            nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
+        endif
+    endif
 endfu
 
 fu! s:get_scriptnames() abort "{{{1
