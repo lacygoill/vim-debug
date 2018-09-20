@@ -73,7 +73,7 @@ fu! debug#log#output(what) abort "{{{1
         nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
         " `gf` &friends can't parse `/path/to/file line 123`,
         " so replace these line with `/path/to/file:123`
-        %s/Last set from.*\zs line \ze\d\+$/:/e
+        sil! %s/Last set from.*\zs line \ze\d\+$/:/
         call search('Last set from \zs')
     endif
 endfu
