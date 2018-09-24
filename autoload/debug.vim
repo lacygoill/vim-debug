@@ -285,7 +285,7 @@ fu! s:break_snr(arg) abort "{{{1
        \ :     a:arg
 endfu
 
-fu! debug#capture_variable() abort "{{{1
+fu! debug#capture_variable(type) abort "{{{1
     let pat = '\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*'
     if match(getline('.'), pat) ==# -1
         echo 'No variable to capture on this line'
@@ -293,7 +293,6 @@ fu! debug#capture_variable() abort "{{{1
     endif
     t.
     sil exe 'keepj keepp s/'.pat.'/g:d_\1\2= deepcopy(\1)/e'
-    sil! call repeat#set("\<plug>(capture-variable)")
 endfu
 
 fu! debug#dump_debugging_variables() abort "{{{1

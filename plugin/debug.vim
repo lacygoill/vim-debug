@@ -89,13 +89,12 @@ nno  <unique>  g!  g<
 " This mapping is useful to create a copy of a variable local to a function or a
 " script into the global namespace, for debugging purpose.
 
-nmap           !c                        <plug>(capture-variable)
-nno  <silent>  <plug>(capture-variable)  :<c-u>call debug#capture_variable()<cr>
+nno  <silent><unique>  !c  :<c-u>set opfunc=debug#capture_variable<cr>g@_
 
 " !d        echo g:d_* {{{2
 
 " typing `:echo debug` gets old really fast
-nno  <silent>  !d  :<c-u>call debug#dump_debugging_variables()<cr>
+nno  <silent><unique>  !d  :<c-u>call debug#dump_debugging_variables()<cr>
 
 " !e        show help about last error {{{2
 
@@ -134,5 +133,5 @@ nno  <silent><unique>  !s  :<c-u>call debug#synnames_map(v:count)<cr>
 
 " !t        show info about running timers {{{2
 
-nno  <silent>  !t  :<c-u>call debug#timer#info_open()<cr>
+nno  <silent><unique>  !t  :<c-u>call debug#timer#info_open()<cr>
 
