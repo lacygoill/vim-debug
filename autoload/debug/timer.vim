@@ -8,7 +8,8 @@ fu! s:fold_section() abort "{{{1
 endfu
 
 fu! s:format_info(v) abort "{{{1
-    return ['id: '.a:v.id,
+    return [
+          \ 'id: '.a:v.id,
           \ 'repeat: '.a:v.repeat,
           \ 'remaining: '.s:format_time(a:v.remaining),
           \ 'time: '.s:format_time(a:v.time),
