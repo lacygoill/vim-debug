@@ -28,13 +28,13 @@ fu! debug#log#output(what) abort "{{{1
         call writefile(lines, tempfile, 'ab')
     else
         let level = a:what.level
-        "                                        ┌ if the level is 1, just write `:Verbose`
-        "                                        │ instead of `:1Verbose`
-        "               ┌────────────────────────┤
+        "               ┌ if the level is 1, just write `:Verbose`
+        "               │ instead of `:1Verbose`
+        "               ├────────────────────────┐
         let title = ':'.(level ==# 1 ? '' : level).'Verbose '.excmd
-        call writefile([ title ], tempfile, 'b')
-        "                                    │
-        "                                    └─ use binary mode to NOT add a linefeed after the title
+        call writefile([title], tempfile, 'b')
+        "                                  │
+        "                                  └ use binary mode to NOT add a linefeed after the title
         " How do you know Vim adds a linefeed?{{{
         "
         " MWE:

@@ -525,7 +525,7 @@ fu! debug#messages_old() abort "{{{1
                     " the file
                     let offset += 1
                 else
-                    call extend(body, [[ s:gsub(line, '\t', repeat(' ', &tb)), offset ]])
+                    call extend(body, [[s:gsub(line, '\t', repeat(' ', &tb)), offset]])
                 endif
             endfor
 
