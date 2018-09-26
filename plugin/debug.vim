@@ -89,7 +89,7 @@ nno  <unique>  g!  g<
 " This mapping is useful to create a copy of a variable local to a function or a
 " script into the global namespace, for debugging purpose.
 
-nno  <silent><unique>  !c  :<c-u>set opfunc=debug#capture_variable<cr>g@_
+nno  <silent><unique>  !c  :<c-u>set opfunc=debug#capture_variable<cr>g@l
 
 " !d        echo g:d_* {{{2
 
