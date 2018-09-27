@@ -1,7 +1,6 @@
 if exists('b:did_ftplugin')
     finish
 endif
-let b:did_ftplugin = 1
 
 runtime! ftplugin/markdown.vim
 
@@ -11,6 +10,8 @@ setl bh=delete bt=nofile fdl=99
 
 nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
 nno  <buffer><nowait><silent>  R  :<c-u>e<cr>
+
+let b:did_ftplugin = 1
 
 " teardown {{{1
 
