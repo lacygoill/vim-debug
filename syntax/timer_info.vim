@@ -1,3 +1,7 @@
+if exists('b:current_syntax')
+    finish
+endif
+
 " ✔
 "     syn match timerInfoNoise        '^#'
 "     syn match timerInfoInteresting  '\%(^#\)\@<=\sid\s\+\zs.*' contains=timerInfoNoise
