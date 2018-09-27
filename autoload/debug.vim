@@ -443,7 +443,7 @@ fu! debug#messages_old() abort "{{{1
         "  │                                           │
         if !empty(lnum) && !empty(qfl) && qfl[-1].text =~# '^Error detected while processing'
             " append the line number to the previous message in the qfl
-            let qfl[-1].text = substitute(qfl[-1].text, ':$', '['.l:lnum.']:', '')
+            let qfl[-1].text = substitute(qfl[-1].text, ':$', '['.lnum.']:', '')
         else
             call add(qfl, { 'text': msg })
         endif
