@@ -46,11 +46,11 @@ fu! s:add_breakpoints(kind, filetype, ...) abort "{{{1
 
     if a:0
         if a:kind is# 'ftplugin' && a:1 is# 'c_*.vim'
-            let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
+            let cmd = 'breakadd file */fptlugin/'.a:filetype.'_*.vim'
         elseif a:kind is# 'ftplugin' && a:1 is# 'c/*.vim'
-            let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'/*.vim'
+            let cmd = 'breakadd file */ftplugin/'.a:filetype.'/*.vim'
         elseif a:kind is# 'syntax'
-            let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
+            let cmd = 'breakadd file */syntax/'.a:filetype.'_*.vim'
         endif
     endif
 
