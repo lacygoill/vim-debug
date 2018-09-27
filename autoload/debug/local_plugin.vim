@@ -25,10 +25,35 @@ fu! debug#local_plugin#main(...) abort "{{{1
         return
     endif
 
-    " breakadd file */ftplugin/awk.vim
-    " breakadd file */indent/awk.vim
-    " breakadd file */syntax/awk.vim
-    let cmd = 'breakadd file */'.kind.'/'.filetype.'.vim'
+    " breakadd file */ftplugin/c.vim
+    " breakadd file */indent/c.vim
+    " breakadd file */syntax/c.vim
+    call s:add_breakpoints(kind, filetype)
+
+    if kind is# 'ftplugin'
+        " breakadd file */ftplugin/c_*.vim
+        call s:add_breakpoints('ftplugin', filetype, 'c_*.vim')
+        " breakadd file */ftplugin/c/*.vim
+        call s:add_breakpoints('ftplugin', filetype, 'c/*.vim')
+    elseif kind is# 'syntax'
+        " breakadd file */syntax/c_*.vim
+        call s:add_breakpoints('syntax', filetype, 'c_*.vim')
+    endif
+endfu
+
+fu! s:add_breakpoints(kind, filetype, ...) abort "{{{1
+    let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'.vim'
+
+    if a:0 && a:kind is# 'ftplugin'
+        if a:1 is# 'c_*.vim'
+            let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
+        elseif a:1 is# 'c/*.vim'
+            let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'/*.vim'
+        endif
+    elseif a:0 && a:kind is# 'syntax'
+        let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
+    endif
+
     echom '[:DebugLocalPlugin] executing:  '.cmd
     exe cmd
 endfu
@@ -52,5 +77,4 @@ fu! debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
 
     return ''
 endfu
-
 
