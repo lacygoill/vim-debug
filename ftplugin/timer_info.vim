@@ -1,3 +1,8 @@
+if exists('b:did_ftplugin')
+    finish
+endif
+let b:did_ftplugin = 1
+
 runtime! ftplugin/markdown.vim
 
 let b:title_like_in_markdown = 1
