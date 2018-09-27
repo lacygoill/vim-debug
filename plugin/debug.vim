@@ -37,6 +37,14 @@ augroup END
 "}}}
 com! -bar -nargs=1 Debug call debug#wrapper(<q-args>)
 
+" Purpose:{{{
+" Wrapper around commands such as `:breakadd file */ftplugin/sh.vim`.
+" Provides a usage message, and smart completion.
+"
+" Useful to debug a filetype/indent/syntax plugin.
+"}}}
+com! -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin  call debug#local_plugin#main(<q-args>)
+
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
 com! -bar DebugVimrc exe debug#vimrc()
