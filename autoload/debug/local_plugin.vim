@@ -44,14 +44,14 @@ endfu
 fu! s:add_breakpoints(kind, filetype, ...) abort "{{{1
     let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'.vim'
 
-    if a:0 && a:kind is# 'ftplugin'
-        if a:1 is# 'c_*.vim'
+    if a:0
+        if a:kind is# 'ftplugin' && a:1 is# 'c_*.vim'
             let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
-        elseif a:1 is# 'c/*.vim'
+        elseif a:kind is# 'ftplugin' && a:1 is# 'c/*.vim'
             let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'/*.vim'
+        elseif a:kind is# 'syntax'
+            let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
         endif
-    elseif a:0 && a:kind is# 'syntax'
-        let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'_*.vim'
     endif
 
     echom '[:DebugLocalPlugin] executing:  '.cmd
