@@ -2,7 +2,7 @@ if exists('b:did_ftplugin')
     finish
 endif
 
-runtime! ftplugin/markdown.vim
+runtime! ftplugin/markdown.vim | unlet! b:did_ftplugin
 
 let b:title_like_in_markdown = 1
 
