@@ -168,7 +168,7 @@ fu! s:break(type, arg) abort "{{{1
     return 'break'.a:type.' '.s:break_snr(a:arg)
 endfu
 
-fu! s:breakadd_complete(arglead, cmdline, _p) abort "{{{1
+fu! s:breakadd_complete(arglead, cmdline, _pos) abort "{{{1
     " Warning: `execute()` doesn't work in a completion function,
     " for Vim < v8.0.1425.
     let functions = join(sort(map(split(execute('function'), '\n'),
@@ -559,15 +559,15 @@ fu! debug#messages_old() abort "{{{1
     call search('^[^|]', 'bWc')
 endfu
 
-fu! debug#runtime_complete(arglead, _c, _p) abort "{{{1
+fu! debug#runtime_complete(arglead, _cmdline, _pos) abort "{{{1
     let cheats = {
-    \              'a' : 'autoload',
-    \              'd' : 'doc',
-    \              'f' : 'ftplugin',
-    \              'i' : 'indent',
-    \              'p' : 'plugin',
-    \              's' : 'syntax',
-    \            }
+    \   'a' : 'autoload',
+    \   'd' : 'doc',
+    \   'f' : 'ftplugin',
+    \   'i' : 'indent',
+    \   'p' : 'plugin',
+    \   's' : 'syntax',
+    \ }
 
     " Purpose:
     " If the lead of the argument begins with `a/` replace it with `autoload/`.
