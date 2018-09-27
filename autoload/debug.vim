@@ -198,29 +198,6 @@ fu! s:breakadd_complete(arglead, cmdline, _pos) abort "{{{1
     " according  to a  function name),  and  would make  the current  completion
     " function extremely slow.
     "}}}
-    " Why don't you filter the candidates?{{{
-    "
-    " Filtering the candidates is only necessary when your completion function
-    " is defined with the attribute `-complete=customlist`.
-    "                                                ^^^^
-    " It's  not needed  with `-complete=custom`,  because Vim  does a  filtering
-    " automatically. From `:command-completion-custom`:
-    "
-    "     For the  "custom" argument, it  is not necessary to  filter candidates
-    "     against  the  (implicit pattern  in)  ArgLead.   Vim will  filter  the
-    "     candidates with its  regexp engine after function return,  and this is
-    "     probably more efficient in  most cases. For the "customlist" argument,
-    "     Vim will  not filter the  returned completion candidates and  the user
-    "     supplied function should filter the candidates.
-    "
-    " This is a basic filtering over which we have no control:
-    "
-    "     • each candidate must begin with `a:arglead`
-    "     • the comparison respects 'ic' and 'scs'
-    "
-    " So,  if  you need  a  custom  filtering, `-complete=customlist`  is  still
-    " useful. Here, we don't need a custom filtering.
-    "}}}
     let id = s:script_id('%')
     return a:cmdline =~# '^\w\+\s\+\w*$'
        \ ?     "here\nfile\nfunc"
