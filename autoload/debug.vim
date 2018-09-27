@@ -142,10 +142,10 @@ fu! s:break(type, arg) abort "{{{1
         "       4. every time `fu!` is found, decrease the counter
         "       5. go on until `fu!` is found, AND the counter is zero
 "}}}
-        let l:lnum = searchpair('^\s*fu\%[nction]\>.*(', '', '^\s*endf\%[unction]\>', 'Wbn')
+        let lnum = searchpair('^\s*fu\%[nction]\>.*(', '', '^\s*endf\%[unction]\>', 'Wbn')
         " check you found sth, and it's valid (i.e. before where we are)
-        if l:lnum && l:lnum < line('.')
-            let function = matchstr(getline(l:lnum), '^\s*\w\+!\?\s*\zs[^( ]*')
+        if lnum && lnum < line('.')
+            let function = matchstr(getline(lnum), '^\s*\w\+!\?\s*\zs[^( ]*')
             if function =~# '^s:\|^<SID>'
                 let id = s:script_id('%')
                 if id
@@ -159,7 +159,7 @@ fu! s:break(type, arg) abort "{{{1
             endif
             return printf('break%s func %d %s',
             \                  a:type,
-            \                  line('.') ==# l:lnum ? '' : line('.') - l:lnum,
+            \                  line('.') ==# lnum ? '' : line('.') - lnum,
             \                  function )
         else
             return 'break'.a:type.' here'
@@ -436,12 +436,12 @@ fu! debug#messages_old() abort "{{{1
     for msg in split(execute('messages'), '\n\+')
         " try to capture the address in a line such as:
         "         line    42:
-        let l:lnum = matchstr(msg, '\v\C^line\s+\zs\d+\ze:$')
+        let lnum = matchstr(msg, '\v\C^line\s+\zs\d+\ze:$')
 
         "  ┌─ if you found one
-        "  │                                             ┌─ and the previous message was an error
-        "  │                                             │
-        if !empty(l:lnum) && !empty(qfl) && qfl[-1].text =~# '^Error detected while processing'
+        "  │                                           ┌─ and the previous message was an error
+        "  │                                           │
+        if !empty(lnum) && !empty(qfl) && qfl[-1].text =~# '^Error detected while processing'
             " append the line number to the previous message in the qfl
             let qfl[-1].text = substitute(qfl[-1].text, ':$', '['.l:lnum.']:', '')
         else
@@ -466,7 +466,7 @@ fu! debug#messages_old() abort "{{{1
             call add(qfl, { 'text': call })
 
             " get the address where the function was called
-            let l:lnum = matchstr(call, '\v\[\zs\d+\ze\]$')
+            let lnum = matchstr(call, '\v\[\zs\d+\ze\]$')
             " get the function name
             let function = substitute(call, '\v\[\d+\]$', '', '')
 
@@ -477,7 +477,7 @@ fu! debug#messages_old() abort "{{{1
             " a ftplugin; put a garbage command in one of them to reproduce
             if function =~# '[/.]' && filereadable(function)
                 let qfl[-1].filename = function
-                let qfl[-1].lnum = l:lnum
+                let qfl[-1].lnum = lnum
                 let qfl[-1].text = ''
                 " there's no chain of calls, the only error comes from this file
                 continue
@@ -543,7 +543,7 @@ fu! debug#messages_old() abort "{{{1
              \ && map(body[j+1 : j+len(code)], { i,v -> v[0] }) ==# code
              \ || pat !~# '\*')
                     let qfl[-1].filename = filename
-                    let qfl[-1].lnum = j + body[j][1] + l:lnum + 1
+                    let qfl[-1].lnum = j + body[j][1] + lnum + 1
                     break
                 endif
             endfor
