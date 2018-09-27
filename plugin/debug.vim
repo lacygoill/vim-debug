@@ -49,8 +49,10 @@ com! -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin
 " Automate the process of finding a bug in our vimrc through a binary search.
 com! -bar DebugVimrc exe debug#vimrc()
 
+" FIXME: Where is `debug#runtime_command()`?
+" And why do we need `<f-args>` (instead of `<q-args>`)?
 com! -bang -bar -nargs=* -complete=customlist,debug#runtime_complete Runtime
-\                                                                    exe debug#runtime_command(<bang>0, <f-args>)
+    \ exe debug#runtime_command(<bang>0, <f-args>)
 
 com! -bar Scriptnames  call debug#scriptnames()
 
@@ -75,12 +77,12 @@ com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "         :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
 "}}}
 com! -range=1 -nargs=1 -complete=command  Verbose
-\                                         call debug#log#output({'level': <count>, 'excmd': <q-args>})
+    \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 
 com! -bar -nargs=1 -complete=option Vo echo 'local: '
-                                \ |    verb setl <args>?
-                                \ |    echo "\nglobal: "
-                                \ |    verb setg <args>?
+    \ |    verb setl <args>?
+    \ |    echo "\nglobal: "
+    \ |    verb setg <args>?
 
 " mappings {{{1
 " g!        last page in the output of last command {{{2
