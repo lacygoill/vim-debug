@@ -56,18 +56,7 @@ com! -bang -bar -nargs=* -complete=customlist,debug#runtime_complete Runtime
 
 com! -bar Scriptnames  call debug#scriptnames()
 
-com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
-"    │
-"    └─ tpope uses `-count=1` instead of `-range=1`
-"
-"       It allows the user  to give the count as as  an initial argument:
-"
-"               :Time 42 cmd
-"
-"       … in addition to a prefix (`:42Time cmd`).
-"
-"       I prefer `-range=1`: only works as a prefix. I will never use the
-"       other syntax anyway.
+com! -count=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 
 " Do NOT give the `-bar` attribute to `:Verbose`.{{{
 "
@@ -76,7 +65,7 @@ com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "
 "         :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
 "}}}
-com! -range=1 -nargs=1 -complete=command  Verbose
+com! -count=1 -nargs=1 -complete=command  Verbose
     \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 
 com! -bar -nargs=1 -complete=option Vo echo 'local: '
