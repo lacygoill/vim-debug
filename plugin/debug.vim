@@ -47,7 +47,7 @@ com! -bar DebugVimrc exe debug#vimrc#main()
 
 com! -bar Scriptnames  call debug#scriptnames#main()
 
-com! -count=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 
 " Do NOT give the `-bar` attribute to `:Verbose`.{{{
 "
@@ -56,7 +56,7 @@ com! -count=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
 "
 "         :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
 "}}}
-com! -count=1 -nargs=1 -complete=command  Verbose
+com! -range=1 -nargs=1 -complete=command  Verbose
     \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 
 com! -bar -nargs=1 -complete=option  Vo  echo 'local: '
