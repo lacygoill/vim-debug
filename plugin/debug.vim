@@ -43,11 +43,11 @@ com! -bar -complete=custom,debug#local_plugin#complete -nargs=*  DebugLocalPlugi
 
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
-com! -bar DebugVimrc exe debug#vimrc#main()
+com! -bar  DebugVimrc  exe debug#vimrc#main()
 
-com! -bar Scriptnames  call debug#scriptnames#main()
+com! -bar  Scriptnames  call debug#scriptnames#main()
 
-com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+com! -range=1 -nargs=+ -complete=command  Time  call debug#time(<q-args>, <count>)
 
 " Do NOT give the `-bar` attribute to `:Verbose`.{{{
 "
