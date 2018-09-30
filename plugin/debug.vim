@@ -45,6 +45,8 @@ com! -bar -complete=custom,debug#local_plugin#complete -nargs=*  DebugLocalPlugi
 " Automate the process of finding a bug in our vimrc through a binary search.
 com! -bar  DebugVimrc  exe debug#vimrc#main()
 
+com! -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
+
 com! -bar  Scriptnames  call debug#scriptnames#main()
 
 com! -range=1 -nargs=+ -complete=command  Time  call debug#time(<q-args>, <count>)
