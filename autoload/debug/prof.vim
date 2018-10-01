@@ -18,15 +18,7 @@ fu! debug#prof#main(...) abort "{{{1
     endif
 
     if a:1 is# '-read_last_profile'
-        let logfile = $XDG_RUNTIME_VIM.'/profile.log'
-        if !filereadable(logfile)
-            echo 'There''s no results to read'
-            return
-        endif
-        sp $XDG_RUNTIME_VIM/profile.log
-        sil TW
-        sil update
-        return
+        return s:read_last_profile()
     endif
 
     let plugin_name = a:1
@@ -69,5 +61,29 @@ fu! debug#prof#main(...) abort "{{{1
     " It prints a NUL `^@` instead.
     "}}}
     echom 'Recreate the issue, restart Vim, and execute:    :Prof -read_last_profile'
+endfu
+
+fu! s:read_last_profile() abort "{{{1
+    let logfile = $XDG_RUNTIME_VIM.'/profile.log'
+    if !filereadable(logfile)
+        echo 'There''s no results to read'
+        return
+    endif
+    sp $XDG_RUNTIME_VIM/profile.log
+    sil TW
+
+    " folding may interfere, disable it
+    let &l:fen = 0
+    " create an empty fold before the first profiled function
+    " for better readability
+    1/^FUNCTION /-put_ | s/^/#/
+    " create an empty fold before the summary at the end
+    1/^FUNCTIONS SORTED/-put_ | s/^/#/
+    let &l:fen = 1
+
+    " fold every function, every script, and the ending summaries
+    sil %s/^FUNCTION\s\+/## /
+    sil %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /
+    sil update
 endfu
 
