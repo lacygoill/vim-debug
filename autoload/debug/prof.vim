@@ -76,14 +76,18 @@ fu! s:read_last_profile() abort "{{{1
     let &l:fen = 0
     " create an empty fold before the first profiled function
     " for better readability
-    1/^FUNCTION /-put_ | s/^/#/
+    " Why `silent!`?{{{
+    "
+    " If we reopen the log, the pattern won't be found anymore.
+    "}}}
+    sil! 1/^FUNCTION /-put_ | s/^/#/
     " create an empty fold before the summary at the end
-    1/^FUNCTIONS SORTED/-put_ | s/^/#/
+    sil! 1/^FUNCTIONS SORTED/-put_ | s/^/#/
     let &l:fen = 1
 
     " fold every function, every script, and the ending summaries
-    sil %s/^FUNCTION\s\+/## /
-    sil %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /
+    sil! %s/^FUNCTION\s\+/## /
+    sil! %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /
     sil update
 endfu
 
