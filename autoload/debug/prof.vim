@@ -35,13 +35,21 @@ fu! debug#prof#main(...) abort "{{{1
         return
     endif
 
-    profile start $XDG_RUNTIME_VIM/profile.log
-    exe 'prof! file '.$HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim'
+    let start_cmd = 'profile start $XDG_RUNTIME_VIM/profile.log'
+    let file_cmd = 'prof! file '.$HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim'
+    exe start_cmd | exe file_cmd
+
     let plugin_files = glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1)
     call filter(plugin_files, {i,v -> v !~# '\m\c/t\%[est]/'})
     call map(plugin_files, {i,v -> 'so '.v})
     call writefile(plugin_files, $XDG_RUNTIME_VIM.'/profile.log')
     sil! so $XDG_RUNTIME_VIM/profile.log
+
+    echo printf("Executing:\n    %s\n    %s\n%s\n\n",
+    \ start_cmd,
+    \ file_cmd,
+    \ join(map(plugin_files, {i,v -> '    '.v}), "\n"),
+    \ )
 
     " TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{
     " We could see the log from the current session.
@@ -50,6 +58,15 @@ fu! debug#prof#main(...) abort "{{{1
     "
     " Should we ask `dump` as a feature request?
     " If you do, ask about `stop` too.
+    "}}}
+    " Why not with `:echo`?{{{
+    "
+    " Because we want it logged.
+    "}}}
+    " Why not everything (i.e. including the previous messages) with `:echom`?{{{
+    "
+    " Because `:echom` doesn't translate `\n` into a newline.
+    " It prints a NUL `^@` instead.
     "}}}
     echom 'Recreate the issue, restart Vim, and execute:    :Prof -read_last_profile'
 endfu
