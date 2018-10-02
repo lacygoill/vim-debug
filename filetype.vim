@@ -3,6 +3,6 @@ if exists('did_load_filetypes')
 endif
 
 augroup filetypedetect
-    au! BufRead,BufNewFile  /tmp/*/timer_info  set timer_info
+    au! BufRead,BufNewFile  /tmp/*/timer_info  setf timer_info
 augroup END
 
