@@ -75,6 +75,7 @@ fu! debug#log#output(what) abort "{{{1
         " so replace these line with `/path/to/file:123`
         sil! %s/Last set from.*\zs line \ze\d\+$/:/
         call search('Last set from \zs')
+        nno  <buffer><nowait><silent>  DD  :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
     endif
 endfu
 
