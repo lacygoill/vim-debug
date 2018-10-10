@@ -18,6 +18,9 @@ fu! debug#capture#dump() abort "{{{1
         call map(vars, {i,v -> v.' = '.string(g:{v})})
         wincmd P
         if &l:pvw
+            " If we  call this  function while  in a help  buffer, which  is not
+            " modifiable, the new buffer will be non-modifiable.
+            setl modifiable
             call setline(1, vars)
             sil update
             nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
