@@ -59,24 +59,29 @@ fu! debug#log#output(what) abort "{{{1
         endif
     endif
 
-    " Load the file in the preview window. Useful to avoid having to close it if
-    " we execute another `:Verbose` command. From `:h :ptag`:
-    "         If a "Preview" window already exists, it is re-used
-    "         (like a help window is).
-    exe 'pedit '.tempfile
+    " If we're in the command-line window, `:pedit` may fail.
+    try
+        " Load the file in the preview window. Useful to avoid having to close it if
+        " we execute another `:Verbose` command. From `:h :ptag`:
+        "         If a "Preview" window already exists, it is re-used
+        "         (like a help window is).
+        exe 'pedit '.tempfile
 
-    " Vim doesn't give the focus to the preview window. Jump to it.
-    wincmd P
-    " if we really got there …
-    if &l:pvw
-        setl bt=nofile nobl noswf nowrap
-        nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
-        " `gf` &friends can't parse `/path/to/file line 123`,
-        " so replace these line with `/path/to/file:123`
-        sil! %s/Last set from.*\zs line \ze\d\+$/:/
-        call search('Last set from \zs')
-        nno  <buffer><nowait><silent>  DD  :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
-    endif
+        " Vim doesn't give the focus to the preview window. Jump to it.
+        wincmd P
+        " if we really got there …
+        if &l:pvw
+            setl bt=nofile nobl noswf nowrap
+            nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
+            " `gf` &friends can't parse `/path/to/file line 123`,
+            " so replace these line with `/path/to/file:123`
+            sil! %s/Last set from.*\zs line \ze\d\+$/:/
+            call search('Last set from \zs')
+            nno  <buffer><nowait><silent>  DD  :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
+        endif
+    catch
+        return lg#catch_error()
+    endtry
 endfu
 
 fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
