@@ -41,6 +41,8 @@ com! -bar -nargs=1  Debug  call debug#wrapper(<q-args>)
 com! -bar -complete=custom,debug#local_plugin#complete -nargs=*  DebugLocalPlugin
     \ call debug#local_plugin#main(<q-args>)
 
+com! -bar DebugMappingsFunctionKeys  call debug#mappings#using_function_keys()
+
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
 com! -bar  DebugVimrc  exe debug#vimrc#main()
