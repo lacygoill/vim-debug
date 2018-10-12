@@ -90,6 +90,10 @@ fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         " We set 'vfile' to `tempfile`.
         " It will redirect (append) all messages to the end of this file.
         let &vfile = a:tempfile
+        " Purpose:{{{
+        " If `excmd` is `!ls` we want to capture the output of `$ ls`, not `:ls`.
+        "}}}
+        let excmd = a:excmd[0] is# '!' ? 'echo system('.string(a:excmd[1:]).')' : a:excmd
 
         "                        ┌─ From `:h :verb`:
         "                        │
@@ -99,7 +103,7 @@ fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         "                        │  We want `:Verbose` to apply to the whole “pipeline“.
         "                        │  Not just the part before the 1st bar.
         "                        │
-        sil exe a:level.'verbose exe '.string(a:excmd)
+        sil exe a:level.'verbose exe '.string(excmd)
         " │
         " └─ even though verbose messages are redirected to a file,
         "    regular messages are  still displayed on the  command-line;
