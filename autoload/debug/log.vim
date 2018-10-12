@@ -21,7 +21,7 @@ fu! debug#log#output(what) abort "{{{1
     let tempfile = tempname()
 
     let excmd = a:what.excmd
-    let pfx = (exists(':'.excmd) == 2 ? ':' : '')
+    let pfx = (exists(':'.excmd) == 2 || executable(excmd[1:]) ? ':' : '')
     if has_key(a:what, 'lines')
         let title = pfx.excmd
         let lines = a:what.lines
