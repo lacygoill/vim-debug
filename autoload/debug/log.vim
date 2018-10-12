@@ -21,8 +21,9 @@ fu! debug#log#output(what) abort "{{{1
     let tempfile = tempname()
 
     let excmd = a:what.excmd
+    let pfx = (exists(':'.excmd) == 2 ? ':' : '')
     if has_key(a:what, 'lines')
-        let title = ':'.excmd
+        let title = pfx.excmd
         let lines = a:what.lines
         call writefile([title], tempfile, '')
         call writefile(lines, tempfile, 'ab')
@@ -31,7 +32,7 @@ fu! debug#log#output(what) abort "{{{1
         "               ┌ if the level is 1, just write `:Verbose`
         "               │ instead of `:1Verbose`
         "               ├────────────────────────┐
-        let title = ':'.(level ==# 1 ? '' : level).'Verbose '.excmd
+        let title = pfx.(level ==# 1 ? '' : level).'Verbose '.excmd
         call writefile([title], tempfile, 'b')
         "                                  │
         "                                  └ use binary mode to NOT add a linefeed after the title
