@@ -3,7 +3,7 @@ fu! debug#local_plugin#main(...) abort "{{{1
     let kind = matchstr(a:1, '-kind\s\+\zs[^ -]\S*')
     let filetype = matchstr(a:1, '-filetype\s\+\zs[^-]\S*')
 
-    if count(args, '-kind') == -1 || count(args, '-filetype') == -1
+    if index(args, '-kind') == -1 || index(args, '-filetype') == -1
         echo 'usage:'
         echo '    DebugLocalPlugin -kind ftplugin -filetype sh'
         echo '    DebugLocalPlugin -kind indent   -filetype awk'
