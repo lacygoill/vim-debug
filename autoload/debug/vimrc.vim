@@ -39,10 +39,10 @@ endfu
 
 fu! s:vimrc_act_on_pane(open) abort "{{{1
     " if there's already a tmux pane opened to debug Vim, kill it
-    if    get(get(s:, 'vimrc', ''), 'pane_id', -1) !=# -1
+    sil if get(get(s:, 'vimrc', ''), 'pane_id', -1) !=# -1
     \ &&  stridx(system('tmux list-pane -t %'.s:vimrc.pane_id),
     \            "can't find pane %".s:vimrc.pane_id) ==# -1
-        call system('tmux kill-pane -t %'.s:vimrc.pane_id)
+        sil call system('tmux kill-pane -t %'.s:vimrc.pane_id)
     endif
     if a:open
         " open  a tmux  pane, and  start a  Vim instance  with the  new modified
