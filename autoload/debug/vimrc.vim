@@ -47,7 +47,7 @@ fu! s:vimrc_act_on_pane(open) abort "{{{1
     if a:open
         " open  a tmux  pane, and  start a  Vim instance  with the  new modified
         " minimal vimrc
-        let s:vimrc.pane_id = systemlist(s:vimrc.cmd)[0][1:]
+        sil let s:vimrc.pane_id = systemlist(s:vimrc.cmd)[0][1:]
     else
         unlet! s:vimrc
     endif
