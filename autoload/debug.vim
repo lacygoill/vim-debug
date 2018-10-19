@@ -85,6 +85,7 @@ fu! debug#messages() abort "{{{1
     call matchadd('ErrorMsg', '\v^Vim.{-}:E\d+:\s+.*')
     call matchadd('ErrorMsg', '^Error detected while processing.*')
     call matchadd('LineNr', '\v^line\s+\d+:$')
+    exe '$'
 endfu
 
 fu! debug#time(cmd, cnt) "{{{1
