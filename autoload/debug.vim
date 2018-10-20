@@ -1,17 +1,27 @@
 fu! debug#help_about_last_errors() abort "{{{1
     let messages = reverse(split(execute('messages'), '\n'))
-    "                                 ┌ Vim prefixes an error message with:
-    "                                 │     Vim:
-    "                                 │ or:
-    "                                 │     Vim({cmd}):
-    "                                 │ … when the error occurs inside a try conditional
-    "                     ┌───────────┤
-    let pat_error = '\v^%(Vim%(\(\a+\))?:)?\zsE\d+'
+    "                    ┌ When an error occurs inside a try conditional,{{{
+    "                    │ Vim prefixes an error message with:
+    "                    │
+    "                    │     Vim:
+    "                    │ or:
+    "                    │     Vim({cmd}):
+    "                    ├───────────────┐}}}
+    let pat_error = '^\%(Vim\%((\a\+)\)\=:\|".\{-}"\s\)\=\zsE\d\+'
+    "                                       ├───────┘{{{
+    "                                       └ in a buffer containing the word 'the', execute:
+    "
+    "                                               g/the/ .w >>/tmp/some_file
+    "
+    "                                         It raises this error message:
+    "
+    "                                               /tmp/file_1" E212: Can't open file for writing
+    "}}}
 
     " index of most recent error
     let i = match(messages, pat_error)
     " index of next line which isn't an error, nor belongs to a stack trace
-    let j = match(messages, '\v^%('.pat_error.'|Error|line)@!', i+1)
+    let j = match(messages, '^\%('.pat_error.'\|Error\|line\)\@!', i+1)
     if j ==# -1
         let j = i+1
     endif
