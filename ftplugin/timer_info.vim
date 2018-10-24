@@ -18,8 +18,10 @@ let b:did_ftplugin = 1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
     \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
-    \ . 'setl fdl<'
-    \ . '| unlet! b:title_like_in_markdown'
-    \ . '| nunmap <buffer> q'
-    \ . '| nunmap <buffer> R'
+    \ . "
+    \ setl fdl<
+    \|unlet! b:title_like_in_markdown
+    \|nunmap <buffer> q
+    \|nunmap <buffer> R
+    \"
 
