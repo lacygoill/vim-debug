@@ -1,11 +1,19 @@
-fu! debug#capture#variable(type) abort "{{{1
+fu! debug#capture#setup(verbose) abort "{{{1
+    let s:verbose = a:verbose
+    set opfunc=debug#capture#variable
+endfu
+
+fu! debug#capture#variable(_) abort "{{{1
     let pat = '\vlet\s+\zs(\S+)(\s*)[+-.*]?\=.*'
     if match(getline('.'), pat) ==# -1
         echo 'No variable to capture on this line'
         return
     endif
     t.
-    sil exe 'keepj keepp s/'.pat.'/g:d_\1\2= deepcopy(\1)/e'
+    let rep = s:verbose
+        \ ? 'g:d_\1\2= get(g:, ''d_\1'', []) + [deepcopy(\1)]'
+        \ : 'g:d_\1\2= deepcopy(\1)'
+    sil exe 'keepj keepp s/'.pat.'/'.rep.'/e'
 endfu
 
 fu! debug#capture#dump() abort "{{{1
