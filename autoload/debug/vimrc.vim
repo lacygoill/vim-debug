@@ -23,7 +23,26 @@ fu! debug#vimrc#main() abort "{{{1
     let s:vimrc.cmd  = 'tmux split-window -c $XDG_RUNTIME_VIM'
     let s:vimrc.cmd .= ' -v -p 50'
     let s:vimrc.cmd .= ' -PF "#D"'
-    let s:vimrc.cmd .= ' vim -Nu $XDG_RUNTIME_VIM/debug_vimrc'
+    " Why the `STTY=-ixon`?{{{
+    "
+    " To avoid the terminal freezing when we press `C-s`.
+    "
+    " MWE:
+    "     :!tmux splitw vim
+    "     :!tmux splitw 'STTY=-ixon vim'
+    "
+    " The  issue comes  from the  fact that  Tmux doesn't  start an  interactive
+    " shell, so Zsh doesn't source its config.
+    "}}}
+    " Would this command work if we used bash?{{{
+    "
+    " No.
+    " The `STTY` parameter is specific to zsh.
+    "
+    " Alternative:
+    "     let s:vimrc.cmd .= ' bash -c "stty -ixon && vim -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
+    "}}}
+    let s:vimrc.cmd .= ' "STTY=-ixon vim -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
 
     augroup my_debug_vimrc
         au! * <buffer>
