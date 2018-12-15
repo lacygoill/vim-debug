@@ -129,6 +129,7 @@ nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr
 "     3!s    show the definition of the 3rd syntax group
 
 nno  <silent><unique>  !s  :<c-u>call debug#synnames#main(v:count)<cr>
+nno  <silent><unique>  !S  :<c-u>so ~/.vim/macros/hitest.vim<cr>
 
 " !t        show info about running timers {{{2
 
