@@ -130,9 +130,9 @@ nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr
 
 nno  <silent><unique>  !s  :<c-u>call debug#synnames#main(v:count)<cr>
 
-" !s        show highlight groups {{{2
+" !S        autoprint stack items under the cursor {{{2
 
-nno  <silent><unique>  !S  :<c-u>call debug#hitest#main()<cr>
+nno  <silent><unique>  !S  :<c-u>call debug#autostack#main()<cr>
 
 " !t        show info about running timers {{{2
 
