@@ -9,5 +9,6 @@ fu! debug#autostack#main() abort
 
     " open a new file to write our mini syntax plugin
     exe 'new '. s:minivimrc
+    call append(0, 'syn clear')
 endfu
 
