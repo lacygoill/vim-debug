@@ -43,6 +43,15 @@ fu! debug#timer#info_open() abort "{{{1
     "
     " We must save the info now, before any event is fired and interferes.
     "}}}
+    " Why the filter?{{{
+    "
+    " In `vim-readline`, we have an autocmd which starts a timer after 0ms every
+    " time we enter the command-line.
+    " Without the filter, we would see this timer all the time.
+    " It's noise.
+    "
+    " Besides, we don't care about a timer which we can't control (stop/pause).
+    "}}}
     let s:infos = filter(timer_info(), {i,v -> v.time > 0})
     if empty(s:infos)
         echo 'no timer is currently running'
