@@ -43,7 +43,7 @@ fu! debug#timer#info_open() abort "{{{1
     "
     " We must save the info now, before any event is fired and interferes.
     "}}}
-    let s:infos = timer_info()
+    let s:infos = filter(timer_info(), {i,v -> v.time > 0})
     if empty(s:infos)
         echo 'no timer is currently running'
         return
