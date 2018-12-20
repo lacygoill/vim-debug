@@ -136,5 +136,12 @@ nno  <silent><unique>  !S  :<c-u>call debug#autostack#main()<cr>
 
 " !t        show info about running timers {{{2
 
-nno  <silent><unique>  !t  :<c-u>call debug#timer#info_open()<cr>
+" Why `@=` instead of `:call`?{{{
+"
+" We have  an autocmd in `vim-readline`  which starts a timer  whenever we enter
+" the command-line.
+" With `:call`, we would see this timer all the time.
+" It's noise.
+"}}}
+nno  <silent><unique>  !t  @=debug#timer#info_open()<cr>
 
