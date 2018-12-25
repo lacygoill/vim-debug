@@ -4,7 +4,7 @@ endif
 
 " ✔
 "     syn match timerInfoNoise        '^#'
-"     syn match timerInfoInteresting  '\%(^#\)\@<=\sid\s\+\zs.*' contains=timerInfoNoise
+"     syn match timerInfoInteresting  '\%(^#\)\@2<=\sid\s\+\zs.*' contains=timerInfoNoise
 
 
 
