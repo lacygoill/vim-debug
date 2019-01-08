@@ -40,10 +40,10 @@ fu! debug#log#output(what) abort "{{{1
         "         :!touch /tmp/file
         "         :call writefile(['text'], '/tmp/file')
         "         :!xxd /tmp/file
-        "                 → 00000000: 7465 7874 0a    text.
-        "                                       └┤        │
-        "                                        │        └─ LF glyph
-        "                                        └─ LF hex code
+        "         00000000: 7465 7874 0a    text.~
+        "                             └┤        │
+        "                              │        └─ LF glyph
+        "                              └─ LF hex code
         "}}}
 
         " 1. `s:redirect_…()` executes `excmd`,
