@@ -33,7 +33,9 @@ fu! debug#log#output(what) abort "{{{1
         "               │ instead of `:1Verbose`
         "               ├────────────────────────┐
         let title = pfx.(level ==# 1 ? '' : level).'Verbose '.excmd
-        call writefile([title], tempfile)
+        call writefile([title], tempfile, 'b')
+        "                                  │
+        "                                  └ don't add a linefeed at the end
         " How do you know Vim adds a linefeed?{{{
         "
         " MWE:
@@ -85,29 +87,55 @@ endfu
 
 fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
     try
+        " Purpose: if `excmd` is `!ls` we want to capture the output of `$ ls`, not `:ls`
+        let excmd = a:excmd[0] is# '!' ? 'echo system('.string(a:excmd[1:]).')' : a:excmd
+
+        let output = execute(a:level.'verbose exe '.string(excmd))
+        "                                     │{{{
+        "                                     └ From `:h :verb`:
+        "
+        "                                                When concatenating another command,
+        "                                                the ":verbose" only applies to the first one.
+        "
+        "                                        We want `:Verbose` to apply to the whole “pipeline“.
+        "                                        Not just the part before the 1st bar.
+        "}}}
+
         " We set 'vfile' to `tempfile`.
         " It will redirect (append) all messages to the end of this file.
         let &vfile = a:tempfile
-        " Purpose:{{{
-        " If `excmd` is `!ls` we want to capture the output of `$ ls`, not `:ls`.
+        " Why not executing the command and `:echo`ing its output in a single command?{{{
+        "
+        " Two issues.
+        "
+        " First, you would need to run the command silently:
+        "
+        "     sil exe a:level.'verbose exe '.string(excmd)
+        "     │
+        "     └─ even though verbose messages are redirected to a file,
+        "        regular messages are  still displayed on the  command-line;
+        "        we don't want that
+        "        MWE:
+        "               Verbose ls
+        "
+        " ---
+        "
+        " Second, sometimes, you would get undesired messages:
+        "
+        "     let &vfile = '/tmp/log'
+        "     echo filter(split(execute('au'), '\n'), {i,v -> v =~# 'fugitive'})
+        "     let &vfile = ''
+        "
+        " The  previous snippet  should have  output only  the lines  containing
+        " `fugitive` inside the output of `:au`.
+        " Because of this, the next command wouldn't work as expected:
+        "
+        "     :Verb Filter /fugitive/ au
         "}}}
-        let excmd = a:excmd[0] is# '!' ? 'echo system('.string(a:excmd[1:]).')' : a:excmd
+        sil echo output
+        let &vfile = ''
 
-        "                        ┌─ From `:h :verb`:
-        "                        │
-        "                        │          When concatenating another command,
-        "                        │          the ":verbose" only applies to the first one.
-        "                        │
-        "                        │  We want `:Verbose` to apply to the whole “pipeline“.
-        "                        │  Not just the part before the 1st bar.
-        "                        │
         sil exe a:level.'verbose exe '.string(excmd)
-        " │
-        " └─ even though verbose messages are redirected to a file,
-        "    regular messages are  still displayed on the  command-line;
-        "    we don't want that
-        "    MWE:
-        "           Verbose ls
     catch
         return lg#catch_error()
     finally
