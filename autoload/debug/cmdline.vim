@@ -14,10 +14,11 @@ fu! debug#cmdline#eval_var_under_cursor() abort "{{{1
     if !exists(var_name)
         return cmdline
     endif
-    let new_pos = strlen(matchstr(cmdline, '.*\%(\w\|:\)*\%'.pos.'c\%(\w\|:\)*'))
-    if type(var_name) == type('')
+    let text_until_var = matchstr(cmdline, '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%'.pos.'c\%(\w\|:\)*')
+    let new_pos = strlen(text_until_var) + strlen(eval(var_name)) + 1
+    if type(eval(var_name)) == type('')
         let rep = '\=string(eval(var_name))'
-        let new_pos += 1
+        let new_pos += 2
     else
         let rep = '\=eval(var_name)'
     endif
