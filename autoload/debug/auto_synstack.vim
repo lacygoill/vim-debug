@@ -1,4 +1,4 @@
-fu! debug#autostack#main() abort
+fu! debug#auto_synstack#main() abort
     let s:minivimrc = $XDG_RUNTIME_VIM . '/debug_syntax_plugin.vim'
 
     augroup debug_syntax

@@ -71,6 +71,10 @@ com! -bar -nargs=1 -complete=option  Vo  echo 'local: '
     \ |    verb setg <args>?
 
 " mappings {{{1
+" C-x C-v   evaluate variable under cursor while on command-line{{{2
+
+cno <unique> <c-x><c-v> <c-\>e debug#cmdline#eval_var_under_cursor()<cr>
+
 " g!        last page in the output of last command {{{2
 
 " Why?{{{
@@ -132,7 +136,7 @@ nno  <silent><unique>  !s  :<c-u>call debug#synnames#main(v:count)<cr>
 
 " !S        autoprint stack items under the cursor {{{2
 
-nno  <silent><unique>  !S  :<c-u>call debug#autostack#main()<cr>
+nno  <silent><unique>  !S  :<c-u>call debug#auto_synstack#main()<cr>
 
 " !t        show info about running timers {{{2
 
