@@ -16,6 +16,8 @@ fu! debug#cmdline#eval_var_under_cursor() abort "{{{1
     endif
     let text_until_var = matchstr(cmdline, '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%'.pos.'c\%(\w\|:\)*')
     let new_pos = strlen(text_until_var) + strlen(eval(var_name)) + 1
+    " if the value of the variable is a string,
+    " we want it to be quoted on the command-line
     if type(eval(var_name)) == type('')
         let rep = '\=string(eval(var_name))'
         let new_pos += 2
@@ -24,6 +26,7 @@ fu! debug#cmdline#eval_var_under_cursor() abort "{{{1
     endif
     let new_cmdline = substitute(cmdline, pat, rep, '')
     call setcmdpos(new_pos)
+    " allow us to undo the evaluation
     if exists('#User#add_to_undolist_c')
         do <nomodeline> User add_to_undolist_c
     endif
