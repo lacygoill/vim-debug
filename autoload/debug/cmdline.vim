@@ -15,14 +15,16 @@ fu! debug#cmdline#eval_var_under_cursor() abort "{{{1
         return cmdline
     endif
     let text_until_var = matchstr(cmdline, '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%'.pos.'c\%(\w\|:\)*')
-    let new_pos = strlen(text_until_var) + strlen(eval(var_name)) + 1
+    let new_pos = strlen(text_until_var)
+        \ + (type(eval(var_name)) > 1 ? strlen(string(eval(var_name))) : strlen(eval(var_name)))
+        \ + 1
     " if the value of the variable is a string,
     " we want it to be quoted on the command-line
     if type(eval(var_name)) == type('')
         let rep = '\=string(eval(var_name))'
         let new_pos += 2
     else
-        let rep = '\=eval(var_name)'
+        let rep = '\=type(eval(var_name)) > 1 ? string(eval(var_name)) : eval(var_name)'
     endif
     let new_cmdline = substitute(cmdline, pat, rep, '')
     call setcmdpos(new_pos)
