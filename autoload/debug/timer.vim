@@ -65,7 +65,7 @@ endfu
 
 fu! debug#timer#measure() abort "{{{1
     if !exists('s:date')
-        echom 'go!'
+        echom '  go!'
         let s:date = reltime()
     else
         echom matchstr(reltimestr(reltime(s:date)), '.*\....') . ' seconds to do the task'
