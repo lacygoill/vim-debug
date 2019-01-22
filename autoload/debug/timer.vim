@@ -65,10 +65,10 @@ endfu
 
 fu! debug#timer#measure() abort "{{{1
     if !exists('s:date')
-        echo 'go!'
+        echom 'go!'
         let s:date = reltime()
     else
-        echo matchstr(reltimestr(reltime(s:date)), '.*\....') . ' seconds to do the task'
+        echom matchstr(reltimestr(reltime(s:date)), '.*\....') . ' seconds to do the task'
         unlet! s:date
     endif
 endfu
