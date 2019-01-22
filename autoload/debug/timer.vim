@@ -63,6 +63,16 @@ fu! debug#timer#info_open() abort "{{{1
     wincmd p
 endfu
 
+fu! debug#timer#measure() abort "{{{1
+    if !exists('s:date')
+        echo 'go!'
+        let s:date = reltime()
+    else
+        echo matchstr(reltimestr(reltime(s:date)), '.*\....') . ' seconds to do the task'
+        unlet! s:date
+    endif
+endfu
+
 fu! debug#timer#populate() abort "{{{1
     if !exists('s:infos')
         let s:infos = timer_info()
