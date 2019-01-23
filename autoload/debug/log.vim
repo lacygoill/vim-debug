@@ -6,8 +6,8 @@ fu! debug#log#output(what) abort "{{{1
     "       │
     "       │      ┌ desired level of verbosity
     "       │      │
-    "     • excmd, level    for :Verbose Cmd
-    "     • excmd, lines    for :ListRepeatableMotions,
+    "     - excmd, level    for :Verbose Cmd
+    "     - excmd, lines    for :ListRepeatableMotions,
     "              │        or any custom command for which we manually build the output
     "              │
     "              └ lists of lines which we'll use as the output of the command
