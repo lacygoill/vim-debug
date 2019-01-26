@@ -22,6 +22,6 @@ fu! s:synnames(...) abort "{{{1
     "
     "                  ┌─ The last one is what `synID()` returns.
     "                  │
-    return reverse(map(synstack(line('.'), col('.')), { i,v -> synIDattr(v, 'name') }))
+    return reverse(map(synstack(line('.'), col('.')), {i,v -> synIDattr(v, 'name')}))
 endfu
 
