@@ -42,7 +42,7 @@ fu! debug#vimrc#main() abort "{{{1
     " Alternative:
     "     let s:vimrc.cmd .= ' bash -c "stty -ixon && vim -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
     "}}}
-    let s:vimrc.cmd .= ' "STTY=-ixon vim -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
+    let s:vimrc.cmd .= ' "STTY=-ixon ' . (has('nvim') ? 'nvim' : 'vim') . ' -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
 
     augroup my_debug_vimrc
         au! * <buffer>
