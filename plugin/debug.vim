@@ -116,11 +116,6 @@ nno  <silent><unique>  !m  :<c-u>call debug#messages()<cr>
 
 " !M        clean messages {{{2
 
-" Why not `SPC c`?{{{
-"
-" Because in filetype  plugins (latex, shell), we often use  `bar c` for various
-" purposes, like compiling or checking errors.
-"}}}
 nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr>
 
 " !o        paste Output of last ex command  {{{2
