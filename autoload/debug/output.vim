@@ -5,12 +5,8 @@ fu! debug#output#last_ex_command() abort "{{{1
         " enable 'paste' so that Vim  doesn't automatically add indentation when the
         " output has multiple lines
         set paste
-        augroup restore_paste
-            au!
-            au CursorMovedI,TextChangedI * sil! exe 'set '.(s:paste_save ? '' : 'no').'paste'
-                \ | unlet! s:paste_save
-                \ | exe 'au! restore_paste' | aug! restore_paste
-        augroup END
+        au CursorMovedI,TextChangedI * ++once sil! exe 'set '.(s:paste_save ? '' : 'no').'paste'
+            \ | unlet! s:paste_save
         return s:get_output()
     else
         let @o = s:get_output()
