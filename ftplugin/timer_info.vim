@@ -16,10 +16,9 @@ let b:did_ftplugin = 1
 
 " teardown {{{1
 
-let b:undo_ftplugin = get(b:, 'undo_ftplugin', '')
-    \ . (empty(get(b:, 'undo_ftplugin', '')) ? '' : '|')
+let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
     \ . "
-    \   setl fdl<
+    \ | setl fdl<
     \ | unlet! b:title_like_in_markdown
     \ | exe 'nunmap <buffer> q'
     \ | exe 'nunmap <buffer> R'

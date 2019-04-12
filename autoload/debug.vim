@@ -133,10 +133,13 @@ endfu
 fu! debug#wrapper(cmd) abort "{{{1
     try
         ToggleEditingCommands 0
+        au! my_granular_undo
         exe 'debug '.a:cmd
     catch
         return lg#catch_error()
     finally
+        unlet g:autoloaded_readline
+        ru autoload/readline.vim
         ToggleEditingCommands 1
     endtry
 endfu
