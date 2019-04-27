@@ -31,7 +31,8 @@ fu! debug#capture#dump() abort "{{{1
             setl modifiable
             call setline(1, vars)
             sil update
-            nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
+            nno <buffer><nowait><silent> q  :<c-u>call lg#window#quit()<cr>
+            nno <buffer><nowait><silent> DD :<c-u>exe 'unlet! ' . matchstr(getline('.'), '^d_\S\+')<cr>dd
         endif
     endif
 endfu
