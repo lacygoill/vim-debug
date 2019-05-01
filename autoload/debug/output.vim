@@ -1,17 +1,6 @@
 fu! debug#output#last_ex_command() abort "{{{1
-    let mode = mode(1)
-    if mode is# 'i'
-        let s:paste_save = &paste
-        " enable 'paste' so that Vim  doesn't automatically add indentation when the
-        " output has multiple lines
-        set paste
-        au CursorMovedI,TextChangedI * ++once sil! exe 'set '.(s:paste_save ? '' : 'no').'paste'
-            \ | unlet! s:paste_save
-        return s:get_output()
-    else
-        let @o = s:get_output()
-        return '"o]p'
-    endif
+    let @o = s:get_output()
+    return '"o]p'
 endfu
 
 fu! s:get_output() abort "{{{1

@@ -120,7 +120,6 @@ nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr
 
 " !o        paste Output of last ex command  {{{2
 
-ino  <expr><silent><unique>  <c-r>O  debug#output#last_ex_command()
 nmap <expr><silent><unique>  !o  debug#output#last_ex_command()
 
 " !s        show syntax groups under cursor {{{2
