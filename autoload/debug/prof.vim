@@ -4,7 +4,7 @@ fu! debug#prof#completion(arglead, cmdline, _pos) abort "{{{1
     endif
 
     let paths_to_plugins = glob($HOME.'/.vim/plugged/*', 0, 1)
-    let plugin_names = map(paths_to_plugins, {i,v -> matchstr(v, '.*/\zs.*')})
+    let plugin_names = map(paths_to_plugins, {i,v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
     return join(plugin_names, "\n")
 endfu
 
@@ -28,10 +28,16 @@ fu! debug#prof#main(...) abort "{{{1
     endif
 
     let start_cmd = 'profile start $XDG_RUNTIME_VIM/profile.log'
-    let file_cmd = 'prof! file '.$HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim'
-    exe start_cmd | exe file_cmd
+    if plugin_name is# 'fzf'
+        let file_cmd = 'prof! file '.$HOME.'/.fzf/**/*.vim'
+        exe start_cmd | exe file_cmd
+        let plugin_files = glob($HOME.'/.fzf/**/*.vim', 0, 1)
+    else
+        let file_cmd = 'prof! file '.$HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim'
+        exe start_cmd | exe file_cmd
+        let plugin_files = glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1)
+    endif
 
-    let plugin_files = glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1)
     call filter(plugin_files, {i,v -> v !~# '\m\c/t\%[est]/'})
     call map(plugin_files, {i,v -> 'so '.v})
     call writefile(plugin_files, $XDG_RUNTIME_VIM.'/profile.log')
