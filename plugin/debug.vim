@@ -53,17 +53,49 @@ com! -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#m
 
 com! -bar  Scriptnames  call debug#scriptnames#main()
 
-com! -range=1 -nargs=+ -complete=command  Time  call debug#time(<q-args>, <count>)
-
-" Do NOT give the `-bar` attribute to `:Verbose`.{{{
+" Since Vim's patch 8.1.1241, a range seems to be, by default, interpreted as a line address.{{{
 "
-" It would  prevent it  from working  correctly when  the command  which follows
-" contains a bar:
+" But here, we don't use the range as a line address, but as an arbitrary count.
+" And it's possible that we give a count which is bigger than the number of lines in the current buffer.
+" If that happens, `E16` will be raised:
 "
-"         :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
+"     :com! -range=1 Cmd echo ''
+"     :new
+"     :3Cmd
+"     E16: Invalid range~
+"
+" Here's the patch 8.1.1241:
+" https://github.com/vim/vim/commit/b731689e85b4153af7edc8f0a6b9f99d36d8b011
+"
+" ---
+"
+" Solution: use the additional attribute `-addr=other`:
+"
+"                    vvvvvvvvvvv
+"     :com! -range=1 -addr=other Cmd echo ''
+"     :new
+"     :3Cmd
+"
+" I think it specifies that the type of  the range is not known (i.e. not a line
+" address, not a buffer number, not a window number, ...).
 "}}}
-com! -range=1 -nargs=1 -complete=command  Verbose
-    \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
+if !has('nvim')
+    com! -range=1 -addr=other -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+    " Do NOT give the `-bar` attribute to `:Verbose`.{{{
+    "
+    " It would prevent it from working  correctly when the command which follows
+    " contains a bar:
+    "
+    "     :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
+    "}}}
+    com! -range=1 -addr=other -nargs=1 -complete=command Verbose
+        \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
+else
+    com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+    com! -range=1 -nargs=1 -complete=command Verbose
+        \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
+endif
+
 
 com! -bar -nargs=1 -complete=option  Vo  echo 'local: '
     \ |    verb setl <args>?
