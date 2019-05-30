@@ -32,7 +32,7 @@ fu! debug#capture#dump() abort "{{{2
             setl modifiable
             call setline(1, vars)
             sil update
-            nno <buffer><nowait><silent> q  :<c-u>call lg#window#quit()<cr>
+            nno <buffer><nowait><silent> q  :<c-u>norm 1<space>q<cr>
             nno <buffer><nowait><silent> DD :<c-u>call <sid>unlet_variable_under_cursor()<cr>
         endif
     endif

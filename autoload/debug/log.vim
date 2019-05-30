@@ -73,7 +73,7 @@ fu! debug#log#output(what) abort "{{{1
         " if we really got there …
         if &l:pvw
             setl bt=nofile nobl noswf nowrap
-            nno  <buffer><nowait><silent>  q  :<c-u>call lg#window#quit()<cr>
+            nno  <buffer><nowait><silent>  q  :<c-u>norm 1<space>q<cr>
             " `gf` &friends can't parse `/path/to/file line 123`,
             " so replace these line with `/path/to/file:123`
             sil! %s/Last set from.*\zs line \ze\d\+$/:/

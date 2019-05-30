@@ -198,11 +198,11 @@ nno  <silent><unique>  !s  :<c-u>call debug#synnames#main(v:count)<cr>
 
 nno  <silent><unique>  !S  :<c-u>call debug#auto_synstack#main()<cr>
 
-" !t        measure time to do task {{{2
+" !T        measure time to do task {{{2
 
-nno  <silent><unique>  !t  :<c-u>call debug#timer#measure()<cr>
+nno  <silent><unique>  !T  :<c-u>call debug#timer#measure()<cr>
 
-" !T        show info about running timers {{{2
+" !t        show info about running timers {{{2
 
-nno  <silent><unique>  !T  :<c-u>call debug#timer#info_open()<cr>
+nno  <silent><unique>  !t  :<c-u>call debug#timer#info_open()<cr>
 

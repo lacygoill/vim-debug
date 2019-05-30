@@ -9,8 +9,8 @@ let b:title_like_in_markdown = 1
 
 setl bh=delete bt=nofile fdl=99
 
-nno  <buffer><nowait><silent>  q  :<c-u>close<cr>
-nno  <buffer><nowait><silent>  R  :<c-u>e<cr>
+nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>close!<cr>'
+nno <buffer><nowait><silent> R :<c-u>e<cr>
 
 let b:did_ftplugin = 1
 
