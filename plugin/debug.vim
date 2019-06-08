@@ -117,7 +117,7 @@ fu! s:vim_patches(n) abort
     " If `$ xdg-open` doesn't start gVim.
     "     $ xdg-mime default gvim.desktop application/octet-stream
     " It may take some time for the buffer to be loaded (≈ 10s).
-    " Issue:
+    " FIXME:
     " This  may make  `:FzHistory`  slow,  because it  will  add  a filepath  to
     " `v:oldfiles` for which `filereadable()` takes a long time to evaluate (≈ a
     " hundred milliseconds instead of instantaneous).
