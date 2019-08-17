@@ -1,16 +1,16 @@
 fu! debug#log#output(what) abort "{{{1
     " The dictionary passed to this function should have one of those set of keys:{{{
     "
-    "       ┌ command we want to execute
-    "       │ (to read its output in the preview window)
-    "       │
-    "       │      ┌ desired level of verbosity
-    "       │      │
-    "     - excmd, level    for :Verbose Cmd
-    "     - excmd, lines    for :RepeatableMotions
-    "              │        or any custom command for which we manually build the output
-    "              │
-    "              └ lists of lines which we'll use as the output of the command
+    "      ┌ command we want to execute
+    "      │ (to read its output in the preview window)
+    "      │
+    "      │      ┌ desired level of verbosity
+    "      │      │
+    "    - excmd, level    for :Verbose Cmd
+    "    - excmd, lines    for :RepeatableMotions
+    "             │        or any custom command for which we manually build the output
+    "             │
+    "             └ lists of lines which we'll use as the output of the command
     "
 "}}}
     if    !has_key(a:what, 'excmd')
@@ -21,6 +21,20 @@ fu! debug#log#output(what) abort "{{{1
     let tempfile = tempname()
 
     let excmd = a:what.excmd
+    " Don't run any single-character command.{{{
+    "
+    " This would raise an error in the next line; specifically because of:
+    "
+    "     split(excmd[1:])[0]
+    "     E684: list index out of range: 0~
+    "
+    " We  could  fix it  with  `get()`,  but  there's  another issue  with  some
+    " single-character commands, such as `:a` (and possibly `:c`, `:i`).
+    " Trying to accept single-character commands is not worth it.
+    "}}}
+    if strlen(excmd) < 2
+        return
+    endif
     let pfx = exists(':'.split(excmd)[0]) == 2 || executable(split(excmd[1:])[0]) ? ':' : ''
     if has_key(a:what, 'lines')
         let title = pfx.excmd
@@ -64,15 +78,17 @@ fu! debug#log#output(what) abort "{{{1
     try
         " Load the file in the preview window. Useful to avoid having to close it if
         " we execute another `:Verbose` command. From `:h :ptag`:
-        "         If a "Preview" window already exists, it is re-used
-        "         (like a help window is).
-        exe 'pedit '.tempfile
+        " > If a "Preview" window already exists, it is re-used
+        " > (like a help window is).
+        exe 'pedit '..tempfile
 
         " Vim doesn't give the focus to the preview window. Jump to it.
         wincmd P
         " if we really got there …
         if &l:pvw
             setl bt=nofile nobl noswf nowrap
+            " https://github.com/vim/vim/issues/3536#issuecomment-522207838
+            if &ft is# 'help' | setl ma noro ft= | endif
             nno  <buffer><nowait><silent>  q  :<c-u>norm 1<space>q<cr>
             " `gf` &friends can't parse `/path/to/file line 123`,
             " so replace these line with `/path/to/file:123`

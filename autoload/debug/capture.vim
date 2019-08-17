@@ -27,9 +27,8 @@ fu! debug#capture#dump() abort "{{{2
         call map(vars, {i,v -> v.' = '.string(g:{v})})
         wincmd P
         if &l:pvw
-            " If we  call this  function while  in a help  buffer, which  is not
-            " modifiable, the new buffer will be non-modifiable.
-            setl modifiable
+            " https://github.com/vim/vim/issues/3536#issuecomment-522207838
+            if &ft is# 'help' | setl ma noro ft= | endif
             call setline(1, vars)
             sil update
             nno <buffer><nowait><silent> q  :<c-u>norm 1<space>q<cr>
