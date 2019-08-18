@@ -27,8 +27,6 @@ fu! debug#capture#dump() abort "{{{2
         call map(vars, {i,v -> v.' = '.string(g:{v})})
         wincmd P
         if &l:pvw
-            " https://github.com/vim/vim/issues/3536#issuecomment-522207838
-            if &ft is# 'help' | setl ma noro ft= | endif
             call setline(1, vars)
             sil update
             nno <buffer><nowait><silent> q  :<c-u>norm 1<space>q<cr>
