@@ -45,6 +45,8 @@ com! -bar  DebugMappingsFunctionKeys  call debug#mappings#using_function_keys()
 
 com! -bar  DebugStartingCmd  echo expand('`ps -o command= -p '.getpid().'`')
 
+com! -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
+
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
 com! -bar  DebugVimrc  exe debug#vimrc#main()
