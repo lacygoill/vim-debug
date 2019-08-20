@@ -29,7 +29,7 @@ fu! debug#capture#dump() abort "{{{2
         if &l:pvw
             call setline(1, vars)
             sil update
-            nno <buffer><nowait><silent> q  :<c-u>norm 1<space>q<cr>
+            nmap <buffer><nowait><silent> q <plug>(my_quit)
             nno <buffer><nowait><silent> DD :<c-u>call <sid>unlet_variable_under_cursor()<cr>
         endif
     endif
