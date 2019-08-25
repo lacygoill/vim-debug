@@ -107,31 +107,27 @@ com! -bar -nargs=1 -complete=option  Vo  echo 'local: '
 com! -bar -nargs=? VimPatches call s:vim_patches(<q-args>)
 fu! s:vim_patches(n) abort
     if a:n is# ''
-        echo 'provide a version number'
+        echo 'provide a major Vim version number'
         echo "\n"
         echo 'usage example:'
         echo '    VimPatches 8.1'
+        echo "\n"
+        echo 'When asked for your credentials, use "anonymous" and any non-empty password (e.g. "j").'
         return
     elseif a:n !~# '^\d\.\d$'
         echo 'invalid version number'
         return
     endif
-    " If `$ xdg-open` doesn't start gVim.
+    " Do *not* run `xdg-open` instead of `gvim`!{{{
+    "
+    " First, to make it start gVim, you may need to run:
+    "
     "     $ xdg-mime default gvim.desktop application/octet-stream
-    " It may take some time for the buffer to be loaded (≈ 10s).
-    " FIXME:
-    " This  may make  `:FzHistory`  slow,  because it  will  add  a filepath  to
-    " `v:oldfiles` for which `filereadable()` takes a long time to evaluate (≈ a
-    " hundred milliseconds instead of instantaneous).
-    " The effect  is cumulative; the more  ftp files are added  to `v:oldfiles`,
-    " the slower `:FzHistory` will get.
-    sil call system('xdg-open ftp://ftp.vim.org/pub/vim/patches/' . a:n . '/README &')
+    "
+    " Second, it will take a long time for the buffer to be loaded (≈ 10s).
+    "}}}
+    sil call system('gvim ftp://ftp.vim.org/pub/vim/patches/' . a:n . '/README &')
 endfu
-
-" # How to get a list of all the minor patches released after a major Vim version (e.g. 8.1)?
-"
-"     $ xdg-mime default gvim.desktop application/octet-stream
-"     $ xdg-open ftp://ftp.vim.org/pub/vim/patches/8.1/README
 
 " Mappings {{{1
 " C-x C-v   evaluate variable under cursor while on command-line{{{2
