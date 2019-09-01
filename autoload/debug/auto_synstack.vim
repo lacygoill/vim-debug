@@ -3,7 +3,7 @@ fu! debug#auto_synstack#main() abort
 
     augroup debug_syntax
         au!
-        au CursorMoved <buffer> echo join(reverse(map(synstack(line('.'), col('.')), {i,v -> synIDattr(v, 'name')})))
+        au CursorMoved <buffer> echo join(reverse(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')})))
         au BufEnter <buffer> exe 'so ' . s:minivimrc
     augroup END
 

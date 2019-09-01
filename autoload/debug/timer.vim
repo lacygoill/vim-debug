@@ -52,7 +52,7 @@ fu! debug#timer#info_open() abort "{{{1
     "
     " Besides, we don't care about a timer which we can't control (stop/pause).
     "}}}
-    let s:infos = filter(timer_info(), {i,v -> v.time > 0})
+    let s:infos = filter(timer_info(), {_,v -> v.time > 0})
     if empty(s:infos)
         echo 'no timer is currently running'
         return
@@ -77,7 +77,7 @@ fu! debug#timer#populate() abort "{{{1
     if !exists('s:infos')
         let s:infos = timer_info()
     endif
-    let infos = map(s:infos, {i,v -> s:format_info(v)})
+    let infos = map(s:infos, {_,v -> s:format_info(v)})
     unlet s:infos
     let lines = []
     for info in infos
@@ -116,6 +116,6 @@ fu! s:put_definition() abort "{{{1
         let func_name = matchstr(line, '^callback\s\+function(''\zs.\{-}\ze'')$')
         let definition = split(execute('fu '.func_name), '\n')
     endif
-    call append('.', ['---'] + map(definition, {i,v -> '    '.v}))
+    call append('.', ['---'] + map(definition, {_,v -> '    '.v}))
 endfu
 

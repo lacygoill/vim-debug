@@ -24,7 +24,7 @@ fu! debug#capture#dump() abort "{{{2
     else
         let tempfile = tempname()
         exe 'pedit '.tempfile
-        call map(vars, {i,v -> v.' = '.string(g:{v})})
+        call map(vars, {_,v -> v.' = '.string(g:{v})})
         wincmd P
         if &l:pvw
             call setline(1, vars)

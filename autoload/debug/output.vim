@@ -14,7 +14,7 @@ fu! s:get_output() abort "{{{1
         let messages = reverse(split(execute('messages'), '\n'))
         let idx = match(messages, '^E\d\+')
         call remove(messages, idx+1, -1)
-        call filter(messages, {i,v -> v =~# '\C^E\d\+'})
+        call filter(messages, {_,v -> v =~# '\C^E\d\+'})
         return join(reverse(messages), "\n")
     endtry
 endfu

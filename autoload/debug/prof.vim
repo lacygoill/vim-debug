@@ -4,7 +4,7 @@ fu! debug#prof#completion(arglead, cmdline, _pos) abort "{{{1
     endif
 
     let paths_to_plugins = glob($HOME.'/.vim/plugged/*', 0, 1)
-    let plugin_names = map(paths_to_plugins, {i,v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
+    let plugin_names = map(paths_to_plugins, {_,v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
     return join(plugin_names, "\n")
 endfu
 
@@ -38,15 +38,15 @@ fu! debug#prof#main(...) abort "{{{1
         let plugin_files = glob($HOME.'/.vim/plugged/'.plugin_name.'/**/*.vim', 0, 1)
     endif
 
-    call filter(plugin_files, {i,v -> v !~# '\m\c/t\%[est]/'})
-    call map(plugin_files, {i,v -> 'so '.v})
+    call filter(plugin_files, {_,v -> v !~# '\m\c/t\%[est]/'})
+    call map(plugin_files, {_,v -> 'so '.v})
     call writefile(plugin_files, $XDG_RUNTIME_VIM.'/profile.log')
     sil! so $XDG_RUNTIME_VIM/profile.log
 
     echo printf("Executing:\n    %s\n    %s\n%s\n\n",
     \ start_cmd,
     \ file_cmd,
-    \ join(map(plugin_files, {i,v -> '    '.v}), "\n"),
+    \ join(map(plugin_files, {_,v -> '    '.v}), "\n"),
     \ )
 
     " TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{

@@ -137,7 +137,7 @@ fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         " Second, sometimes, you would get undesired messages:
         "
         "     let &vfile = '/tmp/log'
-        "     echo filter(split(execute('au'), '\n'), {i,v -> v =~# 'fugitive'})
+        "     echo filter(split(execute('au'), '\n'), {_,v -> v =~# 'fugitive'})
         "     let &vfile = ''
         "
         " The  previous snippet  should have  output only  the lines  containing
