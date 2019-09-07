@@ -88,7 +88,7 @@ fu! s:dump_nvim_terminfo() abort "{{{2
     " to help here.
     "}}}
     let tempfile = tempname()
-    let target_pane = system("tmux neww -PF '#S:#I.#P' 'nvim -V3"..tempfile.."'")[:-2]
+    sil let target_pane = system("tmux neww -PF '#S:#I.#P' 'nvim -V3"..tempfile.."'")[:-2]
     " Don't reduce this sleeping time too much.{{{
     "
     " Nvim's builtin UI needs some time to start up.
@@ -96,7 +96,7 @@ fu! s:dump_nvim_terminfo() abort "{{{2
     " https://github.com/neovim/neovim/issues/9270#issuecomment-441371260
     "}}}
     sleep 300m
-    call system('tmux send -t '..shellescape('='..target_pane) .. " ':q' 'Enter'")
+    sil call system('tmux send -t '..shellescape('='..target_pane) .. " ':q' 'Enter'")
     exe 'sp '..tempfile
 
     " remove irrelevant lines
@@ -198,8 +198,8 @@ fu! s:align_inline_comment() abort "{{{2
     "
     " By default, `:EasyAlign` ignores a delimiter in a comment.
     " This prevents our alignment from being performed.
-    " We fix this by passing `:EasyAlign`  the optional argument `{'ig': []}` to
-    " tell it to ignore nothing.
+    " We fix this by passing to `:EasyAlign` the optional argument `{'ig': []}`,
+    " which tells it to ignore nothing.
     "}}}
     sil keepj keepp /Terminal keys/+,$EasyAlign /"/ {'ig': []}
 endfu
