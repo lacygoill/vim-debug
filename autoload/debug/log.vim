@@ -101,7 +101,7 @@ endfu
 
 fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
     try
-        " Purpose: if `excmd` is `!ls` we want to capture the output of `$ ls`, not `:ls`
+        " Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
         let excmd = a:excmd[0] is# '!' ? 'echo system('.string(a:excmd[1:]).')' : a:excmd
 
         let output = execute(a:level.'verbose exe '.string(excmd))
