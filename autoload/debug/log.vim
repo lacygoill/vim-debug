@@ -58,8 +58,8 @@ fu! debug#log#output(what) abort "{{{1
         "         :!xxd /tmp/file
         "         00000000: 7465 7874 0a    text.~
         "                             └┤        │
-        "                              │        └─ LF glyph
-        "                              └─ LF hex code
+        "                              │        └ LF glyph
+        "                              └ LF hex code
         "}}}
 
         " 1. `s:redirect_…()` executes `excmd`,
@@ -126,11 +126,11 @@ fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         "
         "     sil exe a:level.'verbose exe '.string(excmd)
         "     │
-        "     └─ even though verbose messages are redirected to a file,
-        "        regular messages are  still displayed on the  command-line;
-        "        we don't want that
-        "        MWE:
-        "               Verbose ls
+        "     └ even though verbose messages are redirected to a file,
+        "       regular messages are  still displayed on the  command-line;
+        "       we don't want that
+        "       MWE:
+        "           Verbose ls
         "
         " ---
         "

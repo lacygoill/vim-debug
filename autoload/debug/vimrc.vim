@@ -1,10 +1,17 @@
+if exists('g:autoloaded_debug#vimrc')
+    finish
+endif
+let g:autoloaded_debug#vimrc = 1
+
+let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
+
 fu! debug#vimrc#main() abort "{{{1
     if !exists('$TMUX')
         return 'echoerr "Only works inside Tmux"'
     endif
 
     " open a new file to use as a temporary vimrc
-    new $XDG_RUNTIME_VIM/debug_vimrc
+    exe 'new '..s:DIR..'/debug_vimrc'
     " wipe the buffer when it becomes hidden
     " useful to not have to remove the next buffer-local autocmd
     setl bh=wipe nobl noswf
@@ -20,7 +27,7 @@ fu! debug#vimrc#main() abort "{{{1
     " start a new Vim  instance, in a new tmux pane, so that  we can begin a new
     " test. We build the necessary tmux command.
     let s:vimrc = {}
-    let s:vimrc.cmd  = 'tmux split-window -c $XDG_RUNTIME_VIM'
+    let s:vimrc.cmd  = 'tmux split-window -c '..s:DIR
     let s:vimrc.cmd .= ' -v -p 50'
     let s:vimrc.cmd .= ' -PF "#D"'
     " Why the `STTY=-ixon`?{{{
@@ -40,9 +47,9 @@ fu! debug#vimrc#main() abort "{{{1
     " The `STTY` parameter is specific to zsh.
     "
     " Alternative:
-    "     let s:vimrc.cmd .= ' bash -c "stty -ixon && vim -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
+    "     let s:vimrc.cmd .= ' bash -c "stty -ixon && vim -Nu '..s:DIR..'/debug_vimrc"'
     "}}}
-    let s:vimrc.cmd .= ' "STTY=-ixon ' . (has('nvim') ? 'nvim' : 'vim') . ' -Nu $XDG_RUNTIME_VIM/debug_vimrc"'
+    let s:vimrc.cmd .= ' "STTY=-ixon ' . (has('nvim') ? 'nvim' : 'vim') . ' -Nu '..s:DIR..'/debug_vimrc"'
 
     augroup my_debug_vimrc
         au! * <buffer>
@@ -59,9 +66,9 @@ endfu
 fu! s:vimrc_act_on_pane(open) abort "{{{1
     " if there's already a tmux pane opened to debug Vim, kill it
     sil if get(get(s:, 'vimrc', ''), 'pane_id', -1) !=# -1
-    \ &&  stridx(system('tmux list-pane -t %'.s:vimrc.pane_id),
+    \ &&  stridx(system('tmux list-pane -t %'..s:vimrc.pane_id),
     \            "can't find pane %".s:vimrc.pane_id) ==# -1
-        sil call system('tmux kill-pane -t %'.s:vimrc.pane_id)
+        sil call system('tmux kill-pane -t %'..s:vimrc.pane_id)
     endif
     if a:open
         " open  a tmux  pane, and  start a  Vim instance  with the  new modified

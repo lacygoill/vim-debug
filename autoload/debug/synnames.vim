@@ -20,7 +20,7 @@ fu! s:synnames(...) abort "{{{1
     "
     "                     They are sorted from the outermost syntax group, to the innermost.
     "
-    "                  ┌─ The last one is what `synID()` returns.
+    "                  ┌ The last one is what `synID()` returns.
     "                  │
     return reverse(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')}))
 endfu

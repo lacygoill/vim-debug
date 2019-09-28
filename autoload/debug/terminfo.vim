@@ -256,14 +256,28 @@ fu! s:install_mappings() abort "{{{2
         "
         " Note that  `:filter` is able  to filter the "Terminal  codes" section,
         " but not the "Terminal keys" section.
-        " So, no  matter the line where  you press Enter, you'll  always get the
+        " So, no  matter the line  where you press  `!!`, you'll always  get the
         " whole "Terminal codes" section.
-        " The mapping  is still  useful: if  you press  Enter on  a line  in the
+        " The  mapping is  still useful:  if you  press `!!`  on a  line in  the
         " "Terminal codes" section,  it will correctly filter out  all the other
         " terminal codes.
         "}}}
-        nno <buffer><nowait><silent> <cr>
+        nno <buffer><nowait><silent> !!
             \ :<c-u>exe 'filter /'.. matchstr(getline('.'), 't_[^=]*') ..'/ set termcap'<cr>
+        " open relevant help tag to get more info about the terminal option under the cursor
+        nno <buffer><nowait><silent> <cr>
+            \ :<c-u>exe "h '"..matchstr(getline('.'), '\%(^set \<bar>" \)\@<=t_[^=]*')<cr>
+        " get help about mappings
+        nno <buffer><nowait><silent> g? :<c-u>call <sid>print_help()<cr>
     endif
+endfu
+
+fu! s:print_help() abort "{{{2
+    let help =<< trim END
+    Enter    open relevant help tag to get more info about the terminal option under the cursor
+    !!       compare value on current line with the one in output of `:set termcap`
+    g?       print this help
+    END
+    echo join(help, "\n")
 endfu
 
