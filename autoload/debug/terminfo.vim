@@ -265,10 +265,18 @@ fu! s:install_mappings() abort "{{{2
         nno <buffer><nowait><silent> !!
             \ :<c-u>exe 'filter /'.. matchstr(getline('.'), 't_[^=]*') ..'/ set termcap'<cr>
         " open relevant help tag to get more info about the terminal option under the cursor
-        nno <buffer><nowait><silent> <cr>
-            \ :<c-u>exe "h '"..matchstr(getline('.'), '\%(^set \<bar>" \)\@<=t_[^=]*')<cr>
+        nno <buffer><nowait><silent> <cr> :<c-u>call <sid>get_help()<cr>
         " get help about mappings
         nno <buffer><nowait><silent> g? :<c-u>call <sid>print_help()<cr>
+    endif
+endfu
+
+fu! s:get_help() abort "{{{2
+    let tag = matchstr(getline('.'), '\%(^set \|" \)\@<=t_[^=]*')
+    if tag isnot# ''
+        exe "h '"..tag
+    else
+        echo 'no help tag on this line'
     endif
 endfu
 

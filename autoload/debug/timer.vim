@@ -2,7 +2,7 @@
 fu! s:fold_section() abort "{{{1
     let new_line = substitute(getline('.'), '^', '# ', '')
     call setline('.', ['#'] + [new_line])
-    if line('.') !=# 1
+    if line('.') != 1
         call append(line('.')-1, '')
     endif
 endfu

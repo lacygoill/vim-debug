@@ -22,7 +22,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     let i = match(messages, pat_error)
     " index of next line which isn't an error, nor belongs to a stack trace
     let j = match(messages, '^\%('.pat_error.'\|Error\|line\)\@!', i+1)
-    if j ==# -1
+    if j == -1
         let j = i+1
     endif
 

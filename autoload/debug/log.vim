@@ -45,8 +45,8 @@ fu! debug#log#output(what) abort "{{{1
         let level = a:what.level
         "               ┌ if the level is 1, just write `:Verbose`
         "               │ instead of `:1Verbose`
-        "               ├────────────────────────┐
-        let title = pfx.(level ==# 1 ? '' : level).'Verbose '.excmd
+        "               ├───────────────────────┐
+        let title = pfx.(level == 1 ? '' : level).'Verbose '.excmd
         call writefile([title], tempfile, 'b')
         "                                  │
         "                                  └ don't add a linefeed at the end
@@ -69,7 +69,7 @@ fu! debug#log#output(what) abort "{{{1
         "
         "        it should be `0`
         "        if, instead, it's a string, then an error has occurred: bail out
-        if type(s:redirect_to_tempfile(tempfile, level, excmd)) ==# type('')
+        if type(s:redirect_to_tempfile(tempfile, level, excmd)) == type('')
             return
         endif
     endif
