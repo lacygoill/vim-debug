@@ -1,5 +1,5 @@
 " call timer_start(9296123, {_ -> execute('echom "hello"')})
-fu! s:fold_section() abort "{{{1
+fu s:fold_section() abort "{{{1
     let new_line = substitute(getline('.'), '^', '# ', '')
     call setline('.', ['#'] + [new_line])
     if line('.') != 1
@@ -7,7 +7,7 @@ fu! s:fold_section() abort "{{{1
     endif
 endfu
 
-fu! s:format_info(v) abort "{{{1
+fu s:format_info(v) abort "{{{1
     return [
           \ 'id: '.a:v.id,
           \ 'repeat: '.a:v.repeat,
@@ -18,7 +18,7 @@ fu! s:format_info(v) abort "{{{1
           \ ]
 endfu
 
-fu! s:format_time(v) abort "{{{1
+fu s:format_time(v) abort "{{{1
     return a:v <= 999
     \ ?        a:v.'ms'
     \ :    a:v <= 59999
@@ -28,7 +28,7 @@ fu! s:format_time(v) abort "{{{1
     \ :        (a:v/3600000).'h '.s:format_time(float2nr(fmod(a:v, 3600000)))
 endfu
 
-fu! debug#timer#info_open() abort "{{{1
+fu debug#timer#info_open() abort "{{{1
     " Why saving the info in a script-local variable?{{{
     "
     " To pass it to the function which will populate the buffer.
@@ -63,7 +63,7 @@ fu! debug#timer#info_open() abort "{{{1
     wincmd p
 endfu
 
-fu! debug#timer#measure() abort "{{{1
+fu debug#timer#measure() abort "{{{1
     if !exists('s:date')
         echom '  go!'
         let s:date = reltime()
@@ -73,7 +73,7 @@ fu! debug#timer#measure() abort "{{{1
     endif
 endfu
 
-fu! debug#timer#populate() abort "{{{1
+fu debug#timer#populate() abort "{{{1
     if !exists('s:infos')
         let s:infos = timer_info()
     endif
@@ -92,10 +92,10 @@ fu! debug#timer#populate() abort "{{{1
     " MWE:
     "
     "     nno  <silent>  cd  :<c-u>call FuncA()<cr>
-    "     fu! FuncA() abort
+    "     fu FuncA() abort
     "         .g/^/call FuncB()
     "     endfu
-    "     fu! FuncB() abort
+    "     fu FuncB() abort
     "         call append('.', ['abc', 'def', 'ghi'])
     "     endfu
     "
@@ -107,7 +107,7 @@ fu! debug#timer#populate() abort "{{{1
     keepj keepp g/^id\s\+/call s:fold_section()
 endfu
 
-fu! s:put_definition() abort "{{{1
+fu s:put_definition() abort "{{{1
     let line = getline('.')
     if line =~# '^callback\s\+function(''<lambda>\d\+'')$'
         let lambda_id = matchstr(line, '\d\+')

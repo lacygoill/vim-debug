@@ -30,7 +30,7 @@ augroup END
 " If you have used one of our custom editing command several times, you'll
 " have to re-execute `cont` as many times as needed.
 "}}}
-com! -bar -nargs=1  Debug  call debug#wrapper(<q-args>)
+com -bar -nargs=1  Debug  call debug#wrapper(<q-args>)
 
 " Purpose:{{{
 " Wrapper around commands such as `:breakadd file */ftplugin/sh.vim`.
@@ -38,22 +38,22 @@ com! -bar -nargs=1  Debug  call debug#wrapper(<q-args>)
 "
 " Useful to debug a filetype/indent/syntax plugin.
 "}}}
-com! -bar -complete=custom,debug#local_plugin#complete -nargs=*  DebugLocalPlugin
+com -bar -complete=custom,debug#local_plugin#complete -nargs=*  DebugLocalPlugin
     \ call debug#local_plugin#main(<q-args>)
 
-com! -bar  DebugMappingsFunctionKeys  call debug#mappings#using_function_keys()
+com -bar  DebugMappingsFunctionKeys  call debug#mappings#using_function_keys()
 
-com! -bar  DebugStartingCmd  echo expand('`ps -o command= -p '.getpid().'`')
+com -bar  DebugStartingCmd  echo expand('`ps -o command= -p '.getpid().'`')
 
-com! -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
+com -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
 
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
-com! -bar  DebugVimrc  exe debug#vimrc#main()
+com -bar  DebugVimrc  exe debug#vimrc#main()
 
-com! -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
+com -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
 
-com! -bar  Scriptnames  call debug#scriptnames#main()
+com -bar  Scriptnames  call debug#scriptnames#main()
 
 " Since Vim's patch 8.1.1241, a range seems to be, by default, interpreted as a line address.{{{
 "
@@ -61,7 +61,7 @@ com! -bar  Scriptnames  call debug#scriptnames#main()
 " And it's possible that we give a count which is bigger than the number of lines in the current buffer.
 " If that happens, `E16` will be raised:
 "
-"     :com! -range=1 Cmd echo ''
+"     :com -range=1 Cmd echo ''
 "     :new
 "     :3Cmd
 "     E16: Invalid range~
@@ -73,8 +73,8 @@ com! -bar  Scriptnames  call debug#scriptnames#main()
 "
 " Solution: use the additional attribute `-addr=other`:
 "
-"                    vvvvvvvvvvv
-"     :com! -range=1 -addr=other Cmd echo ''
+"                   vvvvvvvvvvv
+"     :com -range=1 -addr=other Cmd echo ''
 "     :new
 "     :3Cmd
 "
@@ -82,7 +82,7 @@ com! -bar  Scriptnames  call debug#scriptnames#main()
 " address, not a buffer number, not a window number, ...).
 "}}}
 if !has('nvim')
-    com! -range=1 -addr=other -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+    com -range=1 -addr=other -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
     " Do NOT give the `-bar` attribute to `:Verbose`.{{{
     "
     " It would prevent it from working  correctly when the command which follows
@@ -90,22 +90,22 @@ if !has('nvim')
     "
     "     :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
     "}}}
-    com! -range=1 -addr=other -nargs=1 -complete=command Verbose
+    com -range=1 -addr=other -nargs=1 -complete=command Verbose
         \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 else
-    com! -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
-    com! -range=1 -nargs=1 -complete=command Verbose
+    com -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+    com -range=1 -nargs=1 -complete=command Verbose
         \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 endif
 
 
-com! -bar -nargs=1 -complete=option  Vo  echo 'local: '
+com -bar -nargs=1 -complete=option  Vo  echo 'local: '
     \ |    verb setl <args>?
     \ |    echo "\nglobal: "
     \ |    verb setg <args>?
 
-com! -bar -nargs=? VimPatches call s:vim_patches(<q-args>)
-fu! s:vim_patches(n) abort
+com -bar -nargs=? VimPatches call s:vim_patches(<q-args>)
+fu s:vim_patches(n) abort
     if a:n is# ''
         echo 'provide a major Vim version number'
         echo "\n"

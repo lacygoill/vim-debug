@@ -5,7 +5,7 @@ let g:autoloaded_debug#vimrc = 1
 
 let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
 
-fu! debug#vimrc#main() abort "{{{1
+fu debug#vimrc#main() abort "{{{1
     if !exists('$TMUX')
         return 'echoerr "Only works inside Tmux"'
     endif
@@ -63,7 +63,7 @@ fu! debug#vimrc#main() abort "{{{1
     return ''
 endfu
 
-fu! s:vimrc_act_on_pane(open) abort "{{{1
+fu s:vimrc_act_on_pane(open) abort "{{{1
     " if there's already a tmux pane opened to debug Vim, kill it
     sil if get(get(s:, 'vimrc', ''), 'pane_id', -1) != -1
     \ &&  stridx(system('tmux list-pane -t %'..s:vimrc.pane_id),

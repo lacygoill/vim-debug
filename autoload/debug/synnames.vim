@@ -1,4 +1,4 @@
-fu! debug#synnames#main(count) abort "{{{1
+fu debug#synnames#main(count) abort "{{{1
     if a:count
         let name = get(s:synnames(), a:count-1, '')
         if !empty(name)
@@ -9,7 +9,7 @@ fu! debug#synnames#main(count) abort "{{{1
     endif
 endfu
 
-fu! s:synnames(...) abort "{{{1
+fu s:synnames(...) abort "{{{1
     "                     The syntax element under the cursor is part of
     "                     a group, which can be contained in another one,
     "                     and so on.

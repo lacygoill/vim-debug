@@ -5,7 +5,7 @@ let g:autoloaded_debug#prof = 1
 
 let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
 
-fu! debug#prof#completion(arglead, cmdline, _pos) abort "{{{1
+fu debug#prof#completion(arglead, cmdline, _pos) abort "{{{1
     if !empty(matchstr(a:cmdline, '\s-'))
         return '-read_last_profile'
     endif
@@ -15,12 +15,14 @@ fu! debug#prof#completion(arglead, cmdline, _pos) abort "{{{1
     return join(plugin_names, "\n")
 endfu
 
-fu! debug#prof#main(...) abort "{{{1
+fu debug#prof#main(...) abort "{{{1
     if index(['', '-h', '--help'], a:1) >= 0
-        echo printf("usage:\n    %s\n    %s",
-        \ ':Prof {plugin name}         profile a plugin',
-        \ ':Prof -read_last_profile    load last logged profile',
-        \ )
+        let usage =<< trim END
+            usage:
+                :Prof {plugin name}         profile a plugin
+                :Prof -read_last_profile    load last logged profile
+        END
+        echo join(usage, "\n")
         return
     endif
 
@@ -76,7 +78,7 @@ fu! debug#prof#main(...) abort "{{{1
     echom 'Recreate the issue, restart Vim, and execute:    :Prof -read_last_profile'
 endfu
 
-fu! s:read_last_profile() abort "{{{1
+fu s:read_last_profile() abort "{{{1
     let logfile = s:DIR..'/profile.log'
     if !filereadable(logfile)
         echo 'There''s no results to read'

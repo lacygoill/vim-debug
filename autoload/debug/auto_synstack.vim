@@ -5,7 +5,7 @@ let g:autoloaded_debug#auto_synstack = 1
 
 let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
 
-fu! debug#auto_synstack#main() abort "{{{1
+fu debug#auto_synstack#main() abort "{{{1
     let s:minivimrc = s:DIR..'/debug_syntax_plugin.vim'
 
     augroup debug_syntax

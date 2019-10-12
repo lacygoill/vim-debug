@@ -1,5 +1,5 @@
 " Interface {{{1
-fu! debug#terminfo#main() abort "{{{2
+fu debug#terminfo#main() abort "{{{2
     if has('nvim') | call s:dump_nvim_terminfo() | return | endif
 
     call s:split_window()
@@ -24,7 +24,7 @@ fu! debug#terminfo#main() abort "{{{2
 endfu
 "}}}1
 " Core {{{1
-fu! s:dump_nvim_terminfo() abort "{{{2
+fu s:dump_nvim_terminfo() abort "{{{2
     " Issue: To get Nvim's terminfo internal db, we need to start `$ nvim -V3/tmp/log`.
     " But we can't do that from `system()` nor `jobstart()`.
     " Solution: Start Nvim in a temporary tmux window.
@@ -116,18 +116,18 @@ fu! s:dump_nvim_terminfo() abort "{{{2
     call s:install_mappings()
 endfu
 
-fu! s:split_window() abort "{{{2
+fu s:split_window() abort "{{{2
     let tempfile = tempname()..'/termcap.vim'
     exe 'sp '..tempfile
 endfu
 
-fu! s:dump_termcap() abort "{{{2
+fu s:dump_termcap() abort "{{{2
     call setline(1, split(execute('set termcap'), '\n'))
     1put ='' | 1/Terminal keys/put! ='' | 1/Terminal keys/put =''
     sil keepj keepp %s/^ *//e
 endfu
 
-fu! s:split_codes() abort "{{{2
+fu s:split_codes() abort "{{{2
     " split terminal codes; one per line
     sil keepj keepp 1,/Terminal keys/s/ \{2,}/\r/ge
 
@@ -148,7 +148,7 @@ fu! s:split_codes() abort "{{{2
     "}}}
 endfu
 
-fu! s:separate_terminal_keys_without_options() abort "{{{2
+fu s:separate_terminal_keys_without_options() abort "{{{2
     " move terminal keys not associated to any terminal option at the end of the buffer
     sil keepj keepp /Terminal keys/,$g/^</m$
     " separate them from the terminal keys associated with a terminal option{{{
@@ -165,14 +165,14 @@ fu! s:separate_terminal_keys_without_options() abort "{{{2
     1/^<\%(.*" t_\S\S\)\@!/put! =''
 endfu
 
-fu! s:move_keynames_into_inline_comments() abort "{{{2
+fu s:move_keynames_into_inline_comments() abort "{{{2
     "     t_#2 <S-Home>    ^[[1;2H
     "     →
     "     <S-Home>    ^[[1;2H  " t_#2
     sil keepj keepp /Terminal keys/,$s/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
 endfu
 
-fu! s:add_assignment_operators() abort "{{{2
+fu s:add_assignment_operators() abort "{{{2
     " Only necessary for terminal keys (not codes):
     "
     "     <S-Home>    ^[[1;2H  " t_#2
@@ -181,7 +181,7 @@ fu! s:add_assignment_operators() abort "{{{2
     sil keepj keepp /Terminal keys/,$s/^<.\{-1,}>\zs \+/=/e
 endfu
 
-fu! s:align_inline_comment() abort "{{{2
+fu s:align_inline_comment() abort "{{{2
     if exists(':EasyAlign') != 2
         return
     endif
@@ -204,11 +204,11 @@ fu! s:align_inline_comment() abort "{{{2
     sil keepj keepp /Terminal keys/+,$EasyAlign /"/ {'ig': []}
 endfu
 
-fu! s:add_set_commands() abort "{{{2
+fu s:add_set_commands() abort "{{{2
     sil keepj keepp %s/^\ze\%(t_\|<\)/set /e
 endfu
 
-fu! s:escape_spaces_in_options_values() abort "{{{2
+fu s:escape_spaces_in_options_values() abort "{{{2
     "     set t_EI=^[[2 q
     "     →
     "     set t_EI=^[[2\ q
@@ -216,11 +216,11 @@ fu! s:escape_spaces_in_options_values() abort "{{{2
     sil keepj keepp %s/\%(set.\{-}=.*[^"]\)\@<= [^" ]/\\&/ge
 endfu
 
-fu! s:trim_trailing_whitespace() abort "{{{2
+fu s:trim_trailing_whitespace() abort "{{{2
     sil keepj keepp /Terminal keys/,$s/ \+$//e
 endfu
 
-fu! s:translate_special_keys() abort "{{{2
+fu s:translate_special_keys() abort "{{{2
     " translate caret notation of control characters
     sil keepj keepp %s/\^\[/\="\e"/ge
     sil keepj keepp %s/\^\(\u\)/\=eval('"'..'\x'..(char2nr(submatch(1)) - 64)..'"')/ge
@@ -230,7 +230,7 @@ fu! s:translate_special_keys() abort "{{{2
     sil keepj keepp %s/^set <\zs.\{-1,}\ze>=\e\(\l\)/M-\1/e
 endfu
 
-fu! s:sort_lines() abort "{{{2
+fu s:sort_lines() abort "{{{2
     " sort terminal codes: easier to find a given terminal option name
     " sort terminal keys: useful later when vimdiff'ing the output with another one
     sil keepj 1/Terminal codes/+,/Terminal keys/--sort
@@ -238,17 +238,17 @@ fu! s:sort_lines() abort "{{{2
     sil keepj 1/Terminal keys//^$//^$/+;$sort
 endfu
 
-fu! s:comment_section_headers() abort "{{{2
+fu s:comment_section_headers() abort "{{{2
     "     --- Terminal codes ---    →    " Terminal codes
     "     --- Terminal keys ---     →    " Terminal keys
     sil keepj keepp %s/^--- Terminal \(\S*\).*/" Terminal \1/e
 endfu
 
-fu! s:fold() abort "{{{2
+fu s:fold() abort "{{{2
     sil keepj keepp %s/^" .*\zs/\=' {{'..'{1'/e
 endfu
 
-fu! s:install_mappings() abort "{{{2
+fu s:install_mappings() abort "{{{2
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
 
     if !has('nvim')
@@ -271,7 +271,7 @@ fu! s:install_mappings() abort "{{{2
     endif
 endfu
 
-fu! s:get_help() abort "{{{2
+fu s:get_help() abort "{{{2
     let tag = matchstr(getline('.'), '\%(^set \|" \)\@<=t_[^=]*')
     if tag isnot# ''
         exe "h '"..tag
@@ -280,7 +280,7 @@ fu! s:get_help() abort "{{{2
     endif
 endfu
 
-fu! s:print_help() abort "{{{2
+fu s:print_help() abort "{{{2
     let help =<< trim END
     Enter    open relevant help tag to get more info about the terminal option under the cursor
     !!       compare value on current line with the one in output of `:set termcap`

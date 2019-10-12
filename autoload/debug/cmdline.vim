@@ -1,4 +1,4 @@
-fu! debug#cmdline#eval_var_under_cursor() abort "{{{1
+fu debug#cmdline#eval_var_under_cursor() abort "{{{1
     let cmdline = getcmdline()
     let pos = getcmdpos()
     let pat = '\%(\w\|:\)*\%'.pos.'c\%(\w\|:\)\+\&'.'\([bwtgv]:\)\=\%(\a\w*\)'

@@ -1,9 +1,9 @@
-fu! debug#output#last_ex_command() abort "{{{1
+fu debug#output#last_ex_command() abort "{{{1
     let @o = s:get_output()
     return '"o]p'
 endfu
 
-fu! s:get_output() abort "{{{1
+fu s:get_output() abort "{{{1
     try
         " We remove the first newline, so that we can insert the output of a command
         " inline, and not on the next line.

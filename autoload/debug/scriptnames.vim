@@ -1,11 +1,11 @@
-fu! debug#scriptnames#main() abort "{{{1
+fu debug#scriptnames#main() abort "{{{1
     let list = s:get_scriptnames()
     call setqflist(list)
     call setqflist([], 'a', { 'title': ':Scriptnames'})
     do <nomodeline> QuickFixCmdPost copen
 endfu
 
-fu! s:get_scriptnames() abort "{{{1
+fu s:get_scriptnames() abort "{{{1
     " Warning: `execute()` doesn't work in a completion function,
     " for Vim < v8.0.1425.
     let lines = split(execute('scriptnames'), '\n')

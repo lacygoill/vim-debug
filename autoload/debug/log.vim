@@ -1,4 +1,4 @@
-fu! debug#log#output(what) abort "{{{1
+fu debug#log#output(what) abort "{{{1
     " The dictionary passed to this function should have one of those set of keys:{{{
     "
     "      ┌ command we want to execute
@@ -99,7 +99,7 @@ fu! debug#log#output(what) abort "{{{1
     endtry
 endfu
 
-fu! s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
+fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
     try
         " Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
         let excmd = a:excmd[0] is# '!' ? 'echo system('.string(a:excmd[1:]).')' : a:excmd

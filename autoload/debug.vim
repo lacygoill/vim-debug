@@ -1,4 +1,4 @@
-fu! debug#help_about_last_errors() abort "{{{1
+fu debug#help_about_last_errors() abort "{{{1
     let messages = reverse(split(execute('messages'), '\n'))
     "                    ┌ When an error occurs inside a try conditional,{{{
     "                    │ Vim prefixes an error message with:
@@ -50,7 +50,7 @@ fu! debug#help_about_last_errors() abort "{{{1
     return 'h '.get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
 endfu
 
-fu! debug#messages() abort "{{{1
+fu debug#messages() abort "{{{1
     0Verbose messages
     " If `:Verbose` encountered an error, we could still be in a regular window,
     " instead of the preview window. If that's the case, we don't want to remove
@@ -104,7 +104,7 @@ fu! debug#messages() abort "{{{1
     exe '$'
 endfu
 
-fu! debug#time(cmd, cnt) "{{{1
+fu debug#time(cmd, cnt) "{{{1
     let time = reltime()
     try
         " We could get rid of the if/else/endif, and shorten the code, but we
@@ -130,7 +130,7 @@ fu! debug#time(cmd, cnt) "{{{1
     endtry
 endfu
 
-fu! debug#wrapper(cmd) abort "{{{1
+fu debug#wrapper(cmd) abort "{{{1
     try
         ToggleEditingCommands 0
         au! my_granular_undo

@@ -1,4 +1,4 @@
-fu! debug#mappings#using_function_keys() abort "{{{1
+fu debug#mappings#using_function_keys() abort "{{{1
     let pat = '\m\cno mapping found'
     let lines = ['']
     for i in range(1,37)

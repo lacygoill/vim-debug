@@ -1,19 +1,22 @@
-fu! debug#local_plugin#main(...) abort "{{{1
+fu debug#local_plugin#main(...) abort "{{{1
     let args = split(a:1)
     let kind = matchstr(a:1, '-kind\s\+\zs[^ -]\S*')
     let filetype = matchstr(a:1, '-filetype\s\+\zs[^-]\S*')
 
     if index(args, '-kind') == -1 || index(args, '-filetype') == -1
-        echo 'usage:'
-        echo '    DebugLocalPlugin -kind ftplugin -filetype sh'
-        echo '    DebugLocalPlugin -kind indent   -filetype awk'
-        echo '    DebugLocalPlugin -kind syntax   -filetype python'
-        echo "\n"
-        echo 'To get the list of breakpoints, execute:'
-        echo '    breakl '
-        echo "\n"
-        echo 'When you are finished, execute:'
-        echo '    breakd *'
+        let usage =<< trim END
+        usage:
+            DebugLocalPlugin -kind ftplugin -filetype sh
+            DebugLocalPlugin -kind indent   -filetype awk
+            DebugLocalPlugin -kind syntax   -filetype python
+
+        To get the list of breakpoints, execute:
+            breakl
+
+        When you are finished, execute:
+            breakd *
+        END
+        echo join(usage, "\n")
         return
     endif
 
@@ -41,7 +44,7 @@ fu! debug#local_plugin#main(...) abort "{{{1
     endif
 endfu
 
-fu! s:add_breakpoints(kind, filetype, ...) abort "{{{1
+fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
     if a:0
         let cmd = a:kind is# 'ftplugin' && (a:1 is# 'c_*.vim' || a:1 is# 'c/*.vim')
             \ ?     'breakadd file */fptlugin/'.a:filetype . a:1[1:]
@@ -60,7 +63,7 @@ fu! s:add_breakpoints(kind, filetype, ...) abort "{{{1
     exe cmd
 endfu
 
-fu! debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
+fu debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
     let word_before_cursor = matchstr(a:cmdline, '.*\s\zs-\S.*\%'.a:pos.'c.')
 
     if word_before_cursor =~# '^-filetype\s*\S*$'
