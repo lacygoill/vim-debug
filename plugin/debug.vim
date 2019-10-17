@@ -30,7 +30,7 @@ augroup END
 " If you have used one of our custom editing command several times, you'll
 " have to re-execute `cont` as many times as needed.
 "}}}
-com -bar -nargs=1  Debug  call debug#wrapper(<q-args>)
+com -bar -nargs=1 Debug call debug#wrapper(<q-args>)
 
 " Purpose:{{{
 " Wrapper around commands such as `:breakadd file */ftplugin/sh.vim`.
@@ -38,22 +38,22 @@ com -bar -nargs=1  Debug  call debug#wrapper(<q-args>)
 "
 " Useful to debug a filetype/indent/syntax plugin.
 "}}}
-com -bar -complete=custom,debug#local_plugin#complete -nargs=*  DebugLocalPlugin
+com -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin
     \ call debug#local_plugin#main(<q-args>)
 
-com -bar  DebugMappingsFunctionKeys  call debug#mappings#using_function_keys()
+com -bar DebugMappingsFunctionKeys call debug#mappings#using_function_keys()
 
-com -bar  DebugStartingCmd  echo expand('`ps -o command= -p '.getpid().'`')
+com -bar DebugStartingCmd echo expand('`ps -o command= -p '.getpid().'`')
 
 com -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
 
 " Purpose:
 " Automate the process of finding a bug in our vimrc through a binary search.
-com -bar  DebugVimrc  exe debug#vimrc#main()
+com -bar DebugVimrc exe debug#vimrc#main()
 
 com -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
 
-com -bar  Scriptnames  call debug#scriptnames#main()
+com -bar Scriptnames call debug#scriptnames#main()
 
 " Since Vim's patch 8.1.1241, a range seems to be, by default, interpreted as a line address.{{{
 "
@@ -99,7 +99,7 @@ else
 endif
 
 
-com -bar -nargs=1 -complete=option  Vo  echo 'local: '
+com -bar -nargs=1 -complete=option Vo echo 'local: '
     \ |    verb setl <args>?
     \ |    echo "\nglobal: "
     \ |    verb setg <args>?
@@ -141,7 +141,7 @@ cno <unique> <c-x><c-v> <c-\>e debug#cmdline#eval_var_under_cursor()<cr>
 " `g!` is easier to type.
 " `g<` could be used with `g>` to perform a pair of opposite actions.
 "}}}
-nno  <unique>  g!  g<
+nno <unique> g! g<
 
 " !c        capture variable {{{2
 
@@ -150,13 +150,13 @@ nno  <unique>  g!  g<
 
 " `!c` captures the latest value of a variable.
 " `!C` captures all the values of a variable during its lifetime.
-nno  <silent><unique>  !c  :<c-u>call debug#capture#setup(0)<cr>g@l
-nno  <silent><unique>  !C  :<c-u>call debug#capture#setup(1)<cr>g@l
+nno <silent><unique> !c :<c-u>call debug#capture#setup(0)<bar>norm! g@l<cr>
+nno <silent><unique> !C :<c-u>call debug#capture#setup(1)<bar>norm! g@l<cr>
 
 " !d        echo g:d_* {{{2
 
 " typing `:echo debug` gets old really fast
-nno  <silent><unique>  !d  :<c-u>call debug#capture#dump()<cr>
+nno <silent><unique> !d :<c-u>call debug#capture#dump()<cr>
 
 " !e        show help about last error {{{2
 
@@ -165,17 +165,17 @@ nno  <silent><unique>  !d  :<c-u>call debug#capture#dump()<cr>
 " Press `-e` to open the help topic explaining the last one.
 " Repeat to cycle through all the help topics related to the rest of the errors.
 
-"                       ┌ error
-"                       │
-nno  <silent><unique>  !e  :<c-u>exe debug#help_about_last_errors()<cr>
+"                     ┌ error
+"                     │
+nno <silent><unique> !e :<c-u>exe debug#help_about_last_errors()<cr>
 
 " !m        show messages {{{2
 
-nno  <silent><unique>  !m  :<c-u>call debug#messages()<cr>
+nno <silent><unique> !m :<c-u>call debug#messages()<cr>
 
 " !M        clean messages {{{2
 
-nno  <silent><unique>  !M  :<c-u>messages clear <bar> echo 'messages cleared'<cr>
+nno <silent><unique> !M :<c-u>messages clear <bar> echo 'messages cleared'<cr>
 
 " !o        paste Output of last ex command  {{{2
 
@@ -190,17 +190,17 @@ nmap <expr><silent><unique>  !o  debug#output#last_ex_command()
 "     1!s    show the definition of the innermost syntax group
 "     3!s    show the definition of the 3rd syntax group
 
-nno  <silent><unique>  !s  :<c-u>call debug#synnames#main(v:count)<cr>
+nno <silent><unique> !s :<c-u>call debug#synnames#main(v:count)<cr>
 
 " !S        autoprint stack items under the cursor {{{2
 
-nno  <silent><unique>  !S  :<c-u>call debug#auto_synstack#main()<cr>
+nno <silent><unique> !S :<c-u>call debug#auto_synstack#main()<cr>
 
 " !T        measure time to do task {{{2
 
-nno  <silent><unique>  !T  :<c-u>call debug#timer#measure()<cr>
+nno <silent><unique> !T :<c-u>call debug#timer#measure()<cr>
 
 " !t        show info about running timers {{{2
 
-nno  <silent><unique>  !t  :<c-u>call debug#timer#info_open()<cr>
+nno <silent><unique> !t :<c-u>call debug#timer#info_open()<cr>
 

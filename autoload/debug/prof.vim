@@ -5,7 +5,7 @@ let g:autoloaded_debug#prof = 1
 
 let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
 
-fu debug#prof#completion(arglead, cmdline, _pos) abort "{{{1
+fu debug#prof#completion(_a, cmdline, _p) abort "{{{1
     if !empty(matchstr(a:cmdline, '\s-'))
         return '-read_last_profile'
     endif
@@ -18,9 +18,9 @@ endfu
 fu debug#prof#main(...) abort "{{{1
     if index(['', '-h', '--help'], a:1) >= 0
         let usage =<< trim END
-            usage:
-                :Prof {plugin name}         profile a plugin
-                :Prof -read_last_profile    load last logged profile
+        usage:
+            :Prof {plugin name}         profile a plugin
+            :Prof -read_last_profile    load last logged profile
         END
         echo join(usage, "\n")
         return

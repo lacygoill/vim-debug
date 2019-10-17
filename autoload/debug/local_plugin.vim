@@ -63,7 +63,7 @@ fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
     exe cmd
 endfu
 
-fu debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
+fu debug#local_plugin#complete(arglead, _l, pos) abort "{{{1
     let word_before_cursor = matchstr(a:cmdline, '.*\s\zs-\S.*\%'.a:pos.'c.')
 
     if word_before_cursor =~# '^-filetype\s*\S*$'
