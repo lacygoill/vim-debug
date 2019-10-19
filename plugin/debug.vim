@@ -155,8 +155,14 @@ nno <silent><unique> !C :<c-u>call debug#capture#setup(1)<bar>norm! g@l<cr>
 
 " !d        echo g:d_* {{{2
 
-" typing `:echo debug` gets old really fast
-nno <silent><unique> !d :<c-u>call debug#capture#dump()<cr>
+" Why `<expr>`?{{{
+"
+" If you call the function via `:call`, it will fire various events
+" (`CmdlineEnter`, `CmdlineLeave`, `CmdlineChanged`).
+"
+" This could alter the values of your `d_` variables.
+"}}}
+nno <expr><silent><unique> !d debug#capture#dump()
 
 " !e        show help about last error {{{2
 

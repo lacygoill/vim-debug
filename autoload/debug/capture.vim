@@ -18,6 +18,11 @@ fu debug#capture#variable(_) abort "{{{2
 endfu
 
 fu debug#capture#dump() abort "{{{2
+    call timer_start(0, {-> s:dump()})
+    return ''
+endfu
+
+fu s:dump() abort
     let vars = getcompletion('d_*', 'var')
     if empty(vars)
         echo 'there are no debugging variables'
