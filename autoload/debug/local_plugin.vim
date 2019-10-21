@@ -5,16 +5,16 @@ fu debug#local_plugin#main(...) abort "{{{1
 
     if index(args, '-kind') == -1 || index(args, '-filetype') == -1
         let usage =<< trim END
-        usage:
-            DebugLocalPlugin -kind ftplugin -filetype sh
-            DebugLocalPlugin -kind indent   -filetype awk
-            DebugLocalPlugin -kind syntax   -filetype python
+            usage:
+                DebugLocalPlugin -kind ftplugin -filetype sh
+                DebugLocalPlugin -kind indent   -filetype awk
+                DebugLocalPlugin -kind syntax   -filetype python
 
-        To get the list of breakpoints, execute:
-            breakl
+            To get the list of breakpoints, execute:
+                breakl
 
-        When you are finished, execute:
-            breakd *
+            When you are finished, execute:
+                breakd *
         END
         echo join(usage, "\n")
         return

@@ -18,9 +18,9 @@ endfu
 fu debug#prof#main(...) abort "{{{1
     if index(['', '-h', '--help'], a:1) >= 0
         let usage =<< trim END
-        usage:
-            :Prof {plugin name}         profile a plugin
-            :Prof -read_last_profile    load last logged profile
+            usage:
+                :Prof {plugin name}         profile a plugin
+                :Prof -read_last_profile    load last logged profile
         END
         echo join(usage, "\n")
         return

@@ -272,7 +272,7 @@ fu s:install_mappings() abort "{{{2
 endfu
 
 fu s:get_help() abort "{{{2
-    let tag = matchstr(getline('.'), '\%(^set \|" \)\@<=t_[^=]*')
+    let tag = matchstr(getline('.'), '\%(^set \|" \)\@4<=t_[^=]*')
     if tag isnot# ''
         exe "h '"..tag
     else
@@ -282,9 +282,9 @@ endfu
 
 fu s:print_help() abort "{{{2
     let help =<< trim END
-    Enter    open relevant help tag to get more info about the terminal option under the cursor
-    !!       compare value on current line with the one in output of `:set termcap`
-    g?       print this help
+        Enter    open relevant help tag to get more info about the terminal option under the cursor
+        !!       compare value on current line with the one in output of `:set termcap`
+        g?       print this help
     END
     echo join(help, "\n")
 endfu
