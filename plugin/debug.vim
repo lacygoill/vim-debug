@@ -155,14 +155,26 @@ nno <silent><unique> !C :<c-u>call debug#capture#setup(1)<bar>norm! g@l<cr>
 
 " !d        echo g:d_* {{{2
 
-" Why `<expr>`?{{{
-"
-" If you call the function via `:call`, it will fire various events
-" (`CmdlineEnter`, `CmdlineLeave`, `CmdlineChanged`).
-"
-" This could alter the values of your `d_` variables.
-"}}}
-nno <expr><silent><unique> !d debug#capture#dump()
+if !has('nvim')
+    " Why `<expr>`?{{{
+    "
+    " If you call the function via `:call`, it will fire various events
+    " (`CmdlineEnter`, `CmdlineLeave`, `CmdlineChanged`).
+    "
+    " This could alter the values of your `d_` variables.
+    "}}}
+    nno <expr><silent><unique> !d debug#capture#dump()
+else
+    " Why `<cmd>` instead of `<expr>`?{{{
+    "
+    " Printing a message via a timer from an `<expr>` mapping does not work well
+    " in Nvim.  You need to wait for a redraw to see the message.
+    "
+    " Besides, `<cmd>` is better because it was meant to avoid side-effects when
+    " calling a function from a mapping; in contrast, `<expr>` + timer is a hack.
+    "}}}
+    nno <silent><unique> !d <cmd>call debug#capture#dump()<cr>
+endif
 
 " !e        show help about last error {{{2
 
