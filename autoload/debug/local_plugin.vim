@@ -23,7 +23,7 @@ fu debug#local_plugin#main(...) abort "{{{1
     if index(['ftplugin', 'indent', 'syntax'], kind) == -1
         echo 'you did not provide a valid kind; choose:  ftplugin, indent, or syntax'
         return
-    elseif index(getcompletion('*', 'filetype'), filetype) == -1
+    elseif index(getcompletion('', 'filetype'), filetype) == -1
         echo 'you did not provide a valid filetype'
         return
     endif
@@ -67,7 +67,7 @@ fu debug#local_plugin#complete(arglead, _l, pos) abort "{{{1
     let word_before_cursor = matchstr(a:cmdline, '.*\s\zs-\S.*\%'.a:pos.'c.')
 
     if word_before_cursor =~# '^-filetype\s*\S*$'
-        let filetypes = getcompletion('*', 'filetype')
+        let filetypes = getcompletion('', 'filetype')
         return join(filetypes, "\n")
 
     elseif word_before_cursor =~# '^-kind\s*\S*$'
