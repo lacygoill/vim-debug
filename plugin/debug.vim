@@ -104,30 +104,7 @@ com -bar -nargs=1 -complete=option Vo echo 'local: '
     \ |    echo "\nglobal: "
     \ |    verb setg <args>?
 
-com -bar -nargs=? VimPatches call s:vim_patches(<q-args>)
-fu s:vim_patches(n) abort
-    if a:n is# ''
-        echo 'provide a major Vim version number'
-        echo "\n"
-        echo 'usage example:'
-        echo '    VimPatches 8.1'
-        echo "\n"
-        echo 'When asked for your credentials, use "anonymous" and any non-empty password (e.g. "j").'
-        return
-    elseif a:n !~# '^\d\.\d$'
-        echo 'invalid version number'
-        return
-    endif
-    " Do *not* run `xdg-open` instead of `gvim`!{{{
-    "
-    " First, to make it start gVim, you may need to run:
-    "
-    "     $ xdg-mime default gvim.desktop application/octet-stream
-    "
-    " Second, it will take a long time for the buffer to be loaded (≈ 10s).
-    "}}}
-    sil call system('gvim ftp://ftp.vim.org/pub/vim/patches/' . a:n . '/README &')
-endfu
+com -bar -complete=custom,debug#vim_patches_completion -nargs=? VimPatches call debug#vim_patches(<q-args>)
 
 " Mappings {{{1
 " C-x C-v   evaluate variable under cursor while on command-line{{{2

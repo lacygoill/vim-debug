@@ -130,6 +130,65 @@ fu debug#time(cmd, cnt) "{{{1
     endtry
 endfu
 
+fu debug#vim_patches(n) abort "{{{1
+    if a:n is# ''
+        let msg =<< trim END
+        provide a major Vim version number,
+        or pass the optional argument `-missing_in_nvim`
+        to get the list of Vim patches currently missing in Nvim
+
+        usage example:
+
+            VimPatches 8.1
+            VimPatches -missing_in_nvim
+        END
+        echo join(msg, "\n")
+    elseif a:n is# '-missing_in_nvim'
+        new | call s:prettify()
+        sil let text = systemlist($HOME..'/Vcs/nvim/scripts/vim-patch.sh -l')
+        call map(text, {_,v -> substitute(v, '\e[\d\+m', '', 'g')})
+        call setline(1, text)
+        sil keepj keepp %s@•\s*\zsv\([0-9.]\+\)@[\1](https://github.com/vim/vim/releases/tag/v\1)@e
+        sil keepj keepp %s@•\s*\zs\x\+@[&](https://github.com/vim/vim/commit/&)@e
+    elseif a:n =~# '^\d\.\d$'
+        sil exe 'sp ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
+        call s:prettify()
+        sil keepj keepp %s@^\s*\d\+\s\+\zs[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
+    else
+        echohl ErrorMsg
+        echo 'invalid argument'
+        echohl NONE
+    endif
+endfu
+
+fu s:prettify() abort
+    " no modified indicator in the status line if we edit the buffer
+    setl bt=nofile nobl noswf nowrap
+    " conceal url (copied from the markdown syntax plugin)
+    syn match xUrl /\S\+/ contained skipwhite
+    syn region xLinkText matchgroup=xLinkTextDelimiter start=/!\=\[\%(\_[^]]*] \=[[(]\)\@=/ end=/\]\%( \=[[(]\)\@=/ nextgroup=xLink keepend concealends skipwhite
+    syn region xLink matchgroup=xLinkDelimiter start=/(/ end=/)/ contained keepend conceal contains=xUrl
+    hi link xLinkText Underlined
+    hi link xUrl Float
+    setl cole=3 cocu=nc
+endfu
+
+fu debug#vim_patches_completion(_a, _l, _p) abort "{{{1
+    let matches =<< trim END
+        -missing_in_nvim
+        6.3
+        6.4
+        7.0
+        7.1
+        7.2
+        7.3
+        7.4
+        8.0
+        8.1
+    END
+    return join(matches, "\n")
+endfu
+
 fu debug#wrapper(cmd) abort "{{{1
     try
         ToggleEditingCommands 0
