@@ -165,7 +165,7 @@ fu s:prettify() abort
     " no modified indicator in the status line if we edit the buffer
     setl bt=nofile nobl noswf nowrap
     " conceal url (copied from the markdown syntax plugin)
-    syn match xUrl /\S\+/ contained skipwhite
+    syn match xUrl /\S\+/ contained
     syn region xLinkText matchgroup=xLinkTextDelimiter start=/!\=\[\%(\_[^]]*] \=[[(]\)\@=/ end=/\]\%( \=[[(]\)\@=/ nextgroup=xLink keepend concealends skipwhite
     syn region xLink matchgroup=xLinkDelimiter start=/(/ end=/)/ contained keepend conceal contains=xUrl
     hi link xLinkText Underlined
