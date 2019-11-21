@@ -148,12 +148,15 @@ fu debug#vim_patches(n) abort "{{{1
         sil let text = systemlist($HOME..'/Vcs/nvim/scripts/vim-patch.sh -l')
         call map(text, {_,v -> substitute(v, '\e[\d\+m', '', 'g')})
         call setline(1, text)
+        sil keepj keepp 1;/^\s*•/--d_
         sil keepj keepp %s@•\s*\zsv\([0-9.]\+\)@[\1](https://github.com/vim/vim/releases/tag/v\1)@e
         sil keepj keepp %s@•\s*\zs\x\+@[&](https://github.com/vim/vim/commit/&)@e
     elseif a:n =~# '^\d\.\d$'
         sil exe 'sp ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
         call s:prettify()
         sil keepj keepp %s@^\s*\d\+\s\+\zs[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
+        sil keepj keepp %s/^\s*SIZE\s*//e
+        sil keepj keepp '[,$s/^\s*\d\+\s*//e
     else
         echohl ErrorMsg
         echo 'invalid argument'
