@@ -151,7 +151,7 @@ fu debug#vim_patches(n) abort "{{{1
         sil keepj keepp 1;/^\s*•/--d_
         sil keepj keepp %s@•\s*\zsv\([0-9.]\+\)@[\1](https://github.com/vim/vim/releases/tag/v\1)@e
         sil keepj keepp %s@•\s*\zs\x\+@[&](https://github.com/vim/vim/commit/&)@e
-    elseif a:n =~# '^\d\.\d$'
+    elseif index(s:major_versions, a:n) != -1
         sil exe 'sp ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
         call s:prettify()
         sil keepj keepp %s@^\s*\d\+\s\+\zs[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
@@ -177,20 +177,20 @@ fu s:prettify() abort
 endfu
 
 fu debug#vim_patches_completion(_a, _l, _p) abort "{{{1
-    let matches =<< trim END
-        -missing_in_nvim
-        6.3
-        6.4
-        7.0
-        7.1
-        7.2
-        7.3
-        7.4
-        8.0
-        8.1
-    END
-    return join(matches, "\n")
+    return join(s:major_versions + ['-missing_in_nvim'], "\n")
 endfu
+
+const s:major_versions =<< trim END
+    6.3
+    6.4
+    7.0
+    7.1
+    7.2
+    7.3
+    7.4
+    8.0
+    8.1
+END
 
 fu debug#wrapper(cmd) abort "{{{1
     try
