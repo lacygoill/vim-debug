@@ -35,18 +35,18 @@ fu debug#log#output(what) abort "{{{1
     if strlen(excmd) < 2
         return
     endif
-    let pfx = exists(':'.split(excmd)[0]) == 2 || executable(split(excmd[1:])[0]) ? ':' : ''
+    let pfx = exists(':'..split(excmd)[0]) == 2 || executable(split(excmd[1:])[0]) ? ':' : ''
     if has_key(a:what, 'lines')
-        let title = pfx.excmd
+        let title = pfx..excmd
         let lines = a:what.lines
         call writefile([title], tempfile)
         call writefile(lines, tempfile, 'a')
     else
         let level = a:what.level
-        "               ┌ if the level is 1, just write `:Verbose`
-        "               │ instead of `:1Verbose`
-        "               ├───────────────────────┐
-        let title = pfx.(level == 1 ? '' : level).'Verbose '.excmd
+        "                 ┌ if the level is 1, just write `:Verbose`
+        "                 │ instead of `:1Verbose`
+        "                 ├───────────────────────┐
+        let title = pfx..(level == 1 ? '' : level)..'Verbose '..excmd
         call writefile([title], tempfile, 'b')
         "                                  │
         "                                  └ don't add a linefeed at the end
@@ -82,9 +82,9 @@ fu debug#log#output(what) abort "{{{1
         " > (like a help window is).
         exe 'pedit '..tempfile
 
-        " Vim doesn't give the focus to the preview window. Jump to it.
+        " Vim doesn't focus the preview window. Jump to it.
         wincmd P
-        " if we really got there …
+        " if we really got there ...
         if &l:pvw
             setl bt=nofile nobl noswf nowrap
             nmap <buffer><nowait><silent> q <plug>(my_quit)
@@ -102,20 +102,20 @@ endfu
 fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
     try
         " Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
-        let excmd = a:excmd[0] is# '!' ? 'echo system('.string(a:excmd[1:]).')' : a:excmd
+        let excmd = a:excmd[0] is# '!' ? 'echo system('..string(a:excmd[1:])..')' : a:excmd
 
-        let output = execute(a:level.'verbose exe '.string(excmd))
-        "                                     │{{{
-        "                                     └ From `:h :verb`:
+        let output = execute(a:level..'verbose exe '..string(excmd))
+        "                                      │{{{
+        "                                      └ From `:h :verb`:
         "
-        "                                                When concatenating another command,
-        "                                                the ":verbose" only applies to the first one.
+        "                                                 When concatenating another command,
+        "                                                 the ":verbose" only applies to the first one.
         "
-        "                                        We want `:Verbose` to apply to the whole “pipeline“.
-        "                                        Not just the part before the 1st bar.
+        "                                         We want `:Verbose` to apply to the whole “pipeline“.
+        "                                         Not just the part before the 1st bar.
         "}}}
 
-        " We set 'vfile' to `tempfile`.
+        " We set `'vfile'` to `tempfile`.
         " It will redirect (append) all messages to the end of this file.
         let &vfile = a:tempfile
         " Why not executing the command and `:echo`ing its output in a single command?{{{
@@ -149,18 +149,19 @@ fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         sil echo output
         let &vfile = ''
 
-        sil exe a:level.'verbose exe '.string(excmd)
+        sil exe a:level..'verbose exe '..string(excmd)
     catch
         return lg#catch_error()
     finally
-        " We empty the value of 'vfile' for 2 reasons:
+        " We empty the value of `'vfile'` for 2 reasons:{{{
         "
-        "     1. to restore the original value
+        "    1. to restore the original value
         "
-        "     2. writes are buffered, thus may not show up for some time
-        "        Writing to the file ends when […] 'vfile' is made empty.
+        "    2. writes are buffered, thus may not show up for some time
+        "       Writing to the file ends when […] 'vfile' is made empty.
         "
-        " These info are from `:h 'vfile'`.
+        " See `:h 'vfile'`.
+        "}}}
         let &vfile = ''
     endtry
     return 0

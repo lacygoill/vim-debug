@@ -43,13 +43,28 @@ com -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin
 
 com -bar DebugMappingsFunctionKeys call debug#mappings#using_function_keys()
 
-com -bar DebugStartingCmd echo expand('`ps -o command= -p '.getpid().'`')
+com -bar DebugStartingCmd call s:starting_cmd()
+fu s:starting_cmd() abort
+    " TODO: Once Nvim supports `v:argv`, remove:{{{
+    "
+    "    - the guard
+    "    - the `else` block
+    "    - this function
+    "
+    " Just write:
+    "
+    "     com -bar DebugStartingCmd echo join(v:argv)
+    "
+    " Or remove the command, because the rhs is easy enough to remember/type...
+    "}}}
+    if ! has('nvim')
+        echo join(v:argv)
+    else
+        echo expand('`ps -o command= -p '..getpid()..'`')
+    endif
+endfu
 
 com -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
-
-" Purpose:
-" Automate the process of finding a bug in our vimrc through a binary search.
-com -bar DebugVimrc exe debug#vimrc#main()
 
 com -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
 
@@ -174,7 +189,7 @@ nno <silent><unique> !M :<c-u>messages clear <bar> echo 'messages cleared'<cr>
 
 " !o        paste Output of last ex command  {{{2
 
-nmap <expr><silent><unique>  !o  debug#output#last_ex_command()
+nmap <expr><silent><unique> !o debug#output#last_ex_command()
 
 " !s        show syntax groups under cursor {{{2
 
