@@ -42,7 +42,7 @@ endfu
 " }}}1
 " Utilities {{{1
 fu s:unlet_variable_under_cursor() abort "{{{2
-    exe 'unlet! g:' . matchstr(getline('.'), '^d_\S\+')
+    exe 'unlet! g:'..matchstr(getline('.'), '^d_\S\+')
     d_ | sil update
     echom 'the variable has been removed'
 endfu

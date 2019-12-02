@@ -88,7 +88,7 @@ fu s:dump_nvim_terminfo() abort "{{{2
     " to help here.
     "}}}
     let tempfile = tempname()
-    sil let target_pane = system("tmux neww -PF '#S:#I.#P' 'nvim -V3"..tempfile.."'")[:-2]
+    sil let target_pane = system("tmux neww -PF '#S:#I.#P' "..shellescape('nvim -V3'..tempfile))[:-2]
     " Don't reduce this sleeping time too much.{{{
     "
     " Nvim's builtin UI needs some time to start up.
