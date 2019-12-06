@@ -1,3 +1,12 @@
+if exists('g:autoloaded_debug')
+    finish
+endif
+let g:autoloaded_debug = 1
+
+" Init {{{1
+
+const s:NVIM_DIR = $HOME..'/Vcs/nvim'
+
 fu debug#help_about_last_errors() abort "{{{1
     let messages = reverse(split(execute('messages'), '\n'))
     "                    ┌ When an error occurs inside a try conditional,{{{
@@ -145,6 +154,7 @@ fu debug#vim_patches(n) abort "{{{1
         echo join(msg, "\n")
     elseif a:n is# '-missing_in_nvim'
         new | call s:prettify()
+        sil call system('git -C '..s:NVIM_DIR..' checkout master && git -C '..s:NVIM_DIR..' pull')
         sil let text = systemlist($HOME..'/Vcs/nvim/scripts/vim-patch.sh -l')
         call map(text, {_,v -> substitute(v, '\e[\d\+m', '', 'g')})
         call setline(1, text)
