@@ -98,13 +98,7 @@ com -bar Scriptnames call debug#scriptnames#main()
 "}}}
 if !has('nvim')
     com -range=1 -addr=other -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
-    " Do NOT give the `-bar` attribute to `:Verbose`.{{{
-    "
-    " It would prevent it from working  correctly when the command which follows
-    " contains a bar:
-    "
-    "     :4Verbose cgetexpr system('grep -RHIinos pat * \| grep -v garbage')
-    "}}}
+    " Do NOT give the `-bar` attribute to `:Verbose`.
     com -range=1 -addr=other -nargs=1 -complete=command Verbose
         \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 else

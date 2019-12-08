@@ -162,7 +162,10 @@ fu debug#vim_patches(n) abort "{{{1
         sil keepj keepp %s@•\s*\zsv\([0-9.]\+\)@[\1](https://github.com/vim/vim/releases/tag/v\1)@e
         sil keepj keepp %s@•\s*\zs\x\+@[&](https://github.com/vim/vim/commit/&)@e
     elseif index(s:major_versions, a:n) != -1
-        sil exe 'sp ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
+        let filename = 'ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
+        if bufloaded(filename) | let dont_prettify = 1 | endif
+        sil exe 'sp '..filename
+        if exists('dont_prettify') | return | endif
         call s:prettify()
         sil keepj keepp %s@^\s*\d\+\s\+\zs[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
         sil keepj keepp %s/^\s*SIZE\s*//e
