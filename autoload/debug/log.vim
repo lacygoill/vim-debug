@@ -11,8 +11,7 @@ fu debug#log#output(what) abort "{{{1
     "             │        or any custom command for which we manually build the output
     "             │
     "             └ lists of lines which we'll use as the output of the command
-    "
-"}}}
+    "}}}
     if    !has_key(a:what, 'excmd')
     \ && (!has_key(a:what, 'level') || !has_key(a:what, 'lines'))
         return
