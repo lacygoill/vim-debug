@@ -47,24 +47,24 @@ endfu
 fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
     if a:0
         let cmd = a:kind is# 'ftplugin' && (a:1 is# 'c_*.vim' || a:1 is# 'c/*.vim')
-            \ ?     'breakadd file */fptlugin/'.a:filetype . a:1[1:]
+            \ ?     'breakadd file */fptlugin/'..a:filetype..a:1[1:]
             \ : a:kind is# 'syntax'
-            \ ?     'breakadd file */syntax/'.a:filetype . a:1[1:]
+            \ ?     'breakadd file */syntax/'..a:filetype..a:1[1:]
             \ :     ''
     else
-        let cmd = 'breakadd file */'.a:kind.'/'.a:filetype.'.vim'
+        let cmd = 'breakadd file */'..a:kind..'/'..a:filetype..'.vim'
     endif
 
     if cmd is# ''
         return
     endif
 
-    echom '[:DebugLocalPlugin] executing:  '.cmd
+    echom '[:DebugLocalPlugin] executing:  '..cmd
     exe cmd
 endfu
 
-fu debug#local_plugin#complete(arglead, _l, pos) abort "{{{1
-    let word_before_cursor = matchstr(a:cmdline, '.*\s\zs-\S.*\%'.a:pos.'c.')
+fu debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
+    let word_before_cursor = matchstr(a:cmdline, '.*\s\zs-\S.*\%'..a:pos..'c.')
 
     if word_before_cursor =~# '^-filetype\s*\S*$'
         let filetypes = getcompletion('', 'filetype')
