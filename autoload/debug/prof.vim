@@ -53,10 +53,10 @@ fu debug#prof#main(...) abort "{{{1
     sil! exe 'so '..s:DIR..'/profile.log'
 
     echo printf("Executing:\n    %s\n    %s\n%s\n\n",
-    \ start_cmd,
-    \ file_cmd,
-    \ join(map(plugin_files, {_,v -> '    '..v}), "\n"),
-    \ )
+        \ start_cmd,
+        \ file_cmd,
+        \ join(map(plugin_files, {_,v -> '    '..v}), "\n"),
+        \ )
 
     " TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{
     " We could see the log from the current session.
@@ -91,12 +91,8 @@ fu s:read_last_profile() abort "{{{1
     let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
     let &l:fen = 0
     try
-        " create an empty fold before the first profiled function
-        " for better readability
-        " Why `silent!`?{{{
-        "
-        " If we reopen the log, the pattern won't be found anymore.
-        "}}}
+        " create an empty fold before the first profiled function for better readability;
+        " we use `silent!` because if we reopen the log, the pattern won't be found anymore
         sil! 1/^FUNCTION /-put_ | s/^/#/
         " create an empty fold before the summary at the end
         sil! 1/^FUNCTIONS SORTED/-put_ | s/^/#/
@@ -108,8 +104,11 @@ fu s:read_last_profile() abort "{{{1
     endtry
 
     " fold every function, every script, and the ending summaries
-    sil! %s/^FUNCTION\s\+/## /
-    sil! %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /
+    sil %s/^FUNCTION\s\+/## /e
+    sil %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /e
+    call fold#logfile#main()
+    norm! 1G
+    sil! FoldToggle 1
     sil update
 endfu
 

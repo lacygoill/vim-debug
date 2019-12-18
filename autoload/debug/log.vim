@@ -89,7 +89,7 @@ fu debug#log#output(what) abort "{{{1
             nmap <buffer><nowait><silent> q <plug>(my_quit)
             " `gf` &friends can't parse `/path/to/file line 123`,
             " so replace these line with `/path/to/file:123`
-            sil! %s/Last set from.*\zs line \ze\d\+$/:/
+            sil %s/Last set from.*\zs line \ze\d\+$/:/e
             call search('Last set from \zs')
             nno <buffer><nowait><silent> DD :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
         endif

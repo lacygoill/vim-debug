@@ -30,7 +30,7 @@ fu debug#help_about_last_errors() abort "{{{1
     " index of most recent error
     let i = match(messages, pat_error)
     " index of next line which isn't an error, nor belongs to a stack trace
-    let j = match(messages, '^\%('.pat_error.'\|Error\|line\)\@!', i+1)
+    let j = match(messages, '^\%('..pat_error..'\|Error\|line\)\@!', i+1)
     if j == -1
         let j = i+1
     endif
@@ -56,7 +56,7 @@ fu debug#help_about_last_errors() abort "{{{1
         let s:last_errors.taglist = errors
     endif
 
-    return 'h '.get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
+    return 'h '..get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
 endfu
 
 fu debug#messages() abort "{{{1
@@ -103,7 +103,7 @@ fu debug#messages() abort "{{{1
         \ }
 
     for noise in values(noises)
-        sil! exe 'g/\v^'.noise.'$/d_'
+        sil! exe 'g/\v^'..noise..'$/d_'
     endfor
 
     call matchadd('ErrorMsg', '\v^E\d+:\s+.*')
@@ -135,7 +135,7 @@ fu debug#time(cmd, cnt) "{{{1
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
         redraw
-        echom matchstr(reltimestr(reltime(time)), '\v.*\..{,3}').' seconds to run :'.a:cmd
+        echom matchstr(reltimestr(reltime(time)), '\v.*\..{,3}')..' seconds to run :'..a:cmd
     endtry
 endfu
 
@@ -148,7 +148,7 @@ fu debug#vim_patches(n) abort "{{{1
 
         usage example:
 
-            VimPatches 8.1
+            VimPatches 8.2
             VimPatches -missing_in_nvim
         END
         echo join(msg, "\n")
@@ -203,13 +203,14 @@ const s:major_versions =<< trim END
     7.4
     8.0
     8.1
+    8.2
 END
 
 fu debug#wrapper(cmd) abort "{{{1
     try
         ToggleEditingCommands 0
         au! my_granular_undo
-        exe 'debug '.a:cmd
+        exe 'debug '..a:cmd
     catch
         return lg#catch_error()
     finally
