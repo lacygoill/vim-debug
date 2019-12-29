@@ -108,7 +108,7 @@ fu s:read_last_profile() abort "{{{1
     sil %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /e
     call fold#logfile#main()
     norm! 1G
-    sil! FoldToggle 1
+    sil! FoldAutoOpen 1
     sil update
 endfu
 

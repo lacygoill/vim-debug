@@ -74,42 +74,43 @@ fu debug#messages() abort "{{{1
     setl ma noro
 
     let noises = {
-        \ '[fewer|more] lines': '\d+ %(fewer|more) lines%(; %(before|after) #\d+.*)?',
-        \ '1 more line less':   '1 %(more )?line%( less)?%(; %(before|after) #\d+.*)?',
-        \ 'change':             'Already at %(new|old)est change',
-        \ 'changes':            '\d+ changes?; %(before|after) #\d+.*' ,
+        \ '[fewer|more] lines': '\d\+ \%(fewer\|more\) lines\%(; \%(before\|after\) #\d\+.*\)\=',
+        \ '1 more line less':   '1 \%(more \)\=line\%( less\)\=\%(; \%(before\|after\) #\d\+.*\)\=',
+        \ 'change':             'Already at \%(new\|old\)est change',
+        \ 'changes':            '\d\+ changes\=; \%(before\|after\) #\d\+.*' ,
         \ 'E21':                "E21: Cannot make changes, 'modifiable' is off",
         \ 'E387':               'E387: Match is on current line',
         \ 'E486':               'E486: Pattern not found: \S*',
-        \ 'E492':               'E492: Not an editor command: \S+',
+        \ 'E492':               'E492: Not an editor command: \S\+',
         \ 'E501':               'E501: At end-of-file',
         \ 'E553':               'E553: No more items',
         \ 'E663':               'E663: At end of changelist',
         \ 'E664':               'E664: changelist is empty',
         \ 'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
-        \ 'empty lines':        '\s*' ,
-        \ 'lines filtered':     '\d+ lines filtered' ,
-        \ 'lines indented':     '\d+ lines [><]ed \d+ times?',
-        \ 'file loaded':        '".{-}"%( \[RO\])? line \d+ of \d+ --\d+\%-- col \d+%(-\d+)?',
-        \ 'file reloaded':      '".{-}".*\d+L, \d+C',
-        \ 'g C-g':              'col \d+ of \d+; line \d+ of \d+; word \d+ of \d+; char \d+ of \d+; byte \d+ of \d+',
-        \ 'C-c':                'Type\s*:qa!\s*and press \<Enter\> to abandon all changes and exit Vim',
-        \ 'maintainer':         '\mMessages maintainer: Bram Moolenaar <Bram@vim.org>',
+        \ 'empty lines':        '\s*',
+        \ 'lines filtered':     '\d\+ lines filtered' ,
+        \ 'lines indented':     '\d\+ lines [><]ed \d\+ times\=',
+        \ 'file loaded':        '".\{-}"\%( \[RO\]\)\= line \d\+ of \d\+ --\d\+%-- col \d\+\%(-\d\+\)\=',
+        \ 'file reloaded':      '".\{-}".*\d\+L, \d\+C',
+        \ 'g C-g':              'col \d\+ of \d\+; line \d\+ of \d\+; word \d\+ of \d\+;'
+        \                     ..' char \d\+ of \d\+; byte \d\+ of \d\+',
+        \ 'C-c':                'Type\s*:qa!\s*and press <Enter> to abandon all changes and exit Vim',
+        \ 'maintainer':         'Messages maintainer: Bram Moolenaar <Bram@vim.org>',
         \ 'Scanning':           'Scanning:.*',
-        \ 'substitutions':      '\d+ substitutions? on \d+ lines?',
+        \ 'substitutions':      '\d\+ substitutions\= on \d\+ lines\=',
         \ 'verbose':            ':0Verbose messages',
         \ 'W10':                'W10: Warning: Changing a readonly file',
-        \ 'yanked lines':       '%(block of )?\d+ lines yanked',
+        \ 'yanked lines':       '\%(block of \)\=\d\+ lines yanked',
         \ }
 
     for noise in values(noises)
-        sil! exe 'g/\v^'..noise..'$/d_'
+        sil exe 'g/^'..noise..'$/d_'
     endfor
 
-    call matchadd('ErrorMsg', '\v^E\d+:\s+.*')
-    call matchadd('ErrorMsg', '\v^Vim.{-}:E\d+:\s+.*')
+    call matchadd('ErrorMsg', '^E\d\+:\s\+.*')
+    call matchadd('ErrorMsg', '^Vim.\{-}:E\d\+:\s\+.*')
     call matchadd('ErrorMsg', '^Error detected while processing.*')
-    call matchadd('LineNr', '\v^line\s+\d+:$')
+    call matchadd('LineNr', '^line\s\+\d\+:$')
     exe '$'
 endfu
 
@@ -135,7 +136,7 @@ fu debug#time(cmd, cnt) "{{{1
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
         redraw
-        echom matchstr(reltimestr(reltime(time)), '\v.*\..{,3}')..' seconds to run :'..a:cmd
+        echom matchstr(reltimestr(reltime(time)), '.*\..\{,3}')..' seconds to run :'..a:cmd
     endtry
 endfu
 
