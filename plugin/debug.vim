@@ -57,7 +57,7 @@ fu s:starting_cmd() abort
     "
     " Or remove the command, because the rhs is easy enough to remember/type...
     "}}}
-    if ! has('nvim')
+    if !has('nvim')
         echo join(v:argv)
     else
         echo expand('`ps -o command= -p '..getpid()..'`')

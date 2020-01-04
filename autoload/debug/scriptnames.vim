@@ -1,7 +1,6 @@
 fu debug#scriptnames#main() abort "{{{1
     let list = s:get_scriptnames()
-    call setqflist(list)
-    call setqflist([], 'a', { 'title': ':Scriptnames'})
+    call setqflist([], ' ', {'items': list, 'title': ':Scriptnames'})
     do <nomodeline> QuickFixCmdPost copen
 endfu
 
