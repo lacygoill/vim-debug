@@ -107,11 +107,7 @@ else
         \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 endif
 
-
-com -bar -nargs=1 -complete=option Vo echo 'local: '
-    \ |    verb setl <args>?
-    \ |    echo "\nglobal: "
-    \ |    verb setg <args>?
+com -bar -nargs=1 -complete=option Vo call debug#verbose#option(<q-args>)
 
 com -bar -complete=custom,debug#vim_patches_completion -nargs=? VimPatches call debug#vim_patches(<q-args>)
 
