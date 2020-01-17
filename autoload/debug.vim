@@ -183,7 +183,7 @@ fu s:prettify() abort
     setl bt=nofile nobl noswf nowrap
     " conceal url (copied from the markdown syntax plugin)
     syn match xUrl /\S\+/ contained
-    syn region xLinkText matchgroup=xLinkTextDelimiter start=/!\=\[\%(\_[^]]*] \=[[(]\)\@=/ end=/\]\%( \=[[(]\)\@=/ nextgroup=xLink keepend concealends skipwhite
+    syn region xLinkText matchgroup=xLinkTextDelimiter start=/!\=\[\ze\_[^]]*] \=[[(]/ end=/\]\ze \=[[(]/ nextgroup=xLink keepend concealends skipwhite
     syn region xLink matchgroup=xLinkDelimiter start=/(/ end=/)/ contained keepend conceal contains=xUrl
     hi link xLinkText Underlined
     hi link xUrl Float

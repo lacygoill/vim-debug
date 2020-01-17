@@ -133,7 +133,7 @@ fu s:split_codes() abort "{{{2
 
     " split terminal keys; one per line
     sil keepj keepp /Terminal keys/,$s/ \zet_\S*/\r/ge
-    sil keepj keepp /Terminal keys/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\%( <.\{-1,}> \+\S\|$\)\@=/\r&/ge
+    sil keepj keepp /Terminal keys/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
     " Why this second substitution?{{{
     "
     " To handle terminal keys which are not associated to a terminal option.
