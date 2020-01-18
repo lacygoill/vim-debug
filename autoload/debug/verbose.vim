@@ -6,10 +6,9 @@ let g:autoloaded_debug#verbose = 1
 const s:OPTIONS_DOC = readfile($VIMRUNTIME..'/doc/options.txt')
 
 " Interface {{{1
-fu debug#verbose#option(args) abort "{{{2
-    let [verbose, opt] = matchlist(a:args, '^\(-v\)\=\s*\([a-z]\+\)')[1:2]
+fu debug#verbose#option(opt) abort "{{{2
     try
-        let opt = matchstr(execute('set '..opt..'?'), '[a-z]\+')
+        let opt = matchstr(execute('set '..a:opt..'?'), '[a-z]\+')
         " necessary for a reset boolean option (like 'paste')
         let opt = substitute(opt, '^no', '', '')
     catch /^Vim\%((\a\+)\)\=:E518:/
@@ -19,7 +18,7 @@ fu debug#verbose#option(args) abort "{{{2
         return
     endtry
 
-    let msg = s:get_current_value(opt, verbose)
+    let msg = s:get_current_value(opt)
     if exists('b:orig_'..opt)
         let msg += s:get_original_value(opt)
     endif
@@ -28,15 +27,13 @@ fu debug#verbose#option(args) abort "{{{2
 endfu
 "}}}1
 " Core {{{1
-fu s:get_current_value(opt, verbose) abort "{{{2
+fu s:get_current_value(opt) abort "{{{2
     let vlocal = matchstr(execute('verb setl '..a:opt..'?'), '\_s*\zs\S.*')
     let vglobal = matchstr(execute('verb setg '..a:opt..'?'), '\_s*\zs\S.*')
     let type = matchstr(join(s:OPTIONS_DOC, "\n"),
         \ '\n'''..a:opt..'\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
     if type is# 'global'
         let msg = ['global:  '..vglobal]
-    elseif type =~# '^local' && empty(a:verbose)
-        let msg = [type..':  '..vlocal]
     else
         let msg =<< trim END
             local:   %s
