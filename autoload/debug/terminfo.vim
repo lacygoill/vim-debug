@@ -107,11 +107,11 @@ fu s:dump_nvim_terminfo() abort "{{{2
     sil keepj keepp g/^\u.* capabilities:$/t. | keepp s/./-/g
     " Don't move the update after the folding.{{{
     "
-    " It would cause `fold#logfile#main()` to raise an error, because it reloads
+    " It would cause  `fold#adhoc#main()` to raise an error,  because it reloads
     " the buffer to apply the new folding options.
     "}}}
     sil update
-    try | call fold#logfile#main() | catch | call lg#catch_error() | endtry
+    try | call fold#adhoc#main() | catch | call lg#catch_error() | endtry
 
     call s:install_mappings()
 endfu

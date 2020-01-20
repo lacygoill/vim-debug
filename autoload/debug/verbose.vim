@@ -13,7 +13,7 @@ fu debug#verbose#option(opt) abort "{{{2
         let opt = substitute(opt, '^no', '', '')
     catch /^Vim\%((\a\+)\)\=:E518:/
         echohl ErrorMsg
-        echo 'E518: Unknown option: '..opt
+        echo 'E518: Unknown option: '..a:opt
         echohl NONE
         return
     endtry

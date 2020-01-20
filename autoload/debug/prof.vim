@@ -106,7 +106,7 @@ fu s:read_last_profile() abort "{{{1
     " fold every function, every script, and the ending summaries
     sil %s/^FUNCTION\s\+/## /e
     sil %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /e
-    call fold#logfile#main()
+    sil! call fold#adhoc#main()
     norm! 1G
     sil! FoldAutoOpen 1
     sil update
