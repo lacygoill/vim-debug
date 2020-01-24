@@ -33,7 +33,7 @@ fu s:dump_nvim_terminfo() abort "{{{2
     "
     " In the shell, this works:
     "
-    "     $ nvim -V3/tmp/log +'call timer_start(0, {_ -> execute("q")})' && \
+    "     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})' && \
     "       nvim -es +'exe "1,/{{\\%x7b$/g/^/d_" | /}}\%x7d$/,$g/^/d_' +'%p | qa!' /tmp/log
     "
     " Note that in the first Nvim command,  you can't use `-e`, and you must use
@@ -51,14 +51,14 @@ fu s:dump_nvim_terminfo() abort "{{{2
     " would need to use sth like `system()` or `jobstart()`.
     " But both of them fail to display Nvim's internal terminfo db:
     "
-    "     :let shell_cmd = 'nvim -V3/tmp/log +''call timer_start(0, {_ -> execute("q")})'''
+    "     :let shell_cmd = 'nvim -V3/tmp/log +''call timer_start(0, {-> execute("q")})'''
     "     :let cmd = ['/bin/bash', '-c', shell_cmd]
     "     :call jobstart(cmd)
     "     :sp /tmp/log
     "     /terminal
     "     E486~
     "
-    "     :let cmd = 'nvim -V3/tmp/log +''call timer_start(0, {_ -> execute("q")})'''
+    "     :let cmd = 'nvim -V3/tmp/log +''call timer_start(0, {-> execute("q")})'''
     "     :call system(cmd)
     "     :sp /tmp/log
     "     /terminal

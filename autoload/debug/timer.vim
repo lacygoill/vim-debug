@@ -1,4 +1,4 @@
-" call timer_start(9296123, {_ -> execute('echom "hello"')})
+" call timer_start(9296123, {-> execute('echom "hello"')})
 fu s:fold_section() abort "{{{1
     let new_line = substitute(getline('.'), '^', '# ', '')
     call setline('.', ['#'] + [new_line])
