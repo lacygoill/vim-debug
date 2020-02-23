@@ -31,7 +31,8 @@ fu s:get_current_value(opt) abort "{{{2
     let vlocal = matchstr(execute('verb setl '..a:opt..'?'), '\_s*\zs\S.*')
     let vglobal = matchstr(execute('verb setg '..a:opt..'?'), '\_s*\zs\S.*')
     let type = matchstr(join(s:OPTIONS_DOC, "\n"),
-        \ '\n'''..a:opt..'\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
+        \ '\n'''..a:opt..'''\s\+''[a-z]\{2,}''\s\+\%(boolean\|number\|string\)'
+        \ ..'\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
     if type is# 'global'
         let msg = ['global:  '..vglobal]
     else
