@@ -5,7 +5,7 @@ fu debug#capture#setup(verbose) abort "{{{2
 endfu
 
 fu debug#capture#variable(_) abort "{{{2
-    let pat = 'let\s\+\zs\([bwtglsav]:\)\=\(\a\w*\)\(\s*\)[+-.*]\{,2}=.*'
+    let pat = 'let\s\+\zs\([bwtglsav]:\)\=\(\h\w*\)\(\s*\)[+-.*]\{,2}=.*'
     if match(getline('.'), pat) == -1
         echo 'No variable to capture on this line'
         return
