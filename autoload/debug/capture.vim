@@ -5,16 +5,16 @@ fu debug#capture#setup(verbose) abort "{{{2
 endfu
 
 fu debug#capture#variable(_) abort "{{{2
-    let pat = 'let\s\+\zs\([bwtglsav]:\)\=\(\h\w*\)\(\s*\)[+-.*]\{,2}=.*'
+    let pat = '\%(let\|const\)\s\+\([bwtglsav]:\)\=\(\h\w*\)\(\s*\)[+-.*]\{,2}=.*'
     if match(getline('.'), pat) == -1
         echo 'No variable to capture on this line'
         return
     endif
     t.
     let rep = s:verbose
-        \ ? 'g:d_\2\3= get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
-        \ : 'g:d_\2\3= deepcopy(\1\2)'
-    sil exe 'keepj keepp s/'.pat.'/'.rep.'/e'
+        \ ? 'let g:d_\2\3= get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
+        \ : 'let g:d_\2\3= deepcopy(\1\2)'
+    sil exe 'keepj keepp s/'..pat..'/'..rep..'/e'
 endfu
 
 fu debug#capture#dump() abort "{{{2
