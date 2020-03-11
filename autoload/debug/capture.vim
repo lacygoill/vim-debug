@@ -28,8 +28,13 @@ fu s:dump() abort
         echo 'there are no debugging variables'
     else
         let tempfile = tempname()
-        exe 'pedit '.tempfile
-        call map(vars, {_,v -> v.' = '.string(g:{v})})
+        try
+            exe 'pedit '..tempfile
+        " `:pedit` is forbidden from a Vim popup terminal window
+        catch /^Vim\%((\a\+)\)\=:E994:/
+            return lg#catch_error()
+        endtry
+        call map(vars, {_,v -> v..' = '..string(g:{v})})
         wincmd P
         if &l:pvw
             call setline(1, vars)
