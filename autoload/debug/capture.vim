@@ -32,7 +32,7 @@ fu s:dump() abort
             exe 'pedit '..tempfile
         " `:pedit` is forbidden from a Vim popup terminal window
         catch /^Vim\%((\a\+)\)\=:E994:/
-            return lg#catch_error()
+            return lg#catch()
         endtry
         call map(vars, {_,v -> v..' = '..string(g:{v})})
         wincmd P

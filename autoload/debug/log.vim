@@ -91,7 +91,7 @@ fu debug#log#output(what) abort "{{{1
             nno <buffer><nowait><silent> DD :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
         endif
     catch
-        return lg#catch_error()
+        return lg#catch()
     endtry
 endfu
 
@@ -147,7 +147,7 @@ fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
 
         sil exe a:level..'verbose exe '..string(excmd)
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         " We empty the value of `'vfile'` for 2 reasons:{{{
         "

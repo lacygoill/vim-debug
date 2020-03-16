@@ -111,7 +111,7 @@ fu s:dump_nvim_terminfo() abort "{{{2
     " the buffer to apply the new folding options.
     "}}}
     sil update
-    try | call fold#adhoc#main() | catch | call lg#catch_error() | endtry
+    try | call fold#adhoc#main() | catch | call lg#catch() | endtry
 
     call s:install_mappings()
 endfu

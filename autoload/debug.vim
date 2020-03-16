@@ -131,7 +131,7 @@ fu debug#time(cmd, cnt) "{{{1
             exe a:cmd
         endif
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
@@ -213,7 +213,7 @@ fu debug#wrapper(cmd) abort "{{{1
         au! my_granular_undo
         exe 'debug '..a:cmd
     catch
-        return lg#catch_error()
+        return lg#catch()
     finally
         unlet g:autoloaded_readline
         ru autoload/readline.vim
