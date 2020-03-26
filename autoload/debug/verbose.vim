@@ -41,7 +41,7 @@ fu s:get_current_value(opt) abort "{{{2
             global:  %s
             type:    %s
         END
-        let msg = map(msg, {i,v -> substitute(v, '%s', [vlocal, vglobal, type][i], 'g')})
+        call map(msg, {i,v -> substitute(v, '%s', escape([vlocal, vglobal, type][i], '\'), 'g')})
     endif
     return msg
 endfu
