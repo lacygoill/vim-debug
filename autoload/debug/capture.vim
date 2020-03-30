@@ -24,25 +24,15 @@ endfu
 
 fu s:dump() abort
     let vars = getcompletion('d_*', 'var')
-    if empty(vars)
-        echo 'there are no debugging variables'
-    else
-        let tempfile = tempname()
-        try
-            exe 'pedit '..tempfile
-        " `:pedit` is forbidden from a Vim popup terminal window
-        catch /^Vim\%((\a\+)\)\=:E994:/
-            return lg#catch()
-        endtry
-        call map(vars, {_,v -> v..' = '..string(g:{v})})
-        wincmd P
-        if &l:pvw
-            call setline(1, vars)
-            sil update
-            nmap <buffer><nowait><silent> q <plug>(my_quit)
-            nno <buffer><nowait><silent> DD :<c-u>call <sid>unlet_variable_under_cursor()<cr>
-        endif
-    endif
+    if empty(vars) | echo 'there are no debugging variables' | return | endif
+    call map(vars, {_,v -> v..' = '..string(g:{v})})
+    try
+        call lg#window#scratch(vars)
+    catch /^Vim\%((\a\+)\)\=:E994:/
+        return lg#catch()
+    endtry
+    nmap <buffer><nowait><silent> q <plug>(my_quit)
+    nno <buffer><nowait><silent> DD :<c-u>call <sid>unlet_variable_under_cursor()<cr>
 endfu
 " }}}1
 " Utilities {{{1

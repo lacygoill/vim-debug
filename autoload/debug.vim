@@ -64,9 +64,7 @@ fu debug#messages() abort "{{{1
     " If `:Verbose` encountered an error, we could still be in a regular window,
     " instead of the preview window. If that's the case, we don't want to remove
     " any text in the current buffer, nor install any match.
-    if !&l:pvw
-        return
-    endif
+    if !&l:pvw | return | endif
 
     " From a help buffer, the buffer displayed in a newly opened preview
     " window inherits some settings, such as 'nomodifiable' and 'readonly'.

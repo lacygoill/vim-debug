@@ -6,14 +6,14 @@ fu debug#log#output(what) abort "{{{1
     "      │
     "      │      ┌ desired level of verbosity
     "      │      │
-    "    - excmd, level    for :Verbose Cmd
-    "    - excmd, lines    for :RepeatableMotions
+    "    - excmd, level    for `:Verbose Cmd`
+    "    - excmd, lines    for `:RepeatableMotions`
     "             │        or any custom command for which we manually build the output
     "             │
     "             └ lists of lines which we'll use as the output of the command
     "}}}
     if    !has_key(a:what, 'excmd')
-    \ && (!has_key(a:what, 'level') || !has_key(a:what, 'lines'))
+    \ && !(has_key(a:what, 'level') && has_key(a:what, 'lines'))
         return
     endif
 
@@ -31,9 +31,7 @@ fu debug#log#output(what) abort "{{{1
     " single-character commands, such as `:a` (and possibly `:c`, `:i`).
     " Trying to accept single-character commands is not worth it.
     "}}}
-    if strlen(excmd) < 2
-        return
-    endif
+    if strlen(excmd) < 2 | return | endif
     let pfx = exists(':'..split(excmd)[0]) == 2 || executable(split(excmd[1:])[0]) ? ':' : ''
     if has_key(a:what, 'lines')
         let title = pfx..excmd
@@ -44,7 +42,7 @@ fu debug#log#output(what) abort "{{{1
         let level = a:what.level
         "                 ┌ if the level is 1, just write `:Verbose`
         "                 │ instead of `:1Verbose`
-        "                 ├───────────────────────┐
+        "                 ├─────────────────────┐
         let title = pfx..(level == 1 ? '' : level)..'Verbose '..excmd
         call writefile([title], tempfile, 'b')
         "                                  │
@@ -52,19 +50,20 @@ fu debug#log#output(what) abort "{{{1
         " How do you know Vim adds a linefeed?{{{
         "
         " MWE:
-        "         :!touch /tmp/file
-        "         :call writefile(['text'], '/tmp/file')
-        "         :!xxd /tmp/file
-        "         00000000: 7465 7874 0a    text.~
-        "                             └┤        │
-        "                              │        └ LF glyph
-        "                              └ LF hex code
+        "
+        "     :!touch /tmp/file
+        "     :call writefile(['text'], '/tmp/file')
+        "     :!xxd /tmp/file
+        "     00000000: 7465 7874 0a    text.~
+        "                         ├┘        │
+        "                         │         └ LF glyph
+        "                         └ LF hex code
         "}}}
 
-        " 1. `s:redirect_…()` executes `excmd`,
+        " 1. `s:redirect_...()` executes `excmd`,
         "     and redirects its output in a temporary file
         "
-        " 2. `type(…)` checks the output of `s:redirect_…()`
+        " 2. `type(...)` checks the output of `s:redirect_...()`
         "
         "        it should be `0`
         "        if, instead, it's a string, then an error has occurred: bail out
@@ -77,22 +76,21 @@ fu debug#log#output(what) abort "{{{1
     try
         " Load the file in the preview window. Useful to avoid having to close it if
         " we execute another `:Verbose` command. From `:h :ptag`:
-        " > If a "Preview" window already exists, it is re-used
-        " > (like a help window is).
+        " >     If a "Preview" window already exists, it is re-used
+        " >     (like a help window is).
         exe 'pedit '..tempfile
-
-        " Vim doesn't focus the preview window. Jump to it.
-        wincmd P
-        " if we really got there ...
-        if &l:pvw
-            setl bt=nofile nobl noswf nowrap
-            nmap <buffer><nowait><silent> q <plug>(my_quit)
-            call search('Last set from \zs')
-            nno <buffer><nowait><silent> DD :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
-        endif
     catch
         return lg#catch()
     endtry
+
+    " Vim doesn't focus the preview window. Jump to it.
+    wincmd P
+    " check we really got there ...
+    if !&l:pvw | return | endif
+    setl bt=nofile nobl noswf nowrap
+    nmap <buffer><nowait><silent> q <plug>(my_quit)
+    call search('Last set from \zs')
+    nno <buffer><nowait><silent> DD :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
 endfu
 
 fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
@@ -154,7 +152,7 @@ fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         "    1. to restore the original value
         "
         "    2. writes are buffered, thus may not show up for some time
-        "       Writing to the file ends when […] 'vfile' is made empty.
+        "       Writing to the file ends when [...] 'vfile' is made empty.
         "
         " See `:h 'vfile'`.
         "}}}
