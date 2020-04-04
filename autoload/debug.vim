@@ -86,7 +86,7 @@ fu debug#messages() abort "{{{1
         \ 'E664':               'E664: changelist is empty',
         \ 'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
         \ 'empty lines':        '\s*',
-        \ 'lines filtered':     '\d\+ lines filtered' ,
+        \ 'lines filtered':     '\d\+ lines filtered',
         \ 'lines indented':     '\d\+ lines [><]ed \d\+ times\=',
         \ 'file loaded':        '".\{-}"\%( \[RO\]\)\= line \d\+ of \d\+ --\d\+%-- col \d\+\%(-\d\+\)\=',
         \ 'file reloaded':      '".\{-}".*\d\+L, \d\+C',
