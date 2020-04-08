@@ -31,7 +31,8 @@ fu s:dump() abort
     catch /^Vim\%((\a\+)\)\=:E994:/
         return lg#catch()
     endtry
-    nmap <buffer><nowait><silent> q <plug>(my_quit)
+    wincmd P
+    if !&l:pvw | return | endif
     nno <buffer><nowait><silent> DD :<c-u>call <sid>unlet_variable_under_cursor()<cr>
 endfu
 " }}}1
