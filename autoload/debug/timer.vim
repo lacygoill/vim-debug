@@ -9,23 +9,23 @@ endfu
 
 fu s:format_info(v) abort "{{{1
     return [
-          \ 'id: '.a:v.id,
-          \ 'repeat: '.a:v.repeat,
-          \ 'remaining: '.s:format_time(a:v.remaining),
-          \ 'time: '.s:format_time(a:v.time),
-          \ 'paused: '.a:v.paused,
-          \ 'callback: '.string(a:v.callback),
+          \ "id\x01 "..a:v.id,
+          \ "repeat\x01 "..a:v.repeat,
+          \ "remaining\x01 "..s:format_time(a:v.remaining),
+          \ "time\x01 "..s:format_time(a:v.time),
+          \ "paused\x01 "..a:v.paused,
+          \ "callback\x01 "..string(a:v.callback),
           \ ]
 endfu
 
 fu s:format_time(v) abort "{{{1
     return a:v <= 999
-    \ ?        a:v.'ms'
+    \ ?        a:v..'ms'
     \ :    a:v <= 59999
-    \ ?        (a:v/1000).'s '.s:format_time(float2nr(fmod(a:v, 1000)))
+    \ ?        (a:v/1000)..'s '..s:format_time(float2nr(fmod(a:v, 1000)))
     \ :    a:v <= 3600000
-    \ ?        (a:v/60000).'m '.s:format_time(float2nr(fmod(a:v, 60000)))
-    \ :        (a:v/3600000).'h '.s:format_time(float2nr(fmod(a:v, 3600000)))
+    \ ?        (a:v/60000)..'m '..s:format_time(float2nr(fmod(a:v, 60000)))
+    \ :        (a:v/3600000)..'h '..s:format_time(float2nr(fmod(a:v, 3600000)))
 endfu
 
 fu debug#timer#info_open() abort "{{{1
@@ -57,8 +57,8 @@ fu debug#timer#info_open() abort "{{{1
         echo 'no timer is currently running'
         return
     endif
-    let tempfile = tempname().'/timer_info'
-    exe 'to '.(&columns/3).'vnew '.tempfile
+    let tempfile = tempname()..'/timer_info'
+    exe 'to '..(&columns/3)..'vnew '..tempfile
     let &l:pvw = 1
     wincmd p
 endfu
@@ -68,7 +68,7 @@ fu debug#timer#measure() abort "{{{1
         echom '  go!'
         let s:date = reltime()
     else
-        echom matchstr(reltimestr(reltime(s:date)), '.*\....') . ' seconds to do the task'
+        echom matchstr(reltimestr(reltime(s:date)), '.*\....')..' seconds to do the task'
         unlet! s:date
     endif
 endfu
@@ -84,7 +84,7 @@ fu debug#timer#populate() abort "{{{1
         let lines += info
     endfor
     call setline(1, lines)
-    sil %!column -s: -t
+    sil %!column -s $'\x01' -t
     " `s:put_definition()` calls `append()` which is silent, so why `:silent`?{{{
     "
     " Somehow, `:g` has priority, and it's not silent by default.
@@ -111,11 +111,11 @@ fu s:put_definition() abort "{{{1
     let line = getline('.')
     if line =~# '^callback\s\+function(''<lambda>\d\+'')$'
         let lambda_id = matchstr(line, '\d\+')
-        let definition = split(execute('fu {''<lambda>'.lambda_id.'''}'), '\n')
+        let definition = split(execute('fu {''<lambda>'..lambda_id..'''}'), '\n')
     else
         let func_name = matchstr(line, '^callback\s\+function(''\zs.\{-}\ze'')$')
-        let definition = split(execute('fu '.func_name), '\n')
+        let definition = split(execute('fu '..func_name), '\n')
     endif
-    call append('.', ['---'] + map(definition, {_,v -> '    '.v}))
+    call append('.', ['---'] + map(definition, {_,v -> '    '..v}))
 endfu
 
