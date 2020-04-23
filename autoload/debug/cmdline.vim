@@ -24,9 +24,9 @@ fu debug#cmdline#eval_var_under_cursor() abort "{{{1
     "}}}
     let rep = '\=string(eval(var_name))'
     if type(eval(var_name)) == type('')
-        let new_pos = strlen(text_until_var . eval(var_name)) + 3
+        let new_pos = strlen(text_until_var .. eval(var_name)) + 3
     else
-        let new_pos = strlen(text_until_var . string(eval(var_name))) + 1
+        let new_pos = strlen(text_until_var .. string(eval(var_name))) + 1
     endif
     let new_cmdline = substitute(cmdline, pat, rep, '')
     call setcmdpos(new_pos)
