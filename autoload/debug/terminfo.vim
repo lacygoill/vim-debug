@@ -227,7 +227,7 @@ fu s:translate_special_keys() abort "{{{2
     sil keepj keepp %s/\^?/\="\x7f"/ge
 
     "     <á>=^[a    →    <M-a>=^[a
-    sil keepj keepp %s/^set <\zs.\{-1,}\ze>=\e\(\l\)/M-\1/e
+    sil keepj keepp %s/^set <\zs.\ze>=\e\(\l\)/M-\1/e
 endfu
 
 fu s:sort_lines() abort "{{{2

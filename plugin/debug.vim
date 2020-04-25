@@ -132,8 +132,8 @@ nno <unique> g! g<
 
 " `!c` captures the latest value of a variable.
 " `!C` captures all the values of a variable during its lifetime.
-nno <silent><unique> !c :<c-u>call debug#capture#setup(0)<bar>norm! g@l<cr>
-nno <silent><unique> !C :<c-u>call debug#capture#setup(1)<bar>norm! g@l<cr>
+nno <silent><unique> !c :<c-u>call debug#capture#setup(0)<cr>g@l
+nno <silent><unique> !C :<c-u>call debug#capture#setup(1)<cr>g@l
 
 " !d        echo g:d_* {{{2
 
