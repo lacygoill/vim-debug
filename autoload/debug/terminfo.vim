@@ -274,7 +274,14 @@ endfu
 fu s:get_help() abort "{{{2
     let tag = matchstr(getline('.'), '\%(^set \|" \)\@4<=t_[^=]*')
     if tag isnot# ''
-        exe "h '"..tag
+        try
+            exe "h '"..tag
+        " some terminal options have no help tags (e.g. `'t_FL'`)
+        catch /^Vim\%((\a\+)\)\=:E149:/
+            echohl ErrorMsg
+            echom v:exception
+            echohl NONE
+        endtry
     else
         echo 'no help tag on this line'
     endif
