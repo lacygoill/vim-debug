@@ -39,8 +39,8 @@ fu s:dump_nvim_terminfo() abort "{{{2
     " Note that in the first Nvim command,  you can't use `-e`, and you must use
     " a timer to delay `:q`, to let the builtin UI start up:
     "
-    " > invoke :q  manually, so that  the builtin UI  has a chance  to start
-    " > up. Don't add -c "q" in the command-line args.
+    " >     invoke :q  manually, so that  the builtin UI  has a chance  to start
+    " >     up. Don't add -c "q" in the command-line args.
     "
     " Source:
     " https://github.com/neovim/neovim/issues/9270#issuecomment-441371260
