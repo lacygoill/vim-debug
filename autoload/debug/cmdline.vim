@@ -23,7 +23,7 @@ fu debug#cmdline#eval_var_under_cursor() abort "{{{1
     " substitution would fail.
     "}}}
     let rep = '\=string(eval(var_name))'
-    if type(eval(var_name)) == type('')
+    if type(eval(var_name)) == v:t_string
         let new_pos = strlen(text_until_var .. eval(var_name)) + 3
     else
         let new_pos = strlen(text_until_var .. string(eval(var_name))) + 1

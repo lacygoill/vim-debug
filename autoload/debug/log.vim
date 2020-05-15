@@ -67,7 +67,7 @@ fu debug#log#output(what) abort "{{{1
         "
         "        it should be `0`
         "        if, instead, it's a string, then an error has occurred: bail out
-        if type(s:redirect_to_tempfile(tempfile, level, excmd)) == type('')
+        if type(s:redirect_to_tempfile(tempfile, level, excmd)) == v:t_string
             return
         endif
     endif

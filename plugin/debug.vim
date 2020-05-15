@@ -3,6 +3,11 @@ if exists('g:loaded_debug')
 endif
 let g:loaded_debug = 1
 
+" TODO: Implement a command which would tell us which rule governs the indentation of a given line.
+"
+" https://vi.stackexchange.com/a/25338/17449
+" https://vi.stackexchange.com/a/25204/17449
+
 " Autocmds {{{1
 
 augroup timer_info_populate | au!

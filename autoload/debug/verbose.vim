@@ -8,15 +8,14 @@ const s:OPTIONS_DOC = readfile($VIMRUNTIME..'/doc/options.txt')
 " Interface {{{1
 fu debug#verbose#option(opt) abort "{{{2
     try
-        let opt = matchstr(execute('set '..a:opt..'?'), '[a-z]\+')
-        " necessary for a reset boolean option (like 'paste')
-        let opt = substitute(opt, '^no', '', '')
-    catch /^Vim\%((\a\+)\)\=:E518:/
-        echohl ErrorMsg
-        echo 'E518: Unknown option: '..a:opt
-        echohl NONE
-        return
+        " Why not just `a-z`?  To support terminal options.
+        let opt = matchstr(execute('set '..a:opt..'?'), '[a-z0-9<>_-]\+')
+    " many errors are possible when you write nonsense (E518, E846, E488, ...)
+    catch
+        return lg#catch()
     endtry
+    " necessary for a reset boolean option (like 'paste')
+    let opt = substitute(opt, '^no', '', '')
 
     let msg = s:get_current_value(opt)
     if exists('b:orig_'..opt)
@@ -30,11 +29,15 @@ endfu
 fu s:get_current_value(opt) abort "{{{2
     let vlocal = matchstr(execute('verb setl '..a:opt..'?'), '\_s*\zs\S.*')
     let vglobal = matchstr(execute('verb setg '..a:opt..'?'), '\_s*\zs\S.*')
-    let type = matchstr(join(s:OPTIONS_DOC, "\n"),
-        \ '\n'''..a:opt..'''\s\+''[a-z]\{2,}''\s\+\%(boolean\|number\|string\)'
-        \ ..'\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
-    if type is# 'global'
-        let msg = ['global:  '..vglobal]
+    if a:opt[:1] is# 't_' || a:opt[0]..a:opt[-1:-1] is# '<>'
+        let type = 'terminal'
+    else
+        let type = matchstr(join(s:OPTIONS_DOC, "\n"),
+            \ '\n'''..a:opt..'''\s\+\%(''[a-z]\{2,}''\s\+\)\=\%(boolean\|number\|string\)'
+            \ ..'\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
+    endif
+    if type =~# '^\%(global\|terminal\)$'
+        let msg = [type..':  '..vglobal]
     else
         let msg =<< trim END
             local:   %s
