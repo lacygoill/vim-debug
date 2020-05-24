@@ -47,27 +47,6 @@ com -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin
 
 com -bar DebugMappingsFunctionKeys call debug#mappings#using_function_keys()
 
-com -bar DebugStartingCmd call s:starting_cmd()
-fu s:starting_cmd() abort
-    " TODO: Once Nvim supports `v:argv`, remove:{{{
-    "
-    "    - the guard
-    "    - the `else` block
-    "    - this function
-    "
-    " Just write:
-    "
-    "     com -bar DebugStartingCmd echo join(v:argv)
-    "
-    " Or remove the command, because the rhs is easy enough to remember/type...
-    "}}}
-    if !has('nvim')
-        echo join(v:argv)
-    else
-        echo system('ps -o command= -p '..getpid())[:-2]
-    endif
-endfu
-
 com -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
 
 com -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)

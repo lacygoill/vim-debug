@@ -81,7 +81,7 @@ endfu
 fu s:read_last_profile() abort "{{{1
     let logfile = s:DIR..'/profile.log'
     if !filereadable(logfile)
-        echo 'There''s no results to read'
+        echo 'There are no results to read'
         return
     endif
     exe 'sp '..s:DIR..'/profile.log'
