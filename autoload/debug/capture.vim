@@ -1,7 +1,8 @@
 " Interface {{{1
 fu debug#capture#setup(verbose) abort "{{{2
     let s:verbose = a:verbose
-    set opfunc=debug#capture#variable
+    let &opfunc = 'debug#capture#variable'
+    return 'g@l'
 endfu
 
 fu debug#capture#variable(_) abort "{{{2
