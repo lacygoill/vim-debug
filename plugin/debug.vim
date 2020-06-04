@@ -134,9 +134,6 @@ else
     "
     " Printing a message via a timer from an `<expr>` mapping does not work well
     " in Nvim.  You need to wait for a redraw to see the message.
-    "
-    " Besides, `<cmd>` is better because it was meant to avoid side effects when
-    " calling a function from a mapping; in contrast, `<expr>` + timer is a hack.
     "}}}
     nno <silent><unique> !d <cmd>call debug#capture#dump()<cr>
 endif

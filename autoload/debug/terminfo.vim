@@ -123,17 +123,19 @@ endfu
 
 fu s:dump_termcap() abort "{{{2
     call setline(1, split(execute('set termcap'), '\n'))
-    1put ='' | 1/Terminal keys/put! ='' | 1/Terminal keys/put =''
+    " The bang after silent is necessary to suppress `E486` in gVim, where there
+    " may be no `Terminal keys` section.
+    1put ='' | sil! 1/Terminal keys/put! ='' | sil! 1/Terminal keys/put =''
     sil keepj keepp %s/^ *//e
 endfu
 
 fu s:split_codes() abort "{{{2
     " split terminal codes; one per line
-    sil keepj keepp 1,/Terminal keys/s/ \{2,}/\r/ge
+    sil! keepj keepp 1,/Terminal keys/s/ \{2,}/\r/ge
 
     " split terminal keys; one per line
-    sil keepj keepp /Terminal keys/,$s/ \zet_\S*/\r/ge
-    sil keepj keepp /Terminal keys/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
+    sil! keepj keepp /Terminal keys/,$s/ \zet_\S*/\r/ge
+    sil! keepj keepp /Terminal keys/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
     " Why this second substitution?{{{
     "
     " To handle terminal keys which are not associated to a terminal option.
@@ -150,7 +152,7 @@ endfu
 
 fu s:separate_terminal_keys_without_options() abort "{{{2
     " move terminal keys not associated to any terminal option at the end of the buffer
-    sil keepj keepp /Terminal keys/,$g/^</m$
+    sil! keepj keepp /Terminal keys/,$g/^</m$
     " separate them from the terminal keys associated with a terminal option{{{
     "
     "     t_kP <PageUp>    ^[[5~ 
@@ -162,14 +164,14 @@ fu s:separate_terminal_keys_without_options() abort "{{{2
     "
     "     <í>        ^[m
     "}}}
-    1/^<\%(.*" t_\S\S\)\@!/put! =''
+    sil! 1/^<\%(.*" t_\S\S\)\@!/put! =''
 endfu
 
 fu s:move_keynames_into_inline_comments() abort "{{{2
     "     t_#2 <S-Home>    ^[[1;2H
     "     →
     "     <S-Home>    ^[[1;2H  " t_#2
-    sil keepj keepp /Terminal keys/,$s/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
+    sil! keepj keepp /Terminal keys/,$s/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
 endfu
 
 fu s:add_assignment_operators() abort "{{{2
@@ -178,7 +180,7 @@ fu s:add_assignment_operators() abort "{{{2
     "     <S-Home>    ^[[1;2H  " t_#2
     "     →
     "     <S-Home>=^[[1;2H  " t_#2
-    sil keepj keepp /Terminal keys/,$s/^<.\{-1,}>\zs \+/=/e
+    sil! keepj keepp /Terminal keys/,$s/^<.\{-1,}>\zs \+/=/e
 endfu
 
 fu s:align_inline_comment() abort "{{{2
@@ -201,7 +203,7 @@ fu s:align_inline_comment() abort "{{{2
     " We fix this by passing to `:EasyAlign` the optional argument `{'ig': []}`,
     " which tells it to ignore nothing.
     "}}}
-    sil keepj keepp /Terminal keys/+,$EasyAlign /"/ {'ig': []}
+    sil! keepj keepp /Terminal keys/+,$EasyAlign /"/ {'ig': []}
 endfu
 
 fu s:add_set_commands() abort "{{{2
@@ -217,7 +219,7 @@ fu s:escape_spaces_in_options_values() abort "{{{2
 endfu
 
 fu s:trim_trailing_whitespace() abort "{{{2
-    sil keepj keepp /Terminal keys/,$s/ \+$//e
+    sil! keepj keepp /Terminal keys/,$s/ \+$//e
 endfu
 
 fu s:translate_special_keys() abort "{{{2
@@ -233,9 +235,9 @@ endfu
 fu s:sort_lines() abort "{{{2
     " sort terminal codes: easier to find a given terminal option name
     " sort terminal keys: useful later when vimdiff'ing the output with another one
-    sil keepj 1/Terminal codes/+,/Terminal keys/--sort
-    sil keepj 1/Terminal keys/++;/^$/-sort
-    sil keepj 1/Terminal keys//^$//^$/+;$sort
+    sil! keepj 1/Terminal codes/+,/Terminal keys/--sort
+    sil! keepj 1/Terminal keys/++;/^$/-sort
+    sil! keepj 1/Terminal keys//^$//^$/+;$sort
 endfu
 
 fu s:comment_section_headers() abort "{{{2
