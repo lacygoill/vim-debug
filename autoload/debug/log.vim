@@ -31,7 +31,12 @@ fu debug#log#output(what) abort "{{{1
     " single-character commands, such as `:a` (and possibly `:c`, `:i`).
     " Trying to accept single-character commands is not worth it.
     "}}}
-    if strlen(excmd) < 2 | return | endif
+    if strlen(excmd) < 2
+        echohl ErrorMsg
+        echom 'can''t run a single-character command; try to write it in its long form'
+        echohl NONE
+        return
+    endif
     let pfx = exists(':'..split(excmd)[0]) == 2 || executable(split(excmd[1:])[0]) ? ':' : ''
     if has_key(a:what, 'lines')
         let title = pfx..excmd

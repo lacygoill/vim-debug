@@ -5,8 +5,6 @@ let g:autoloaded_debug = 1
 
 " Init {{{1
 
-const s:NVIM_DIR = $HOME..'/Vcs/nvim'
-
 fu debug#help_about_last_errors() abort "{{{1
     let messages = reverse(split(execute('messages'), '\n'))
     "                    ┌ When an error occurs inside a try conditional,{{{
@@ -138,29 +136,44 @@ fu debug#time(cmd, cnt) "{{{1
     endtry
 endfu
 
+fu debug#unused_functions() abort "{{{1
+    " look for all function definitions in the current repo
+    sil noa lvim /^\s*fu\%[nction]\s\+/ ./**/*.vim
+    let functions = getloclist(0)->map({_,v -> v.text->matchstr('[^ (]*\ze(')})
+
+    " build a list of unused functions
+    let unused = []
+    for afunc in functions
+        let pat = afunc
+        if afunc[:1] is# 's:'
+            let pat ..= '\|<sid>'..afunc[2:]
+        endif
+        exe 'sil noa lvim /'..pat..'/ ./**/*.vim'
+        " the name of an unused function appears only once
+        if getloclist(0, {'size': 0}).size <= 1
+            let unused += [afunc]
+        endif
+    endfor
+
+    " report unused functions if any
+    if empty(unused)
+        echom 'no unused function in '..getcwd()
+    else
+        exe 'lvim /'..unused->join('\|')..'/ ./**/*.vim'
+    endif
+endfu
+
 fu debug#vim_patches(n) abort "{{{1
     if a:n is# ''
         let msg =<< trim END
-        provide a major Vim version number,
-        or pass the optional argument `-missing_in_nvim`
-        to get the list of Vim patches currently missing in Nvim
+        provide a major Vim version number
 
         usage example:
 
             VimPatches 8.2
-            VimPatches -missing_in_nvim
         END
         echo join(msg, "\n")
-    elseif a:n is# '-missing_in_nvim'
-        new | call s:prettify()
-        sil call system('git -C '..s:NVIM_DIR..' checkout master && git -C '..s:NVIM_DIR..' pull')
-        sil let text = systemlist($HOME..'/Vcs/nvim/scripts/vim-patch.sh -l')
-        call map(text, {_,v -> substitute(v, '\e[\d\+m', '', 'g')})
-        call setline(1, text)
-        sil keepj keepp 1;/^\s*•/--d_
-        sil keepj keepp %s@•\s*\zsv\([0-9.]\+\)@[\1](https://github.com/vim/vim/releases/tag/v\1)@e
-        sil keepj keepp %s@•\s*\zs\x\+@[&](https://github.com/vim/vim/commit/&)@e
-    elseif index(s:major_versions, a:n) != -1
+    elseif index(s:MAJOR_VERSIONS, a:n) != -1
         let filename = 'ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
         if bufloaded(filename) | let dont_prettify = 1 | endif
         sil exe 'sp '..filename
@@ -189,10 +202,10 @@ fu s:prettify() abort
 endfu
 
 fu debug#vim_patches_completion(_a, _l, _p) abort "{{{1
-    return join(s:major_versions + ['-missing_in_nvim'], "\n")
+    return join(s:MAJOR_VERSIONS, "\n")
 endfu
 
-const s:major_versions =<< trim END
+const s:MAJOR_VERSIONS =<< trim END
     6.3
     6.4
     7.0

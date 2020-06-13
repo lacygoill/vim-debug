@@ -47,7 +47,15 @@ com -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin
 
 com -bar DebugMappingsFunctionKeys call debug#mappings#using_function_keys()
 
-com -bar -nargs=0 DebugTerminfo call debug#terminfo#main()
+" `:DebugTerminfo` dumps the termcap db of the current Vim instance
+" `:DebugTerminfo!` prettifies the termcap db written in the current file
+com -bar -bang -nargs=0 -complete=file DebugTerminfo call debug#terminfo#main(<bang>0)
+
+" Sometimes, after a  refactoring, we forget to remove some  functions which are
+" no longer necessary.  This command should list them in the location window.
+" Warning: It may give false positives, because  a function may appear only once
+" in a plugin, but still be called from another plugin.
+com -bar DebugUnusedFunctions call debug#unused_functions()
 
 com -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
 
@@ -79,16 +87,10 @@ com -bar Scriptnames call debug#scriptnames#main()
 " I think it specifies that the type of  the range is not known (i.e. not a line
 " address, not a buffer number, not a window number, ...).
 "}}}
-if !has('nvim')
-    com -range=1 -addr=other -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
-    " Do NOT give the `-bar` attribute to `:Verbose`.
-    com -range=1 -addr=other -nargs=1 -complete=command Verbose
-        \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
-else
-    com -range=1 -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
-    com -range=1 -nargs=1 -complete=command Verbose
-        \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
-endif
+com -range=1 -addr=other -nargs=+ -complete=command Time call debug#time(<q-args>, <count>)
+" Do *not* give the `-bar` attribute to `:Verbose`.
+com -range=1 -addr=other -nargs=1 -complete=command Verbose
+    \ call debug#log#output({'level': <count>, 'excmd': <q-args>})
 
 com -bar -nargs=1 -complete=option Vo call debug#verbose#option(<q-args>)
 
@@ -120,23 +122,14 @@ nno <expr><unique> !C debug#capture#setup(1)
 
 " !d        echo g:d_* {{{2
 
-if !has('nvim')
-    " Why `<expr>`?{{{
-    "
-    " If you call the function via `:call`, it will fire various events
-    " (`CmdlineEnter`, `CmdlineLeave`, `CmdlineChanged`).
-    "
-    " This could alter the values of your `d_` variables.
-    "}}}
-    nno <expr><silent><unique> !d debug#capture#dump()
-else
-    " Why `<cmd>` instead of `<expr>`?{{{
-    "
-    " Printing a message via a timer from an `<expr>` mapping does not work well
-    " in Nvim.  You need to wait for a redraw to see the message.
-    "}}}
-    nno <silent><unique> !d <cmd>call debug#capture#dump()<cr>
-endif
+" Why `<expr>`?{{{
+"
+" If you call the function via `:call`, it will fire various events
+" (`CmdlineEnter`, `CmdlineLeave`, `CmdlineChanged`).
+"
+" This could alter the values of your `d_` variables.
+"}}}
+nno <expr><silent><unique> !d debug#capture#dump()
 
 " !e        show help about last error {{{2
 

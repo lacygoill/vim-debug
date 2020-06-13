@@ -1,9 +1,12 @@
 " Interface {{{1
-fu debug#terminfo#main() abort "{{{2
-    if has('nvim') | call s:dump_nvim_terminfo() | return | endif
+fu debug#terminfo#main(use_curfile) abort "{{{2
+    if a:use_curfile
+        call s:set_ft()
+    else
+        call s:split_window()
+    endif
 
-    call s:split_window()
-    call s:dump_termcap()
+    call s:dump_termcap(a:use_curfile)
     call s:split_codes()
     call s:separate_terminal_keys_without_options()
     call s:move_keynames_into_inline_comments()
@@ -24,96 +27,10 @@ fu debug#terminfo#main() abort "{{{2
 endfu
 "}}}1
 " Core {{{1
-fu s:dump_nvim_terminfo() abort "{{{2
-    " Issue: To get Nvim's terminfo internal db, we need to start `$ nvim -V3/tmp/log`.
-    " But we can't do that from `system()` nor `jobstart()`.
-    " Solution: Start Nvim in a temporary tmux window.
-
-    " FIXME: How to support Neovim outside tmux?{{{
-    "
-    " In the shell, this works:
-    "
-    "     $ nvim -V3/tmp/log +'call timer_start(0, {-> execute("q")})' && \
-    "       nvim -es +'exe "1,/{{\\%x7b$/g/^/d_" | /}}\%x7d$/,$g/^/d_' +'%p | qa!' /tmp/log
-    "
-    " Note that in the first Nvim command,  you can't use `-e`, and you must use
-    " a timer to delay `:q`, to let the builtin UI start up:
-    "
-    " >     invoke :q  manually, so that  the builtin UI  has a chance  to start
-    " >     up. Don't add -c "q" in the command-line args.
-    "
-    " Source:
-    " https://github.com/neovim/neovim/issues/9270#issuecomment-441371260
-    "
-    " ---
-    "
-    " To integrate these 2 shell  commands in our `:TermcapDump` command, we
-    " would need to use sth like `system()` or `jobstart()`.
-    " But both of them fail to display Nvim's internal terminfo db:
-    "
-    "     :let shell_cmd = 'nvim -V3/tmp/log +''call timer_start(0, {-> execute("q")})'''
-    "     :let cmd = ['/bin/bash', '-c', shell_cmd]
-    "     :call jobstart(cmd)
-    "     :sp /tmp/log
-    "     /terminal
-    "     E486~
-    "
-    "     :let cmd = 'nvim -V3/tmp/log +''call timer_start(0, {-> execute("q")})'''
-    "     :call system(cmd)
-    "     :sp /tmp/log
-    "     /terminal
-    "     E486~
-    "
-    " I think that's because Nvim sees that it's not attached to a terminal,
-    " and  so has  no need  to start  up  its UI,  nor to  set its  internal
-    " terminfo database.
-    "}}}
-    if !exists('$TMUX') | echo 'Requires tmux' | return | endif
-
-    " Don't add a path component in the name of the temporary file.{{{
-    "
-    "     let tempfile = tempname()..'/foo'
-    "                                 ^
-    "                                 ✘
-    "
-    " It would cause  a pager to be opened, and you would  need to press keys to
-    " get rid of it.
-    " I think it's because `E484` is raised; the message can be seen only at the end:
-    "
-    "     $ nvim -V3/tmp/nvimLKeZX6/1/foo
-    "     ...~
-    "     E484: Can't open file /tmp/nvimLKeZX6/1/foo~
-    "
-    " Our autocmd which  automatically creates a missing  directory doesn't seem
-    " to help here.
-    "}}}
-    let tempfile = tempname()
-    sil let target_pane = system("tmux neww -PF '#S:#I.#P' "..shellescape('nvim -V3'..tempfile))[:-2]
-    " Don't reduce this sleeping time too much.{{{
-    "
-    " Nvim's builtin UI needs some time to start up.
-    "
-    " https://github.com/neovim/neovim/issues/9270#issuecomment-441371260
-    "}}}
-    sleep 300m
-    sil call system('tmux send -t '..shellescape('='..target_pane) .. " ':q' 'Enter'")
-    exe 'sp '..tempfile
-
-    " remove irrelevant lines
-    sil keepj keepp 1,/{{\%x7b$/g/^/d_
-    sil keepj keepp 1/}}\%x7d$/,$g/^/d_
-
-    " try to add folding
-    sil keepj keepp g/^\u.* capabilities:$/t. | keepp s/./-/g
-    " Don't move the update after the folding.{{{
-    "
-    " It would cause  `fold#adhoc#main()` to raise an error,  because it reloads
-    " the buffer to apply the new folding options.
-    "}}}
-    sil update
-    try | call fold#adhoc#main() | catch | call lg#catch() | endtry
-
-    call s:install_mappings()
+fu s:set_ft() abort "{{{2
+    if &ft isnot# 'vim'
+        set ft=vim
+    endif
 endfu
 
 fu s:split_window() abort "{{{2
@@ -121,8 +38,10 @@ fu s:split_window() abort "{{{2
     exe 'sp '..tempfile
 endfu
 
-fu s:dump_termcap() abort "{{{2
-    call setline(1, split(execute('set termcap'), '\n'))
+fu s:dump_termcap(use_curfile) abort "{{{2
+    if !a:use_curfile
+        call setline(1, split(execute('set termcap'), '\n'))
+    endif
     " The bang after silent is necessary to suppress `E486` in gVim, where there
     " may be no `Terminal keys` section.
     1put ='' | sil! 1/Terminal keys/put! ='' | sil! 1/Terminal keys/put =''
@@ -252,25 +171,22 @@ endfu
 
 fu s:install_mappings() abort "{{{2
     nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
-
-    if !has('nvim')
-        " mapping to compare value on current line with the one in output of `:set termcap`{{{
-        "
-        " Note that  `:filter` is able  to filter the "Terminal  codes" section,
-        " but not the "Terminal keys" section.
-        " So, no  matter the line  where you press  `!!`, you'll always  get the
-        " whole "Terminal codes" section.
-        " The  mapping is  still useful:  if you  press `!!`  on a  line in  the
-        " "Terminal codes" section,  it will correctly filter out  all the other
-        " terminal codes.
-        "}}}
-        nno <buffer><nowait><silent> !!
-            \ :<c-u>exe 'filter /'.. matchstr(getline('.'), 't_[^=]*') ..'/ set termcap'<cr>
-        " open relevant help tag to get more info about the terminal option under the cursor
-        nno <buffer><nowait><silent> <cr> :<c-u>call <sid>get_help()<cr>
-        " get help about mappings
-        nno <buffer><nowait><silent> g? :<c-u>call <sid>print_help()<cr>
-    endif
+    " mapping to compare value on current line with the one in output of `:set termcap`{{{
+    "
+    " Note that  `:filter` is able  to filter the "Terminal  codes" section,
+    " but not the "Terminal keys" section.
+    " So, no  matter the line  where you press  `!!`, you'll always  get the
+    " whole "Terminal codes" section.
+    " The  mapping is  still useful:  if you  press `!!`  on a  line in  the
+    " "Terminal codes" section,  it will correctly filter out  all the other
+    " terminal codes.
+    "}}}
+    nno <buffer><nowait><silent> !!
+        \ :<c-u>exe 'filter /'.. matchstr(getline('.'), 't_[^=]*') ..'/ set termcap'<cr>
+    " open relevant help tag to get more info about the terminal option under the cursor
+    nno <buffer><nowait><silent> <cr> :<c-u>call <sid>get_help()<cr>
+    " get help about mappings
+    nno <buffer><nowait><silent> g? :<c-u>call <sid>print_help()<cr>
 endfu
 
 fu s:get_help() abort "{{{2
