@@ -78,7 +78,6 @@ fu debug#messages() abort "{{{1
         \ 'E387':               'E387: Match is on current line',
         \ 'E486':               'E486: Pattern not found: \S*',
         \ 'E492':               'E492: Not an editor command: \S\+',
-        \ 'E501':               'E501: At end-of-file',
         \ 'E553':               'E553: No more items',
         \ 'E663':               'E663: At end of changelist',
         \ 'E664':               'E664: changelist is empty',
