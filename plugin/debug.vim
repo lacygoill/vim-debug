@@ -79,7 +79,7 @@ com -bar Scriptnames call debug#scriptnames#main()
 "
 " Solution: use the additional attribute `-addr=other`:
 "
-"                   vvvvvvvvvvv
+"                   v---------v
 "     :com -range=1 -addr=other Cmd echo ''
 "     :new
 "     :3Cmd
