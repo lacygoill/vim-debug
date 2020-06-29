@@ -1,5 +1,5 @@
 fu debug#output#last_ex_command() abort "{{{1
-    let @o = s:get_output()
+    call setreg('o', s:get_output(), 'c')
     return '"o]p'
 endfu
 
