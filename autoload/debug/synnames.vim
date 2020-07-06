@@ -5,23 +5,21 @@ fu debug#synnames#main(count) abort "{{{1
             exe 'syntax list '.name
         endif
     else
-        echo join(s:synnames())
+        echo s:synnames()->join()
     endif
 endfu
 
 fu s:synnames(...) abort "{{{1
-    "                     The syntax element under the cursor is part of
-    "                     a group, which can be contained in another one,
-    "                     and so on.
+    " The syntax  element under  the cursor  is part  of a  group, which  can be
+    " contained in another one, and so on.
     "
-    "                     This imbrication of syntax groups can be seen as a stack.
-    "                     `synstack()` returns the list of IDs for all syntax groups
-    "                     in the stack, at the position given.
+    " This imbrication  of syntax groups  can be  seen as a  stack. `synstack()`
+    " returns  the list  of IDs  for  all syntax  groups  in the  stack, at  the
+    " position given.
     "
-    "                     They are sorted from the outermost syntax group, to the innermost.
+    " They are sorted from the outermost syntax group, to the innermost.
     "
-    "                  ┌ The last one is what `synID()` returns.
-    "                  │
-    return reverse(map(synstack(line('.'), col('.')), {_,v -> synIDattr(v, 'name')}))
+    " The last one is what `synID()` returns.
+    return synstack(line('.'), col('.'))->map('synIDattr(v:val, "name")')->reverse()
 endfu
 

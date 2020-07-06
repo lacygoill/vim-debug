@@ -50,11 +50,13 @@ endfu
 
 fu s:split_codes() abort "{{{2
     " split terminal codes; one per line
-    sil! keepj keepp 1,/Terminal keys/s/ \{2,}/\r/ge
+    sil! keepj keepp 1,/Terminal keys\|\%$/s/ \{2,}/\r/ge
+    "                                ├───┘
+    "                                └ to support the GUI where there is no "Terminal keys" section
 
     " split terminal keys; one per line
-    sil! keepj keepp /Terminal keys/,$s/ \zet_\S*/\r/ge
-    sil! keepj keepp /Terminal keys/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
+    sil! keepj keepp /Terminal keys\|\%$/,$s/ \zet_\S*/\r/ge
+    sil! keepj keepp /Terminal keys\|\%$/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
     " Why this second substitution?{{{
     "
     " To handle terminal keys which are not associated to a terminal option.
