@@ -1,20 +1,21 @@
 fu debug#scriptnames#main() abort "{{{1
-    let list = s:get_scriptnames()
-    call setqflist([], ' ', {'items': list, 'title': ':Scriptnames'})
+    let items = s:get_scriptnames()
+    call setqflist([], ' ', {'items': items, 'title': ':Scriptnames'})
     do <nomodeline> QuickFixCmdPost copen
 endfu
 
 fu s:get_scriptnames() abort "{{{1
-    let lines = split(execute('scriptnames'), '\n')
-    let list = []
+    let lines = execute('scriptnames')->split('\n')
+    let items = []
     for line in lines
         if line =~# ':'
-            call add(list, {
+            call add(items, {
             \ 'text': matchstr(line, '\d\+'),
-            \ 'filename': expand(matchstr(line, ': \zs.*')),
+            \ 'filename': matchstr(line, ': \zs.*')->expand(),
+            \ 'valid': 1,
             \ })
         endif
     endfor
-    return list
+    return items
 endfu
 
