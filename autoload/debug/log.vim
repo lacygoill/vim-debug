@@ -1,3 +1,5 @@
+import Catch from 'lg.vim'
+
 fu debug#log#output(what) abort "{{{1
     " The dictionary passed to this function should have one of those set of keys:{{{
     "
@@ -12,7 +14,7 @@ fu debug#log#output(what) abort "{{{1
     "             │
     "             └ lists of lines which we'll use as the output of the command
     "}}}
-    if    !has_key(a:what, 'excmd')
+    if !has_key(a:what, 'excmd')
     \ && !(has_key(a:what, 'level') && has_key(a:what, 'lines'))
         return
     endif
@@ -37,18 +39,18 @@ fu debug#log#output(what) abort "{{{1
         echohl NONE
         return
     endif
-    let pfx = exists(':'..split(excmd)[0]) == 2 || executable(split(excmd[1:])[0]) ? ':' : ''
+    let pfx = exists(':' .. split(excmd)[0]) == 2 || split(excmd[1:])[0]->executable() ? ':' : ''
     if has_key(a:what, 'lines')
-        let title = pfx..excmd
+        let title = pfx .. excmd
         let lines = a:what.lines
         call writefile([title], tempfile)
         call writefile(lines, tempfile, 'a')
     else
         let level = a:what.level
-        "                 ┌ if the level is 1, just write `:Verbose`
-        "                 │ instead of `:1Verbose`
-        "                 ├─────────────────────┐
-        let title = pfx..(level == 1 ? '' : level)..'Verbose '..excmd
+        "                   ┌ if the level is 1, just write `:Verbose`
+        "                   │ instead of `:1Verbose`
+        "                   ├─────────────────────┐
+        let title = pfx .. (level == 1 ? '' : level) .. 'Verbose ' .. excmd
         call writefile([title], tempfile, 'b')
         "                                  │
         "                                  └ don't add a linefeed at the end
@@ -72,23 +74,23 @@ fu debug#log#output(what) abort "{{{1
         "
         "        it should be `0`
         "        if, instead, it's a string, then an error has occurred: bail out
-        if type(s:redirect_to_tempfile(tempfile, level, excmd)) == v:t_string
+        if s:redirect_to_tempfile(tempfile, level, excmd)->type() == v:t_string
             return
         endif
     endif
 
     " If we're in the command-line window, `:pedit` may fail.
     try
-        " Load the file in the preview window. Useful to avoid having to close it if
-        " we execute another `:Verbose` command. From `:h :ptag`:
+        " Load the file in the preview  window.  Useful to avoid having to close
+        " it if we execute another `:Verbose` command.  From `:h :ptag`:
         " >     If a "Preview" window already exists, it is re-used
         " >     (like a help window is).
-        exe 'pedit '..tempfile
+        exe 'pedit ' .. tempfile
     catch
-        return lg#catch()
+        return s:Catch()
     endtry
 
-    " Vim doesn't focus the preview window. Jump to it.
+    " Vim doesn't focus the preview window.  Jump to it.
     wincmd P
     " check we really got there ...
     if !&l:pvw | return | endif
@@ -101,17 +103,17 @@ endfu
 fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
     try
         " Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
-        let excmd = a:excmd[0] is# '!' ? 'echo system('..string(a:excmd[1:])..')' : a:excmd
+        let excmd = a:excmd[0] is# '!' ? 'echo system(' .. string(a:excmd[1:]) .. ')' : a:excmd
 
-        let output = execute(a:level..'verbose exe '..string(excmd))
-        "                                      │{{{
-        "                                      └ From `:h :verb`:
+        let output = execute(a:level .. 'verbose exe ' .. string(excmd))
+        "                                        │{{{
+        "                                        └ From `:h :verb`:
         "
-        "                                                 When concatenating another command,
-        "                                                 the ":verbose" only applies to the first one.
+        "                                                   When concatenating another command,
+        "                                                   the ":verbose" only applies to the first one.
         "
-        "                                         We want `:Verbose` to apply to the whole “pipeline“.
-        "                                         Not just the part before the 1st bar.
+        "                                           We want `:Verbose` to apply to the whole “pipeline“.
+        "                                           Not just the part before the 1st bar.
         "}}}
 
         " We set `'vfile'` to `tempfile`.
@@ -123,7 +125,7 @@ fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         "
         " First, you would need to run the command silently:
         "
-        "     sil exe a:level.'verbose exe '.string(excmd)
+        "     sil exe a:level .. 'verbose exe ' .. string(excmd)
         "     │
         "     └ even though verbose messages are redirected to a file,
         "       regular messages are  still displayed on the  command-line;
@@ -136,7 +138,7 @@ fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         " Second, sometimes, you would get undesired messages:
         "
         "     let &vfile = '/tmp/log'
-        "     echo filter(split(execute('au'), '\n'), {_,v -> v =~# 'fugitive'})
+        "     echo execute('au')->split('\n')->filter({_, v -> v =~# 'fugitive'})
         "     let &vfile = ''
         "
         " The  previous snippet  should have  output only  the lines  containing
@@ -148,9 +150,9 @@ fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
         sil echo output
         let &vfile = ''
 
-        sil exe a:level..'verbose exe '..string(excmd)
+        sil exe a:level .. 'verbose exe ' .. string(excmd)
     catch
-        return lg#catch()
+        return s:Catch()
     finally
         " We empty the value of `'vfile'` for 2 reasons:{{{
         "

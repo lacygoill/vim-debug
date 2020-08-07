@@ -2,7 +2,7 @@ fu debug#synnames#main(count) abort "{{{1
     if a:count
         let name = get(s:synnames(), a:count-1, '')
         if !empty(name)
-            exe 'syntax list '.name
+            exe 'syntax list ' .. name
         endif
     else
         echo s:synnames()->join()
@@ -20,6 +20,6 @@ fu s:synnames(...) abort "{{{1
     " They are sorted from the outermost syntax group, to the innermost.
     "
     " The last one is what `synID()` returns.
-    return synstack(line('.'), col('.'))->map('synIDattr(v:val, "name")')->reverse()
+    return synstack('.', col('.'))->map('synIDattr(v:val, "name")')->reverse()
 endfu
 

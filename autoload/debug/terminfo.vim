@@ -34,17 +34,19 @@ fu s:set_ft() abort "{{{2
 endfu
 
 fu s:split_window() abort "{{{2
-    let tempfile = tempname()..'/termcap.vim'
-    exe 'sp '..tempfile
+    let tempfile = tempname() .. '/termcap.vim'
+    exe 'sp ' .. tempfile
 endfu
 
 fu s:dump_termcap(use_curfile) abort "{{{2
     if !a:use_curfile
-        call setline(1, split(execute('set termcap'), '\n'))
+        call execute('set termcap')->split('\n')->setline(1)
     endif
+    call append(1, '')
     " The bang after silent is necessary to suppress `E486` in gVim, where there
     " may be no `Terminal keys` section.
-    1put ='' | sil! 1/Terminal keys/put! ='' | sil! 1/Terminal keys/put =''
+    sil! 1/Terminal keys/call append(line('.') - 1, '')
+    sil! 1/Terminal keys/call append('.', '')
     sil keepj keepp %s/^ *//e
 endfu
 
@@ -149,7 +151,7 @@ endfu
 fu s:translate_special_keys() abort "{{{2
     " translate caret notation of control characters
     sil keepj keepp %s/\^\[/\="\e"/ge
-    sil keepj keepp %s/\^\(\u\)/\=eval('"'..'\x'..(char2nr(submatch(1)) - 64)..'"')/ge
+    sil keepj keepp %s/\^\(\u\)/\=eval('"' .. '\x' .. (submatch(1)->char2nr() - 64) .. '"')/ge
     sil keepj keepp %s/\^?/\="\x7f"/ge
 
     "     <á>=^[a    →    <M-a>=^[a
@@ -171,11 +173,11 @@ fu s:comment_section_headers() abort "{{{2
 endfu
 
 fu s:fold() abort "{{{2
-    sil keepj keepp %s/^" .*\zs/\=' {{'..'{1'/e
+    sil keepj keepp %s/^" .*\zs/\=' {{' .. '{1'/e
 endfu
 
 fu s:install_mappings() abort "{{{2
-    nno <buffer><expr><nowait><silent> q reg_recording() isnot# '' ? 'q' : ':<c-u>q!<cr>'
+    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
     " mapping to compare value on current line with the one in output of `:set termcap`{{{
     "
     " Note that  `:filter` is able  to filter the "Terminal  codes" section,
@@ -187,7 +189,7 @@ fu s:install_mappings() abort "{{{2
     " terminal codes.
     "}}}
     nno <buffer><nowait><silent> !!
-        \ :<c-u>exe 'filter /'.. matchstr(getline('.'), 't_[^=]*') ..'/ set termcap'<cr>
+        \ :<c-u>exe 'filter /' .. getline('.')->matchstr('t_[^=]*') .. '/ set termcap'<cr>
     " open relevant help tag to get more info about the terminal option under the cursor
     nno <buffer><nowait><silent> <cr> :<c-u>call <sid>get_help()<cr>
     " get help about mappings
@@ -195,10 +197,10 @@ fu s:install_mappings() abort "{{{2
 endfu
 
 fu s:get_help() abort "{{{2
-    let tag = matchstr(getline('.'), '\%(^set \|" \)\@4<=t_[^=]*')
-    if tag isnot# ''
+    let tag = getline('.')->matchstr('\%(^set \|" \)\@4<=t_[^=]*')
+    if tag != ''
         try
-            exe "h '"..tag
+            exe "h '" .. tag
         " some terminal options have no help tags (e.g. `'t_FL'`)
         catch /^Vim\%((\a\+)\)\=:E149:/
             echohl ErrorMsg

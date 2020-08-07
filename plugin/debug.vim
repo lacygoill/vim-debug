@@ -18,16 +18,15 @@ augroup END
 
 " Purpose:{{{
 "
-" Our custom <cr> mapping prevents us from using `:debug`.
-" Don't even try, you wouldn't be able to quit debug mode.
-" We install `:Debug` as a thin wrapper which temporarily removes our mapping.
+" Our command-line mappings may badly interfere when we use `:debug`.
+" We install `:Debug` as a thin wrapper which temporarily removes these mappings.
 "}}}
-" What happens if we use a custom mapping while in debug mode?{{{
+" What happens if I use a custom mapping while in debug mode?{{{
 "
 " You'll see  the first  line of  the function  which it  calls (it  happens for
 " example with `c-t` ; transpose-chars).  And, you'll step through it.
 "}}}
-" What to do in this case?{{{
+"   What to do in this case?{{{
 "
 " Execute `cont` to get out.
 "

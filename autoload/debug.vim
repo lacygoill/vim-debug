@@ -3,10 +3,10 @@ if exists('g:autoloaded_debug')
 endif
 let g:autoloaded_debug = 1
 
-" Init {{{1
+import Catch from 'lg.vim'
 
 fu debug#help_about_last_errors() abort "{{{1
-    let messages = reverse(split(execute('messages'), '\n'))
+    let messages = execute('messages')->split('\n')->reverse()
     "                    ┌ When an error occurs inside a try conditional,{{{
     "                    │ Vim prefixes an error message with:
     "                    │
@@ -28,15 +28,15 @@ fu debug#help_about_last_errors() abort "{{{1
     " index of most recent error
     let i = match(messages, pat_error)
     " index of next line which isn't an error, nor belongs to a stack trace
-    let j = match(messages, '^\%('..pat_error..'\|Error\|line\)\@!', i+1)
+    let j = match(messages, '^\%(' .. pat_error .. '\|Error\|line\)\@!', i+1)
     if j == -1
         let j = i+1
     endif
 
-    let errors = map(messages[i:j-1], {idx,v -> matchstr(v, pat_error)})
+    let errors = map(messages[i:j - 1], {idx, v -> matchstr(v, pat_error)})
     " remove lines  which don't contain  an error,  or which contain  the errors
     " E662 / E663 / E664 (they aren't interesting and come frequently)
-    call filter(errors, {_,v -> !empty(v) && v !~# '^E66[234]$'})
+    call filter(errors, {_, v -> !empty(v) && v !~# '^E66[234]$'})
     if empty(errors)
         return 'echo "no last errors"'
     endif
@@ -46,7 +46,7 @@ fu debug#help_about_last_errors() abort "{{{1
     " we invoked this function
     if errors ==# s:last_errors.taglist
         " just update our position in the list of visited errors
-        let s:last_errors.pos = (s:last_errors.pos + 1)%len(s:last_errors.taglist)
+        let s:last_errors.pos = (s:last_errors.pos + 1) % len(s:last_errors.taglist)
     else
         " reset our position in the list of visited errors
         let s:last_errors.pos = 0
@@ -54,14 +54,14 @@ fu debug#help_about_last_errors() abort "{{{1
         let s:last_errors.taglist = errors
     endif
 
-    return 'h '..get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
+    return 'h ' .. get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
 endfu
 
 fu debug#messages() abort "{{{1
     0Verbose messages
     " If `:Verbose` encountered an error, we could still be in a regular window,
-    " instead of the preview window. If that's the case, we don't want to remove
-    " any text in the current buffer, nor install any match.
+    " instead  of the  preview window.   If that's  the case,  we don't  want to
+    " remove any text in the current buffer, nor install any match.
     if !&l:pvw | return | endif
 
     " From a help buffer, the buffer displayed in a newly opened preview
@@ -88,18 +88,18 @@ fu debug#messages() abort "{{{1
         \ 'file loaded':        '".\{-}"\%( \[RO\]\)\= line \d\+ of \d\+ --\d\+%-- col \d\+\%(-\d\+\)\=',
         \ 'file reloaded':      '".\{-}".*\d\+L, \d\+C',
         \ 'g C-g':              'col \d\+ of \d\+; line \d\+ of \d\+; word \d\+ of \d\+;'
-        \                     ..' char \d\+ of \d\+; byte \d\+ of \d\+',
-        \ 'C-c':                'Type\s*:qa!\s*and press <Enter> to abandon all changes and exit Vim',
-        \ 'maintainer':         'Messages maintainer: Bram Moolenaar <Bram@vim.org>',
-        \ 'Scanning':           'Scanning:.*',
-        \ 'substitutions':      '\d\+ substitutions\= on \d\+ lines\=',
-        \ 'verbose':            ':0Verbose messages',
-        \ 'W10':                'W10: Warning: Changing a readonly file',
-        \ 'yanked lines':       '\%(block of \)\=\d\+ lines yanked',
+        \                   .. ' char \d\+ of \d\+; byte \d\+ of \d\+',
+        \ 'C-c':           'Type\s*:qa!\s*and press <Enter> to abandon all changes and exit Vim',
+        \ 'maintainer':    'Messages maintainer: Bram Moolenaar <Bram@vim.org>',
+        \ 'Scanning':      'Scanning:.*',
+        \ 'substitutions': '\d\+ substitutions\= on \d\+ lines\=',
+        \ 'verbose':       ':0Verbose messages',
+        \ 'W10':           'W10: Warning: Changing a readonly file',
+        \ 'yanked lines':  '\%(block of \)\=\d\+ lines yanked',
         \ }
 
     for noise in values(noises)
-        sil exe 'g/^'..noise..'$/d_'
+        sil exe 'g/^' .. noise .. '$/d_'
     endfor
 
     call matchadd('ErrorMsg', '^E\d\+:\s\+.*')
@@ -112,10 +112,10 @@ endfu
 fu debug#time(cmd, cnt) "{{{1
     let time = reltime()
     try
-        " We could get rid of the if/else/endif, and shorten the code, but we
-        " won't do it, because the most usual case is a:cnt = 1. And we want to
-        " execute a:cmd as fast as possible (no let,  no while loop), because Ex
-        " commands are slow.
+        " We could  get rid of the  if/else/endif, and shorten the  code, but we
+        " won't do it, because the most usual case is `a:cnt = 1`.  And we want to
+        " execute `a:cmd` as  fast as possible (no let, no  while loop), because
+        " Ex commands are slow.
         if a:cnt > 1
             let i = 0
             while i < a:cnt
@@ -126,28 +126,28 @@ fu debug#time(cmd, cnt) "{{{1
             exe a:cmd
         endif
     catch
-        return lg#catch()
+        return s:Catch()
     finally
         " We clear the screen before displaying the results, to erase the
         " possible messages displayed by the command.
         redraw
-        echom matchstr(reltimestr(reltime(time)), '.*\..\{,3}')..' seconds to run :'..a:cmd
+        echom reltime(time)->reltimestr()->matchstr('.*\..\{,3}') .. ' seconds to run :' .. a:cmd
     endtry
 endfu
 
 fu debug#unused_functions() abort "{{{1
     " look for all function definitions in the current repo
     sil noa lvim /^\s*fu\%[nction]\s\+/ ./**/*.vim
-    let functions = getloclist(0)->map({_,v -> v.text->matchstr('[^ (]*\ze(')})
+    let functions = getloclist(0)->map({_, v -> v.text->matchstr('[^ (]*\ze(')})
 
     " build a list of unused functions
     let unused = []
     for afunc in functions
         let pat = afunc
         if afunc[:1] is# 's:'
-            let pat ..= '\|<sid>'..afunc[2:]
+            let pat ..= '\|<sid>' .. afunc[2:]
         endif
-        exe 'sil noa lvim /'..pat..'/ ./**/*.vim'
+        exe 'sil noa lvim /' .. pat .. '/ ./**/*.vim'
         " the name of an unused function appears only once
         if getloclist(0, {'size': 0}).size <= 1
             let unused += [afunc]
@@ -156,14 +156,14 @@ fu debug#unused_functions() abort "{{{1
 
     " report unused functions if any
     if empty(unused)
-        echom 'no unused function in '..getcwd()
+        echom 'no unused function in ' .. getcwd()
     else
-        exe 'lvim /'..unused->join('\|')..'/ ./**/*.vim'
+        exe 'lvim /' .. join(unused, '\|') .. '/ ./**/*.vim'
     endif
 endfu
 
 fu debug#vim_patches(n) abort "{{{1
-    if a:n is# ''
+    if a:n == ''
         let msg =<< trim END
         provide a major Vim version number
 
@@ -173,9 +173,9 @@ fu debug#vim_patches(n) abort "{{{1
         END
         echo join(msg, "\n")
     elseif index(s:MAJOR_VERSIONS, a:n) != -1
-        let filename = 'ftp://ftp.vim.org/pub/vim/patches/'..a:n..'/README'
+        let filename = 'ftp://ftp.vim.org/pub/vim/patches/' .. a:n .. '/README'
         if bufloaded(filename) | let dont_prettify = 1 | endif
-        sil exe 'sp '..filename
+        sil exe 'sp ' .. filename
         if exists('dont_prettify') | return | endif
         call s:prettify()
         sil keepj keepp %s@^\s*\d\+\s\+\zs[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
@@ -221,9 +221,9 @@ fu debug#wrapper(cmd) abort "{{{1
     try
         ToggleEditingCommands 0
         au! my_granular_undo
-        exe 'debug '..a:cmd
+        exe 'debug ' .. a:cmd
     catch
-        return lg#catch()
+        return s:Catch()
     finally
         unlet g:autoloaded_readline
         ru autoload/readline.vim
