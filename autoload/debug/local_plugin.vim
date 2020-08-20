@@ -64,13 +64,13 @@ fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
 endfu
 
 fu debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
-    let word_before_cursor = matchstr(a:cmdline, '.*\s\zs-\S.*\%' .. a:pos .. 'c.')
+    let from_dash_to_cursor = matchstr(a:cmdline, '.*\s\zs-.*\%' .. (a:pos + 1) .. 'c')
 
-    if word_before_cursor =~# '^-filetype\s*\S*$'
+    if from_dash_to_cursor =~# '^-filetype\s*\S*$'
         let filetypes = getcompletion('', 'filetype')
         return join(filetypes, "\n")
 
-    elseif word_before_cursor =~# '^-kind\s*\S*$'
+    elseif from_dash_to_cursor =~# '^-kind\s*\S*$'
         let kinds = ['ftplugin', 'indent', 'syntax']
         return join(kinds, "\n")
 

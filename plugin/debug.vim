@@ -20,6 +20,12 @@ augroup END
 "
 " Our command-line mappings may badly interfere when we use `:debug`.
 " We install `:Debug` as a thin wrapper which temporarily removes these mappings.
+"
+" ---
+"
+" Also, `:debug` doesn't provide any completion for script-local functions.
+" And yet, you *can* pass to `:debug` any function name.
+" Again, our wrapper fixes that.
 "}}}
 " What happens if I use a custom mapping while in debug mode?{{{
 "
@@ -33,7 +39,17 @@ augroup END
 " If you have used one of our custom editing command several times, you'll
 " have to re-execute `cont` as many times as needed.
 "}}}
-com -bar -nargs=1 Debug call debug#wrapper(<q-args>)
+com -bar -nargs=1 -complete=customlist,debug#debug#completion Debug call debug#debug#wrapper(<q-args>)
+
+" Wrappers around some debugging commands which don't provide completion for function names.{{{
+"
+" It's especially useful to fix that for  the names of functions which are local
+" to a script.
+"}}}
+cnorea <expr> ba getcmdtype() is# ':' && getcmdpos() == 3 ? 'Breakadd' : 'ba'
+com -bar -nargs=1 -complete=customlist,debug#break#completion Breakadd call debug#break#wrapper('add', <q-args>)
+com -bar -nargs=1 -complete=customlist,debug#break#completion Breakdel call debug#break#wrapper('del', <q-args>)
+com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof call debug#prof#wrapper(<bang>0, <q-args>)
 
 " Purpose:{{{
 " Wrapper around commands such as `:breakadd file */ftplugin/sh.vim`.
@@ -41,7 +57,7 @@ com -bar -nargs=1 Debug call debug#wrapper(<q-args>)
 "
 " Useful to debug a filetype/indent/syntax plugin.
 "}}}
-com -bar -complete=custom,debug#local_plugin#complete -nargs=* DebugLocalPlugin
+com -bar -nargs=* -complete=custom,debug#local_plugin#complete DebugLocalPlugin
     \ call debug#local_plugin#main(<q-args>)
 
 com -bar DebugMappingsFunctionKeys call debug#mappings#using_function_keys()
@@ -55,8 +71,6 @@ com -bar -bang -nargs=0 -complete=file DebugTerminfo call debug#terminfo#main(<b
 " Warning: It may give false positives, because  a function may appear only once
 " in a plugin, but still be called from another plugin.
 com -bar DebugUnusedFunctions call debug#unused_functions()
-
-com -bar -complete=custom,debug#prof#completion -nargs=? Prof call debug#prof#main(<q-args>)
 
 com -bar Scriptnames call debug#scriptnames#main()
 
@@ -93,7 +107,7 @@ com -range=1 -addr=other -nargs=1 -complete=command Verbose
 
 com -bar -nargs=1 -complete=option Vo call debug#verbose#option(<q-args>)
 
-com -bar -complete=custom,debug#vim_patches_completion -nargs=? VimPatches call debug#vim_patches(<q-args>)
+com -bar -nargs=? -complete=custom,debug#vim_patches_completion VimPatches call debug#vim_patches(<q-args>)
 
 " Mappings {{{1
 " C-x C-v   evaluate variable under cursor while on command-line{{{2

@@ -35,14 +35,14 @@ let b:current_syntax = 'timer_info'
 " Without `\zs`, the order of the rules matters.
 " This is expected; from `:h :syn-priority`:
 "
-" >     1. When multiple Match or Region items start in the same position,
-" >        the item defined last has priority.
+"    > 1. When multiple Match or Region items start in the same position,
+"    >    the item defined last has priority.
 "
 " With `\zs`, `Interesting` always wins over `Callback`.
 " Is it explained by:
 "
-" >     3. An item that starts in an earlier position has priority over
-" >        items that start in later positions.
+"    > 3. An item that starts in an earlier position has priority over
+"    >    items that start in later positions.
 "
 " ?
 "

@@ -3,19 +3,45 @@ if exists('g:autoloaded_debug#prof')
 endif
 let g:autoloaded_debug#prof = 1
 
-let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
+import FuncComplete from 'lg.vim'
 
-fu debug#prof#completion(_a, cmdline, _p) abort "{{{1
-    if !matchstr(a:cmdline, '\s-')->empty()
-        return '-read_last_profile'
+const s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
+
+const s:ARGUMENTS = getcompletion('profile ', 'cmdline')
+"                                         ^
+"                                         necessary
+
+fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
+    if a:cmdline =~# '^\CProf func\s\+'
+    \ && a:cmdline !~# '^\CProf func\s\+\S\+\s\+'
+        return s:FuncComplete(a:arglead, '', 0)
+    elseif a:cmdline =~# '^\CProf \%(file\|start\)\s\+'
+    \ && a:cmdline !~# '^\CProf \%(file\|start\)\s\+\S\+\s\+'
+        if a:arglead =~# '$\h\w*$'
+            return getcompletion(a:arglead[1:], 'environment')
+                \ ->map({_, v -> '$' .. v})
+        else
+            return getcompletion(a:arglead, 'file')
+        endif
+    elseif a:cmdline =~# '^\CProf \%(' .. join(s:ARGUMENTS, '\|') .. '\)'
+        \ || count(a:cmdline, ' -') >= 2
+        return []
+    elseif a:cmdline !~# '-'
+        return copy(s:ARGUMENTS)->filter({_, v -> stridx(v, a:arglead) == 0})
     endif
 
-    let paths_to_plugins = glob($HOME .. '/.vim/plugged/*', 0, 1)
-    let plugin_names = map(paths_to_plugins, {_, v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
-    return join(plugin_names, "\n")
+    let from_dash_to_cursor = matchstr(a:cmdline, '.*\s\zs-.*\%' .. (a:pos + 1) .. 'c')
+    if from_dash_to_cursor =~# '-\%[plugin]$\|-\%[read_last_profile]$'
+        return ['-plugin', '-read_last_profile']
+    elseif from_dash_to_cursor =~# '^-plugin\s\+'
+        let paths_to_plugins = glob($HOME .. '/.vim/plugged/*', 0, 1)
+        let plugin_names = map(paths_to_plugins, {_, v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
+        return plugin_names
+    endif
+    return []
 endfu
 
-fu debug#prof#main(...) abort "{{{1
+fu debug#prof#wrapper(bang, ...) abort "{{{1
     if index(['', '-h', '--help'], a:1) >= 0
         let usage =<< trim END
             usage:
@@ -26,12 +52,22 @@ fu debug#prof#main(...) abort "{{{1
         return
     endif
 
-    if a:1 is# '-read_last_profile'
+    if a:1 =~# '^\C\%(' .. join(s:ARGUMENTS, '\|') .. '\)\s*$'
+        \ .. '\|^\%(start\|file\|func\)\s\+\S\+\s*$'
+        try
+            exe printf('prof%s %s', a:bang ? '!' : '', a:1)
+        catch
+            echohl ErrorMsg
+            echom v:exception
+            echohl NONE
+        endtry
+        return
+    elseif a:1 is# '-read_last_profile'
         return s:read_last_profile()
     endif
 
     let plugin_name = a:1
-    if debug#prof#completion('', '', -1)->split("\n")->index(plugin_name) == -1
+    if debug#prof#completion('', '', -1)->index(plugin_name) == -1
         echo 'There''s no plugin named:  ' .. a:1
         return
     endif

@@ -33,7 +33,7 @@ fu debug#help_about_last_errors() abort "{{{1
         let j = i+1
     endif
 
-    let errors = map(messages[i:j - 1], {idx, v -> matchstr(v, pat_error)})
+    let errors = map(messages[i : j - 1], {idx, v -> matchstr(v, pat_error)})
     " remove lines  which don't contain  an error,  or which contain  the errors
     " E662 / E663 / E664 (they aren't interesting and come frequently)
     call filter(errors, {_, v -> !empty(v) && v !~# '^E66[234]$'})
@@ -216,18 +216,4 @@ const s:MAJOR_VERSIONS =<< trim END
     8.1
     8.2
 END
-
-fu debug#wrapper(cmd) abort "{{{1
-    try
-        ToggleEditingCommands 0
-        au! my_granular_undo
-        exe 'debug ' .. a:cmd
-    catch
-        return s:Catch()
-    finally
-        unlet g:autoloaded_readline
-        ru autoload/readline.vim
-        ToggleEditingCommands 1
-    endtry
-endfu
 

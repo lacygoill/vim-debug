@@ -83,8 +83,8 @@ fu debug#log#output(what) abort "{{{1
     try
         " Load the file in the preview  window.  Useful to avoid having to close
         " it if we execute another `:Verbose` command.  From `:h :ptag`:
-        " >     If a "Preview" window already exists, it is re-used
-        " >     (like a help window is).
+        "    > If a "Preview" window already exists, it is re-used
+        "    > (like a help window is).
         exe 'pedit ' .. tempfile
     catch
         return s:Catch()
