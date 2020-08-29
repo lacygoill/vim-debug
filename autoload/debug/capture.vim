@@ -1,4 +1,4 @@
-import Catch from 'lg.vim'
+import {Catch, IsVim9} from 'lg.vim'
 import WinScratch from 'lg/window.vim'
 
 " Interface {{{1
@@ -15,7 +15,7 @@ fu debug#capture#variable(_) abort "{{{2
         return
     endif
     t.
-    let cmd = getline(1) is# 'vim9script' ? '' : 'let '
+    let cmd = s:IsVim9() ? '' : 'let '
     let rep = s:verbose
         \ ? cmd .. 'g:d_\2\3= get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
         \ : cmd .. 'g:d_\2\3= deepcopy(\1\2)'

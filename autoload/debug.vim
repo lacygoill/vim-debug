@@ -165,11 +165,11 @@ endfu
 fu debug#vim_patches(n) abort "{{{1
     if a:n == ''
         let msg =<< trim END
-        provide a major Vim version number
+            provide a major Vim version number
 
-        usage example:
+            usage example:
 
-            VimPatches 8.2
+                VimPatches 8.2
         END
         echo join(msg, "\n")
     elseif index(s:MAJOR_VERSIONS, a:n) != -1
