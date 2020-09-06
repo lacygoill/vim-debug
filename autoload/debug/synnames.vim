@@ -1,6 +1,6 @@
 fu debug#synnames#main(count) abort "{{{1
     if a:count
-        let name = get(s:synnames(), a:count-1, '')
+        let name = s:synnames()->get(a:count-1, '')
         if !empty(name)
             exe 'syntax list ' .. name
         endif

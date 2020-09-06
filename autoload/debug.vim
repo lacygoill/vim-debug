@@ -102,10 +102,10 @@ fu debug#messages() abort "{{{1
         sil exe 'g/^' .. noise .. '$/d_'
     endfor
 
-    call matchadd('ErrorMsg', '^E\d\+:\s\+.*')
-    call matchadd('ErrorMsg', '^Vim.\{-}:E\d\+:\s\+.*')
-    call matchadd('ErrorMsg', '^Error detected while processing.*')
-    call matchadd('LineNr', '^line\s\+\d\+:$')
+    call matchadd('ErrorMsg', '^E\d\+:\s\+.*', 0)
+    call matchadd('ErrorMsg', '^Vim.\{-}:E\d\+:\s\+.*', 0)
+    call matchadd('ErrorMsg', '^Error detected while processing.*', 0)
+    call matchadd('LineNr', '^line\s\+\d\+:$', 0)
     exe '$'
 endfu
 
