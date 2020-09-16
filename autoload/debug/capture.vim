@@ -9,7 +9,11 @@ fu debug#capture#setup(verbose) abort "{{{2
 endfu
 
 fu debug#capture#variable(_) abort "{{{2
-    let pat = '\%(let\|const\)\s\+\([bwtglsav]:\)\=\(\h\w*\)\(\s*\)[+-.*]\{,2}=.*'
+    let pat = '\%(let\|const\)\s\+\([bwtglsav]:\)\=\(\h\w*\)\s*[+-.*]\{,2}[=:].*'
+    "                                                                       ^
+    "                                                                       For Vim9 variables
+    "                                                                       which are only declared,
+    "                                                                       not assigned
     if getline('.')->match(pat) == -1
         echo 'No variable to capture on this line'
         return
@@ -17,8 +21,8 @@ fu debug#capture#variable(_) abort "{{{2
     t.
     let cmd = s:IsVim9() ? '' : 'let '
     let rep = s:verbose
-        \ ? cmd .. 'g:d_\2\3= get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
-        \ : cmd .. 'g:d_\2\3= deepcopy(\1\2)'
+        \ ? cmd .. 'g:d_\2 = get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
+        \ : cmd .. 'g:d_\2 = deepcopy(\1\2)'
     sil exe 'keepj keepp s/' .. pat .. '/' .. rep .. '/e'
 endfu
 

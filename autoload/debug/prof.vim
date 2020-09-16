@@ -12,18 +12,18 @@ const s:ARGUMENTS = getcompletion('profile ', 'cmdline')
 "                                         necessary
 
 fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
-    if a:cmdline =~# '^\CProf func\s\+'
-    \ && a:cmdline !~# '^\CProf func\s\+\S\+\s\+'
+    if a:cmdline =~# '^\CProf\s\+func\s\+'
+    \ && a:cmdline !~# '^\CProf\s\+func\s\+\S\+\s\+'
         return s:FuncComplete(a:arglead, '', 0)
-    elseif a:cmdline =~# '^\CProf \%(file\|start\)\s\+'
-    \ && a:cmdline !~# '^\CProf \%(file\|start\)\s\+\S\+\s\+'
+    elseif a:cmdline =~# '^\CProf\s\+\%(file\|start\)\s\+'
+    \ && a:cmdline !~# '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
         if a:arglead =~# '$\h\w*$'
             return getcompletion(a:arglead[1:], 'environment')
                 \ ->map({_, v -> '$' .. v})
         else
             return getcompletion(a:arglead, 'file')
         endif
-    elseif a:cmdline =~# '^\CProf \%(' .. join(s:ARGUMENTS, '\|') .. '\)'
+    elseif a:cmdline =~# '^\CProf\s\+\%(' .. join(s:ARGUMENTS, '\|') .. '\)'
         \ || count(a:cmdline, ' -') >= 2
         return []
     elseif a:cmdline !~# '-'
