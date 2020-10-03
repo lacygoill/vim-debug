@@ -162,7 +162,7 @@ fu debug#unused_functions() abort "{{{1
     endif
 endfu
 
-fu debug#vim_patches(n) abort "{{{1
+fu debug#vim_patches(n, append = v:false) abort "{{{1
     if a:n == ''
         let msg =<< trim END
             provide a major Vim version number
@@ -170,27 +170,88 @@ fu debug#vim_patches(n) abort "{{{1
             usage example:
 
                 VimPatches 8.2
+                VimPatches 7.4 - 8.2
         END
         echo join(msg, "\n")
     elseif index(s:MAJOR_VERSIONS, a:n) != -1
         let filename = 'ftp://ftp.vim.org/pub/vim/patches/' .. a:n .. '/README'
-        if bufloaded(filename) | let dont_prettify = 1 | endif
-        sil exe 'sp ' .. filename
-        if exists('dont_prettify') | return | endif
+        if a:append
+            let bufnr = bufadd(filename)
+            call bufload(bufnr)
+            call getbufline(bufnr, 1, '$')->append('$')
+            exe 'bw! ' .. bufnr
+            call append('$', '')
+            " Sometimes, we have 2 empty lines between 2 major versions, instead of just 1; remove it.{{{
+            "
+            " That happens, for example, if you run:
+            "
+            "     :VimPatches 8.0 - 8.2
+            "
+            " There are 2 empty lines between the 8.1 patches and the 8.2 patches.
+            " For some  reason, we need to  delay, otherwise we might  delete an
+            " empty line which we want to keep (e.g. between 8.0 and 8.1).
+            "}}}
+            au SafeState * ++once sil! g/^\n\n\|\%^$\|\%$$/d_
+            "                                 ^----------^
+            "                                 also delete the first and last empty lines
+        elseif bufloaded(filename)
+            return s:display(filename)
+        else
+            sil exe 'sp ' .. filename
+            call s:prettify()
+        endif
+    elseif a:n =~ '^\d\.\d\s*-\s*\d\.\d$'
+        let [first, last] = matchlist(a:n, '\(\d\.\d\)\s*-\s*\(\d\.\d\)')[1:2]
+        if index(s:MAJOR_VERSIONS, first) == -1
+            call s:error(first .. ' is not a valid major Vim version')
+        elseif index(s:MAJOR_VERSIONS, last) == -1
+            call s:error(last .. ' is not a valid major Vim version')
+        endif
+        let filename = 'VimPatches ' .. a:n
+        if bufloaded(filename)
+            return s:display(filename)
+        endif
+        new
+        exe 'file ' .. fnameescape(filename)
+        let ifirst = index(s:MAJOR_VERSIONS, first)
+        let ilast = index(s:MAJOR_VERSIONS, last)
+        let numbers = s:MAJOR_VERSIONS[ifirst : ilast]
+        for number in numbers
+            call debug#vim_patches(number, v:true)
+        endfor
         call s:prettify()
-        sil keepj keepp %s@^\s*\d\+\s\+\zs[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
-        sil keepj keepp %s/^\s*SIZE\s*//e
-        sil keepj keepp '[,$s/^\s*\d\+\s*//e
     else
-        echohl ErrorMsg
-        echo 'invalid argument'
-        echohl NONE
+        call s:error('invalid argument')
     endif
+endfu
+
+fu s:display(filename) abort
+    let winid = bufnr(a:filename)->win_findbuf()->get(-1)
+    if winid > 0
+        call win_gotoid(winid)
+    else
+        exe 'sp ' .. a:filename
+    endif
+endfu
+
+fu s:error(msg) abort
+    echohl ErrorMsg
+    echom a:msg
+    echohl NONE
 endfu
 
 fu s:prettify() abort
     " no modified indicator in the status line if we edit the buffer
     setl bt=nofile nobl noswf nowrap
+
+    " remove noise
+    sil g/^Patches for Vim/;/^\s*SIZE/d_
+    sil! g/^--- The story continues with Vim /d_
+    sil keepj keepp %s/^\s*\d\+\s\+//e
+
+    " format links
+    sil keepj keepp %s@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
+
     " conceal url (copied from the markdown syntax plugin)
     syn match xUrl /\S\+/ contained
     syn region xLinkText matchgroup=xLinkTextDelimiter start=/!\=\[\ze\_[^]]*] \=[[(]/ end=/\]\ze \=[[(]/ nextgroup=xLink keepend concealends skipwhite

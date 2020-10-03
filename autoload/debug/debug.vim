@@ -20,7 +20,7 @@ fu debug#debug#wrapper(cmd) abort
     catch
         return s:Catch()
     finally
-        unlet g:autoloaded_readline
+        unlet! g:autoloaded_readline
         ru autoload/readline.vim
         ToggleEditingCommands 1
     endtry

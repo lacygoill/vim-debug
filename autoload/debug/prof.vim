@@ -12,9 +12,12 @@ const s:ARGUMENTS = getcompletion('profile ', 'cmdline')
 "                                         necessary
 
 fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
+    let l:Filter = {l -> filter(l, {_, v -> stridx(v, a:arglead) == 0})}
+
     if a:cmdline =~# '^\CProf\s\+func\s\+'
     \ && a:cmdline !~# '^\CProf\s\+func\s\+\S\+\s\+'
         return s:FuncComplete(a:arglead, '', 0)
+
     elseif a:cmdline =~# '^\CProf\s\+\%(file\|start\)\s\+'
     \ && a:cmdline !~# '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
         if a:arglead =~# '$\h\w*$'
@@ -23,20 +26,30 @@ fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
         else
             return getcompletion(a:arglead, 'file')
         endif
+
     elseif a:cmdline =~# '^\CProf\s\+\%(' .. join(s:ARGUMENTS, '\|') .. '\)'
         \ || count(a:cmdline, ' -') >= 2
         return []
+
     elseif a:cmdline !~# '-'
-        return copy(s:ARGUMENTS)->filter({_, v -> stridx(v, a:arglead) == 0})
+        return copy(s:ARGUMENTS)->l:Filter()
     endif
 
-    let from_dash_to_cursor = matchstr(a:cmdline, '.*\s\zs-.*\%' .. (a:pos + 1) .. 'c')
-    if from_dash_to_cursor =~# '-\%[plugin]$\|-\%[read_last_profile]$'
-        return ['-plugin', '-read_last_profile']
-    elseif from_dash_to_cursor =~# '^-plugin\s\+'
+    " Warning: if you try to refactor this block, make some tests.{{{
+    "
+    " In particular, check how the function completes this:
+    "
+    "     :Prof -plu
+    "     :Prof -plugin vim-
+    "}}}
+    let last_dash_to_cursor = matchstr(a:cmdline, '.*\s\zs-.*\%' .. (a:pos + 1) .. 'c')
+    if last_dash_to_cursor =~# '^-\%[plugin]$\|^-\%[read_last_profile]$'
+        return l:Filter(['-plugin', '-read_last_profile'])
+
+    elseif last_dash_to_cursor =~# '^-plugin\s\+\S*$'
         let paths_to_plugins = glob($HOME .. '/.vim/plugged/*', 0, 1)
         let plugin_names = map(paths_to_plugins, {_, v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
-        return plugin_names
+        return l:Filter(plugin_names)
     endif
     return []
 endfu
@@ -45,17 +58,23 @@ fu debug#prof#wrapper(bang, ...) abort "{{{1
     if index(['', '-h', '--help'], a:1) >= 0
         let usage =<< trim END
             usage:
-                :Prof {plugin name}         profile a plugin
+                :Prof continue
+                :Prof[!] file {pattern}
+                :Prof func {pattern}
+                :Prof pause
+                :Prof start {fname}
+                :Prof -plugin {plugin name} profile a plugin
                 :Prof -read_last_profile    load last logged profile
         END
         echo join(usage, "\n")
         return
     endif
 
+    let bang = a:bang ? '!' : ''
     if a:1 =~# '^\C\%(' .. join(s:ARGUMENTS, '\|') .. '\)\s*$'
         \ .. '\|^\%(start\|file\|func\)\s\+\S\+\s*$'
         try
-            exe printf('prof%s %s', a:bang ? '!' : '', a:1)
+            exe printf('prof%s %s', bang, a:1)
         catch
             echohl ErrorMsg
             echom v:exception
@@ -66,19 +85,20 @@ fu debug#prof#wrapper(bang, ...) abort "{{{1
         return s:read_last_profile()
     endif
 
-    let plugin_name = a:1
-    if debug#prof#completion('', '', -1)->index(plugin_name) == -1
-        echo 'There''s no plugin named:  ' .. a:1
+    let plugin_name = substitute(a:1, '-plugin\s\+', '', '')
+    let cmdline = 'Prof -plugin '
+    if debug#prof#completion('', cmdline, strchars(cmdline, 1))->index(plugin_name) == -1
+        echo 'There''s no plugin named:  ' .. plugin_name
         return
     endif
 
     let start_cmd = 'profile start ' .. s:DIR .. '/profile.log'
     if plugin_name is# 'fzf'
-        let file_cmd = 'prof! file ' .. $HOME .. '/.fzf/**/*.vim'
+        let file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.fzf/**/*.vim'
         exe start_cmd | exe file_cmd
         let plugin_files = glob($HOME .. '/.fzf/**/*.vim', 0, 1)
     else
-        let file_cmd = 'prof! file ' .. $HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim'
+        let file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim'
         exe start_cmd | exe file_cmd
         let plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', 0, 1)
     endif

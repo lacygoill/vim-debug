@@ -78,7 +78,7 @@ fu debug#timer#populate() abort "{{{1
         let s:infos = timer_info()
     endif
     let infos = map(s:infos, {_, v -> s:format_info(v)})
-    unlet s:infos
+    unlet! s:infos
     let lines = []
     for info in infos
         let lines += info

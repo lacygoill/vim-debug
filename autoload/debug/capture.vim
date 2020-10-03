@@ -9,11 +9,12 @@ fu debug#capture#setup(verbose) abort "{{{2
 endfu
 
 fu debug#capture#variable(_) abort "{{{2
-    let pat = '\%(let\|const\)\s\+\([bwtglsav]:\)\=\(\h\w*\)\s*[+-.*]\{,2}[=:].*'
-    "                                                                       ^
-    "                                                                       For Vim9 variables
-    "                                                                       which are only declared,
-    "                                                                       not assigned
+    let pat =
+        "\ this part is optional because, in Vim9 script, there might be no assignment command
+        \    '\%(\%(let\|var\|const\=\)\s\+\)\='
+        \ .. '\([bwtglsav]:\)\=\(\h\w*\)\s*[+-.*]\{,2}[=:].*'
+    "                                                   ^
+    "                                                   for Vim9 variables which are only declared, not assigned
     if getline('.')->match(pat) == -1
         echo 'No variable to capture on this line'
         return
@@ -27,6 +28,7 @@ fu debug#capture#variable(_) abort "{{{2
 endfu
 
 fu debug#capture#dump() abort "{{{2
+    " timer because we can't split the window in an `<expr>` mapping (`E565`)
     call timer_start(0, {-> s:dump()})
     return ''
 endfu
