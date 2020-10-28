@@ -3,7 +3,7 @@ if exists('g:autoloaded_debug#debug')
 endif
 let g:autoloaded_debug#debug = 1
 
-import FuncComplete from 'lg.vim'
+import {Catch, FuncComplete} from 'lg.vim'
 
 fu debug#debug#completion(arglead, cmdline, _p) abort
     return getcompletion('', 'command')

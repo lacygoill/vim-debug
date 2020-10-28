@@ -90,7 +90,7 @@ fu s:separate_terminal_keys_without_options() abort "{{{2
     "
     "     <í>        ^[m
     "}}}
-    sil! 1/^<\%(.*" t_\S\S\)\@!/put! =''
+    sil! 1/^<\%(.*" t_\S\S\)\@!/put! _
 endfu
 
 fu s:move_keynames_into_inline_comments() abort "{{{2
