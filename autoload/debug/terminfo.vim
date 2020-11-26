@@ -188,12 +188,12 @@ fu s:install_mappings() abort "{{{2
     " "Terminal codes" section,  it will correctly filter out  all the other
     " terminal codes.
     "}}}
-    nno <buffer><nowait><silent> !!
-        \ :<c-u>exe 'filter /' .. getline('.')->matchstr('t_[^=]*') .. '/ set termcap'<cr>
+    nno <buffer><nowait> !!
+        \ <cmd>exe 'filter /' .. getline('.')->matchstr('t_[^=]*') .. '/ set termcap'<cr>
     " open relevant help tag to get more info about the terminal option under the cursor
-    nno <buffer><nowait><silent> <cr> :<c-u>call <sid>get_help()<cr>
+    nno <buffer><nowait> <cr> <cmd>call <sid>get_help()<cr>
     " get help about mappings
-    nno <buffer><nowait><silent> g? :<c-u>call <sid>print_help()<cr>
+    nno <buffer><nowait> g? <cmd>call <sid>print_help()<cr>
 endfu
 
 fu s:get_help() abort "{{{2

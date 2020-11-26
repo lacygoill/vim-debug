@@ -1,25 +1,27 @@
-fu debug#synnames#main(count) abort "{{{1
-    if a:count
-        let name = s:synnames()->get(a:count-1, '')
+vim9script
+
+def debug#synnames#main(count: number) #{{{1
+    if count != 0
+        var name = Synnames()->get(count - 1, '')
         if !empty(name)
             exe 'syntax list ' .. name
         endif
     else
-        echo s:synnames()->join()
+        echo Synnames()->join()
     endif
-endfu
+enddef
 
-fu s:synnames(...) abort "{{{1
-    " The syntax  element under  the cursor  is part  of a  group, which  can be
-    " contained in another one, and so on.
-    "
-    " This imbrication  of syntax groups  can be  seen as a  stack. `synstack()`
-    " returns  the list  of IDs  for  all syntax  groups  in the  stack, at  the
-    " position given.
-    "
-    " They are sorted from the outermost syntax group, to the innermost.
-    "
-    " The last one is what `synID()` returns.
-    return synstack('.', col('.'))->map('synIDattr(v:val, "name")')->reverse()
-endfu
+def Synnames(): list<string> #{{{1
+    # The syntax  element under  the cursor  is part  of a  group, which  can be
+    # contained in another one, and so on.
+    #
+    # This imbrication  of syntax groups  can be  seen as a  stack. `synstack()`
+    # returns  the list  of IDs  for  all syntax  groups  in the  stack, at  the
+    # position given.
+    #
+    # They are sorted from the outermost syntax group, to the innermost.
+    #
+    # The last one is what `synID()` returns.
+    return synstack('.', col('.'))->map({_, v -> synIDattr(v, 'name')})->reverse()
+enddef
 

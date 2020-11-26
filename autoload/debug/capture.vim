@@ -28,12 +28,6 @@ fu debug#capture#variable(_) abort "{{{2
 endfu
 
 fu debug#capture#dump() abort "{{{2
-    " timer because we can't split the window in an `<expr>` mapping (`E565`)
-    call timer_start(0, {-> s:dump()})
-    return ''
-endfu
-
-fu s:dump() abort
     let vars = getcompletion('d_*', 'var')
     if empty(vars) | echo 'there are no debugging variables' | return | endif
     call map(vars, {_, v -> v .. ' = ' .. string(g:{v})})
@@ -44,7 +38,7 @@ fu s:dump() abort
     endtry
     wincmd P
     if !&l:pvw | return | endif
-    nno <buffer><nowait><silent> DD :<c-u>call <sid>unlet_variable_under_cursor()<cr>
+    nno <buffer><nowait> DD <cmd>call <sid>unlet_variable_under_cursor()<cr>
 endfu
 " }}}1
 " Utilities {{{1

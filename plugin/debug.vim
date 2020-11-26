@@ -135,14 +135,7 @@ nno <expr><unique> !C debug#capture#setup(1)
 
 " !d        echo g:d_* {{{2
 
-" Why `<expr>`?{{{
-"
-" If you call the function via `:call`, it will fire various events
-" (`CmdlineEnter`, `CmdlineLeave`, `CmdlineChanged`).
-"
-" This could alter the values of your `d_` variables.
-"}}}
-nno <expr><silent><unique> !d debug#capture#dump()
+nno <unique> !d <cmd>call debug#capture#dump()<cr>
 
 " !e        show help about last error {{{2
 
@@ -151,21 +144,21 @@ nno <expr><silent><unique> !d debug#capture#dump()
 " Press `-e` to open the help topic explaining the last one.
 " Repeat to cycle through all the help topics related to the rest of the errors.
 
-"                     ┌ error
-"                     │
-nno <silent><unique> !e :<c-u>exe debug#help_about_last_errors()<cr>
+"             ┌ error
+"             │
+nno <unique> !e <cmd>exe debug#help_about_last_errors()<cr>
 
 " !m        show messages {{{2
 
-nno <silent><unique> !m :<c-u>call debug#messages()<cr>
+nno <unique> !m <cmd>call debug#messages()<cr>
 
 " !M        clean messages {{{2
 
-nno <silent><unique> !M :<c-u>messages clear <bar> echo 'messages cleared'<cr>
+nno <unique> !M <cmd>messages clear <bar> echo 'messages cleared'<cr>
 
 " !o        paste Output of last ex command  {{{2
 
-nmap <expr><silent><unique> !o debug#output#last_ex_command()
+nmap <expr><unique> !o debug#output#last_ex_command()
 
 " !s        show syntax groups under cursor {{{2
 
@@ -176,17 +169,17 @@ nmap <expr><silent><unique> !o debug#output#last_ex_command()
 "     1!s    show the definition of the innermost syntax group
 "     3!s    show the definition of the 3rd syntax group
 
-nno <silent><unique> !s :<c-u>call debug#synnames#main(v:count)<cr>
+nno <unique> !s <cmd>call debug#synnames#main(v:count)<cr>
 
 " !S        autoprint stack items under the cursor {{{2
 
-nno <silent><unique> !S :<c-u>call debug#auto_synstack#main()<cr>
+nno <unique> !S <cmd>call debug#auto_synstack#main()<cr>
 
 " !T        measure time to do task {{{2
 
-nno <silent><unique> !T :<c-u>call debug#timer#measure()<cr>
+nno <unique> !T <cmd>call debug#timer#measure()<cr>
 
 " !t        show info about running timers {{{2
 
-nno <silent><unique> !t :<c-u>call debug#timer#info_open()<cr>
+nno <unique> !t <cmd>call debug#timer#info_open()<cr>
 

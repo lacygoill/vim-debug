@@ -91,7 +91,7 @@ fu debug#timer#populate() abort "{{{1
     "
     " MWE:
     "
-    "     nno <silent> cd :<c-u>call FuncA()<cr>
+    "     nno cd <cmd>call FuncA()<cr>
     "     fu FuncA() abort
     "         .g/^/call FuncB()
     "     endfu

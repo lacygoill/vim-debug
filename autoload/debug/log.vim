@@ -95,9 +95,9 @@ fu debug#log#output(what) abort "{{{1
     " check we really got there ...
     if !&l:pvw | return | endif
     setl bt=nofile nobl noswf nowrap
-    nmap <buffer><nowait><silent> q <plug>(my_quit)
+    nmap <buffer><nowait> q <plug>(my_quit)
     call search('Last set from \zs')
-    nno <buffer><nowait><silent> DD :<c-u>sil keepj keepp g/^\s*Last set from/d_<cr>
+    nno <buffer><nowait> DD <cmd>sil keepj keepp g/^\s*Last set from/d_<cr>
 endfu
 
 fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
