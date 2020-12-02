@@ -33,9 +33,9 @@ fu debug#break#completion(arglead, cmdline, _p) abort
             return getcompletion(a:arglead, 'file')
         endif
     elseif a:cmdline =~# '^\CBreakadd \%(' .. join(s:ADD_ARGUMENTS, '\|') .. '\)'
-    \ || a:cmdline =~# '^\CBreakdel \%(' .. copy(s:DEL_ARGUMENTS)
-    \ ->map({_, v -> escape(v, '*')})
-    \ ->join('\|') .. '\)'
+    \ || a:cmdline =~# '^\CBreakdel \%('
+    \     .. mapnew(s:DEL_ARGUMENTS, {_, v -> escape(v, '*')})
+    \     ->join('\|') .. '\)'
         return []
     else
         return copy(a:cmdline =~# '^\CBreakadd\s' ? s:ADD_ARGUMENTS : s:DEL_ARGUMENTS)

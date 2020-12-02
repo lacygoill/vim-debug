@@ -177,7 +177,7 @@ fu s:fold() abort "{{{2
 endfu
 
 fu s:install_mappings() abort "{{{2
-    nno <buffer><expr><nowait><silent> q reg_recording() != '' ? 'q' : ':<c-u>q!<cr>'
+    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q!<cr>'
     " mapping to compare value on current line with the one in output of `:set termcap`{{{
     "
     " Note that  `:filter` is able  to filter the "Terminal  codes" section,
