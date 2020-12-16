@@ -8,7 +8,7 @@ let s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
 fu debug#auto_synstack#main() abort "{{{1
     let s:minivimrc = s:DIR .. '/debug_syntax_plugin.vim'
 
-    augroup debug_syntax | au!
+    augroup DebugSyntax | au!
         au CursorMoved <buffer> echo synstack('.', col('.'))
             \ ->map({_, v -> synIDattr(v, 'name')})
             \ ->reverse()

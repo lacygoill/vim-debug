@@ -31,8 +31,8 @@ fu debug#cmdline#eval_var_under_cursor() abort "{{{1
     let new_cmdline = substitute(cmdline, pat, rep, '')
     call setcmdpos(new_pos)
     " allow us to undo the evaluation
-    if exists('#User#add_to_undolist_c')
-        do <nomodeline> User add_to_undolist_c
+    if exists('#User#AddToUndolistC')
+        do <nomodeline> User AddToUndolistC
     endif
     return new_cmdline
 endfu

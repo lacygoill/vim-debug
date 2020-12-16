@@ -10,7 +10,7 @@ let g:loaded_debug = 1
 
 " Autocmds {{{1
 
-augroup timer_info_populate | au!
+augroup TimerInfoPopulate | au!
     au BufNewFile /tmp/*/timer_info call debug#timer#populate()
 augroup END
 
