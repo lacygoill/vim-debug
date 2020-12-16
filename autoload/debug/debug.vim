@@ -15,7 +15,7 @@ endfu
 fu debug#debug#wrapper(cmd) abort
     try
         ToggleEditingCommands 0
-        au! my_granular_undo
+        au! MyGranularUndo
         exe 'debug ' .. a:cmd
     catch
         return s:Catch()
