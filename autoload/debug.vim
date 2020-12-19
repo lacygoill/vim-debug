@@ -1,7 +1,9 @@
+vim9script
+
 if exists('g:autoloaded_debug')
     finish
 endif
-let g:autoloaded_debug = 1
+g:autoloaded_debug = 1
 
 import Catch from 'lg.vim'
 
@@ -162,9 +164,9 @@ fu debug#unused_functions() abort "{{{1
     endif
 endfu
 
-fu debug#vim_patches(n, append = v:false) abort "{{{1
-    if a:n == ''
-        let msg =<< trim END
+def debug#vimPatches(n: string, append = v:false) #{{{1
+    if n == ''
+        var msg =<< trim END
             provide a major Vim version number
 
             usage example:
@@ -173,99 +175,107 @@ fu debug#vim_patches(n, append = v:false) abort "{{{1
                 VimPatches 7.4 - 8.2
         END
         echo join(msg, "\n")
-    elseif index(s:MAJOR_VERSIONS, a:n) != -1
-        let filename = 'ftp://ftp.vim.org/pub/vim/patches/' .. a:n .. '/README'
-        if a:append
-            let bufnr = bufadd(filename)
-            call bufload(bufnr)
-            call getbufline(bufnr, 1, '$')->append('$')
+    elseif index(MAJOR_VERSIONS, n) != -1
+        var filename = 'ftp://ftp.vim.org/pub/vim/patches/' .. n .. '/README'
+        if append
+            var bufnr = bufadd(filename)
+            bufload(bufnr)
+            getbufline(bufnr, 1, '$')->append('$')
             exe 'bw! ' .. bufnr
-            call append('$', '')
-            " Sometimes, we have 2 empty lines between 2 major versions, instead of just 1; remove it.{{{
-            "
-            " That happens, for example, if you run:
-            "
-            "     :VimPatches 8.0 - 8.2
-            "
-            " There are 2 empty lines between the 8.1 patches and the 8.2 patches.
-            " For some  reason, we need to  delay, otherwise we might  delete an
-            " empty line which we want to keep (e.g. between 8.0 and 8.1).
-            "}}}
-            au SafeState * ++once sil! g/^\n\n\|\%^$\|\%$$/d_
-            "                                 ^----------^
-            "                                 also delete the first and last empty lines
+            append('$', '')
+            # Sometimes, we have 2 empty lines between 2 major versions, instead of just 1; remove it.{{{
+            #
+            # That happens, for example, if you run:
+            #
+            #     :VimPatches 8.0 - 8.2
+            #
+            # There are 2 empty lines between the 8.1 patches and the 8.2 patches.
+            # For some  reason, we need to  delay, otherwise we might  delete an
+            # empty line which we want to keep (e.g. between 8.0 and 8.1).
+            #}}}
+            au SafeState * ++once sil! g/^\n\n\|\%^$\|\%$$/d _
+            #                                 ^----------^
+            #                                 also delete the first and last empty lines
         elseif bufloaded(filename)
-            return s:display(filename)
+            Display(filename)
+            return
         else
             sil exe 'sp ' .. filename
-            call s:prettify()
+            Prettify()
         endif
-    elseif a:n =~ '^\d\.\d\s*-\s*\d\.\d$'
-        let [first, last] = matchlist(a:n, '\(\d\.\d\)\s*-\s*\(\d\.\d\)')[1:2]
-        if index(s:MAJOR_VERSIONS, first) == -1
-            call s:error(first .. ' is not a valid major Vim version')
-        elseif index(s:MAJOR_VERSIONS, last) == -1
-            call s:error(last .. ' is not a valid major Vim version')
+    elseif n =~ '^\d\.\d\s*-\s*\d\.\d$'
+        var first: string
+        var last: string
+        [first, last] = matchlist(n, '\(\d\.\d\)\s*-\s*\(\d\.\d\)')[1:2]
+        if index(MAJOR_VERSIONS, first) == -1
+            Error(first .. ' is not a valid major Vim version')
+        elseif index(MAJOR_VERSIONS, last) == -1
+            Error(last .. ' is not a valid major Vim version')
         endif
-        let filename = 'VimPatches ' .. a:n
+        var filename = 'VimPatches ' .. n
         if bufloaded(filename)
-            return s:display(filename)
+            Display(filename)
+            return
         endif
         new
         exe 'file ' .. fnameescape(filename)
-        let ifirst = index(s:MAJOR_VERSIONS, first)
-        let ilast = index(s:MAJOR_VERSIONS, last)
-        let numbers = s:MAJOR_VERSIONS[ifirst : ilast]
+        var ifirst = index(MAJOR_VERSIONS, first)
+        var ilast = index(MAJOR_VERSIONS, last)
+        var numbers = MAJOR_VERSIONS[ifirst : ilast]
         for number in numbers
-            call debug#vim_patches(number, v:true)
+            debug#vimPatches(number, true)
         endfor
-        call s:prettify()
+        Prettify()
     else
-        call s:error('invalid argument')
+        Error('invalid argument')
     endif
-endfu
+enddef
 
-fu s:display(filename) abort
-    let winid = bufnr(a:filename)->win_findbuf()->get(-1)
+def Display(filename: string)
+    var winid = bufnr(filename)->win_findbuf()->get(-1)
     if winid > 0
-        call win_gotoid(winid)
+        win_gotoid(winid)
     else
-        exe 'sp ' .. a:filename
+        exe 'sp ' .. filename
     endif
-endfu
+enddef
 
-fu s:error(msg) abort
+def Error(msg: string)
     echohl ErrorMsg
-    echom a:msg
+    echom msg
     echohl NONE
-endfu
+enddef
 
-fu s:prettify() abort
-    " no modified indicator in the status line if we edit the buffer
+def Prettify()
+    # no modified indicator in the status line if we edit the buffer
     setl bt=nofile nobl noswf nowrap
 
-    " remove noise
-    sil g/^Patches for Vim/;/^\s*SIZE/d_
-    sil! g/^--- The story continues with Vim /d_
-    sil keepj keepp %s/^\s*\d\+\s\+//e
+    # remove noise
+    sil g/^Patches for Vim/ :.;/^\s*SIZE/d _
+    sil! g/^--- The story continues with Vim /d _
+    sil keepj keepp :%s/^\s*\d\+\s\+//e
 
-    " format links
-    sil keepj keepp %s@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
+    # format links
+    sil keepj keepp :%s@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
 
-    " conceal url (copied from the markdown syntax plugin)
+    # conceal url (copied from the markdown syntax plugin)
     syn match xUrl /\S\+/ contained
-    syn region xLinkText matchgroup=xLinkTextDelimiter start=/!\=\[\ze\_[^]]*] \=[[(]/ end=/\]\ze \=[[(]/ nextgroup=xLink keepend concealends skipwhite
-    syn region xLink matchgroup=xLinkDelimiter start=/(/ end=/)/ contained keepend conceal contains=xUrl
+    syn region xLinkText matchgroup=xLinkTextDelimiter
+        \ start=/!\=\[\ze\_[^]]*] \=[[\x28]/ end=/\]\ze \=[[\x28]/
+        \ nextgroup=xLink keepend concealends skipwhite
+    syn region xLink matchgroup=xLinkDelimiter
+        \ start=/(/ end=/)/
+        \ contained keepend conceal contains=xUrl
     hi link xLinkText Underlined
     hi link xUrl Float
     setl cole=3 cocu=nc
-endfu
+enddef
 
-fu debug#vim_patches_completion(_a, _l, _p) abort "{{{1
-    return join(s:MAJOR_VERSIONS, "\n")
-endfu
+def debug#vimPatchesCompletion(_a: any, _l: any, _p: any): string #{{{1
+    return join(MAJOR_VERSIONS, "\n")
+enddef
 
-const s:MAJOR_VERSIONS =<< trim END
+const MAJOR_VERSIONS =<< trim END
     6.3
     6.4
     7.0
