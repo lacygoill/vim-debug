@@ -5,7 +5,7 @@ let g:autoloaded_debug#prof = 1
 
 import FuncComplete from 'lg.vim'
 
-const s:DIR = getenv('XDG_RUNTIME_VIM') == v:null ? '/tmp' : $XDG_RUNTIME_VIM
+const s:DIR = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
 
 const s:ARGUMENTS = getcompletion('profile ', 'cmdline')
 "                                         ^
