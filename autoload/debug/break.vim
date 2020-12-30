@@ -27,7 +27,7 @@ fu debug#break#completion(arglead, cmdline, _p) abort
     elseif a:cmdline =~# '^\CBreak\%(add\|del\) file\s\+'
     \ && a:cmdline !~# '^\CBreak\%(add\|del\) file\s\+\S\+\s\+'
         if a:arglead =~# '$\h\w*$'
-            return getcompletion(a:arglead[1:], 'environment')
+            return getcompletion(a:arglead[1 :], 'environment')
                 \ ->map({_, v -> '$' .. v})
         else
             return getcompletion(a:arglead, 'file')

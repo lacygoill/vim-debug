@@ -21,7 +21,7 @@ fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
     elseif a:cmdline =~# '^\CProf\s\+\%(file\|start\)\s\+'
     \ && a:cmdline !~# '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
         if a:arglead =~# '$\h\w*$'
-            return getcompletion(a:arglead[1:], 'environment')
+            return getcompletion(a:arglead[1 :], 'environment')
                 \ ->map({_, v -> '$' .. v})
         else
             return getcompletion(a:arglead, 'file')

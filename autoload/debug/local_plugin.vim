@@ -47,9 +47,9 @@ endfu
 fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
     if a:0
         let cmd = a:kind is# 'ftplugin' && (a:1 is# 'c_*.vim' || a:1 is# 'c/*.vim')
-            \ ?     'breakadd file */fptlugin/' .. a:filetype .. a:1[1:]
+            \ ?     'breakadd file */fptlugin/' .. a:filetype .. a:1[1 :]
             \ : a:kind is# 'syntax'
-            \ ?     'breakadd file */syntax/' .. a:filetype .. a:1[1:]
+            \ ?     'breakadd file */syntax/' .. a:filetype .. a:1[1 :]
             \ :     ''
     else
         let cmd = 'breakadd file */' .. a:kind .. '/' .. a:filetype .. '.vim'

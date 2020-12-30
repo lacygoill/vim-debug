@@ -1,9 +1,7 @@
-vim9script
+vim9script noclear
 
-if exists('g:loaded_debug')
-    finish
-endif
-g:loaded_debug = 1
+if exists('loaded') | finish | endif
+var loaded = true
 
 # TODO: Implement a command which would tell us which rule governs the indentation of a given line.
 #

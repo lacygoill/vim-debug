@@ -30,7 +30,7 @@ endfu
 fu s:get_current_value(opt) abort "{{{2
     let vlocal = execute('verb setl ' .. a:opt .. '?')->matchstr('\_s*\zs\S.*')
     let vglobal = execute('verb setg ' .. a:opt .. '?')->matchstr('\_s*\zs\S.*')
-    if a:opt[:1] is# 't_' || a:opt[0] .. a:opt[-1:-1] is# '<>'
+    if a:opt[: 1] is# 't_' || a:opt[0] .. a:opt[-1 : -1] is# '<>'
         let type = 'terminal'
     else
         let type = join(s:OPTIONS_DOC, "\n")
@@ -55,7 +55,7 @@ fu s:get_original_value(opt) abort "{{{2
     let origval = b:orig_{a:opt}
     let is_boolean = empty(curval)
     if is_boolean
-        let curval = execute('setl ' .. a:opt .. '?')[1:]
+        let curval = execute('setl ' .. a:opt .. '?')[1 :]
         let origval = s:bool2name(origval, curval)
     endif
     if curval isnot# origval

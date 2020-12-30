@@ -26,7 +26,7 @@ fu debug#log#output(what) abort "{{{1
     "
     " This would raise an error in the next line; specifically because of:
     "
-    "     split(excmd[1:])[0]
+    "     split(excmd[1 :])[0]
     "     E684: list index out of range: 0~
     "
     " We  could  fix it  with  `get()`,  but  there's  another issue  with  some
@@ -39,7 +39,7 @@ fu debug#log#output(what) abort "{{{1
         echohl NONE
         return
     endif
-    let pfx = exists(':' .. split(excmd)[0]) == 2 || split(excmd[1:])[0]->executable() ? ':' : ''
+    let pfx = exists(':' .. split(excmd)[0]) == 2 || split(excmd[1 :])[0]->executable() ? ':' : ''
     if has_key(a:what, 'lines')
         let title = pfx .. excmd
         let lines = a:what.lines
@@ -103,7 +103,7 @@ endfu
 fu s:redirect_to_tempfile(tempfile, level, excmd) abort "{{{1
     try
         " Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
-        let excmd = a:excmd[0] is# '!' ? 'echo system(' .. string(a:excmd[1:]) .. ')' : a:excmd
+        let excmd = a:excmd[0] is# '!' ? 'echo system(' .. string(a:excmd[1 :]) .. ')' : a:excmd
 
         let output = execute(a:level .. 'verbose exe ' .. string(excmd))
         "                                        │{{{

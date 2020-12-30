@@ -1,4 +1,7 @@
-vim9script
+vim9script noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
 
 def debug#synnames#main(count: number) #{{{1
     if count != 0
@@ -22,6 +25,6 @@ def Synnames(): list<string> #{{{1
     # They are sorted from the outermost syntax group, to the innermost.
     #
     # The last one is what `synID()` returns.
-    return synstack('.', col('.'))->map({_, v -> synIDattr(v, 'name')})->reverse()
+    return synstack('.', col('.'))->map((_, v) => synIDattr(v, 'name'))->reverse()
 enddef
 

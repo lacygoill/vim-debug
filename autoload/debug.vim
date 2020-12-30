@@ -1,9 +1,7 @@
-vim9script
+vim9script noclear
 
-if exists('g:autoloaded_debug')
-    finish
-endif
-g:autoloaded_debug = 1
+if exists('loaded') | finish | endif
+var loaded = true
 
 import Catch from 'lg.vim'
 
@@ -146,8 +144,8 @@ fu debug#unused_functions() abort "{{{1
     let unused = []
     for afunc in functions
         let pat = afunc
-        if afunc[:1] is# 's:'
-            let pat ..= '\|<sid>' .. afunc[2:]
+        if afunc[: 1] is# 's:'
+            let pat ..= '\|<sid>' .. afunc[2 :]
         endif
         exe 'sil noa lvim /' .. pat .. '/ ./**/*.vim'
         " the name of an unused function appears only once
@@ -198,15 +196,17 @@ def debug#vimPatches(n: string, append = v:false) #{{{1
             #                                 also delete the first and last empty lines
         elseif bufloaded(filename)
             Display(filename)
+            Mapping()
             return
         else
             sil exe 'sp ' .. filename
             Prettify()
+            Mapping()
         endif
     elseif n =~ '^\d\.\d\s*-\s*\d\.\d$'
         var first: string
         var last: string
-        [first, last] = matchlist(n, '\(\d\.\d\)\s*-\s*\(\d\.\d\)')[1:2]
+        [first, last] = matchlist(n, '\(\d\.\d\)\s*-\s*\(\d\.\d\)')[1 : 2]
         if index(MAJOR_VERSIONS, first) == -1
             Error(first .. ' is not a valid major Vim version')
         elseif index(MAJOR_VERSIONS, last) == -1
@@ -229,6 +229,11 @@ def debug#vimPatches(n: string, append = v:false) #{{{1
     else
         Error('invalid argument')
     endif
+enddef
+
+def Mapping()
+    # We often press `x` instead of `gx` by accident.
+    nmap <buffer><nowait> x gx
 enddef
 
 def Display(filename: string)
