@@ -87,7 +87,7 @@ fu debug#prof#wrapper(bang, ...) abort "{{{1
 
     let plugin_name = substitute(a:1, '-plugin\s\+', '', '')
     let cmdline = 'Prof -plugin '
-    if debug#prof#completion('', cmdline, strchars(cmdline, 1))->index(plugin_name) == -1
+    if debug#prof#completion('', cmdline, strchars(cmdline, v:true))->index(plugin_name) == -1
         echo 'There''s no plugin named:  ' .. plugin_name
         return
     endif
