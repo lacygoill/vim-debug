@@ -39,7 +39,7 @@ def debug#capture#dump() #{{{2
         echo 'there are no debugging variables'
         return
     endif
-    map(vars, (_, v) => v .. ' = ' .. eval('g:' .. v))
+    map(vars, (_, v) => v .. ' = ' .. eval('g:' .. v)->string())
     try
         WinScratch(vars)
     catch /^Vim\%((\a\+)\)\=:E994:/
