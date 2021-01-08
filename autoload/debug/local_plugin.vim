@@ -1,10 +1,15 @@
-fu debug#local_plugin#main(...) abort "{{{1
-    let args = split(a:1)
-    let kind = matchstr(a:1, '-kind\s\+\zs[^ -]\S*')
-    let filetype = matchstr(a:1, '-filetype\s\+\zs[^-]\S*')
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
+
+def debug#local_plugin#main(args: string) #{{{1
+    var args = split(args)
+    var kind = matchstr(args, '-kind\s\+\zs[^ -]\S*')
+    var filetype = matchstr(args, '-filetype\s\+\zs[^-]\S*')
 
     if index(args, '-kind') == -1 || index(args, '-filetype') == -1
-        let usage =<< trim END
+        var usage =<< trim END
             usage:
                 DebugLocalPlugin -kind ftplugin -filetype sh
                 DebugLocalPlugin -kind indent   -filetype awk
@@ -28,31 +33,32 @@ fu debug#local_plugin#main(...) abort "{{{1
         return
     endif
 
-    "     breakadd file */ftplugin/c.vim
-    "     breakadd file */indent/c.vim
-    "     breakadd file */syntax/c.vim
-    call s:add_breakpoints(kind, filetype)
+    #     breakadd file */ftplugin/c.vim
+    #     breakadd file */indent/c.vim
+    #     breakadd file */syntax/c.vim
+    AddBreakpoints(kind, filetype)
 
-    if kind is# 'ftplugin'
-        "     breakadd file */ftplugin/c_*.vim
-        call s:add_breakpoints('ftplugin', filetype, 'c_*.vim')
-        "     breakadd file */ftplugin/c/*.vim
-        call s:add_breakpoints('ftplugin', filetype, 'c/*.vim')
-    elseif kind is# 'syntax'
-        "     breakadd file */syntax/c_*.vim
-        call s:add_breakpoints('syntax', filetype, 'c/*.vim')
+    if kind == 'ftplugin'
+        #     breakadd file */ftplugin/c_*.vim
+        AddBreakpoints('ftplugin', filetype, 'c_*.vim')
+        #     breakadd file */ftplugin/c/*.vim
+        AddBreakpoints('ftplugin', filetype, 'c/*.vim')
+    elseif kind == 'syntax'
+        #     breakadd file */syntax/c_*.vim
+        AddBreakpoints('syntax', filetype, 'c/*.vim')
     endif
-endfu
+enddef
 
-fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
-    if a:0
-        let cmd = a:kind is# 'ftplugin' && (a:1 is# 'c_*.vim' || a:1 is# 'c/*.vim')
-            \ ?     'breakadd file */fptlugin/' .. a:filetype .. a:1[1 :]
-            \ : a:kind is# 'syntax'
-            \ ?     'breakadd file */syntax/' .. a:filetype .. a:1[1 :]
-            \ :     ''
+def AddBreakpoints(kind: string, filetype: string, glob = '') #{{{1
+    var cmd: string
+    if glob != ''
+        cmd = kind == 'ftplugin' && (glob == 'c_*.vim' || glob == 'c/*.vim')
+            ?     'breakadd file */fptlugin/' .. filetype .. glob[1 :]
+            : kind == 'syntax'
+            ?     'breakadd file */syntax/' .. filetype .. glob[1 :]
+            :     ''
     else
-        let cmd = 'breakadd file */' .. a:kind .. '/' .. a:filetype .. '.vim'
+        cmd = 'breakadd file */' .. kind .. '/' .. filetype .. '.vim'
     endif
 
     if cmd == ''
@@ -61,24 +67,24 @@ fu s:add_breakpoints(kind, filetype, ...) abort "{{{1
 
     echom '[:DebugLocalPlugin] executing:  ' .. cmd
     exe cmd
-endfu
+enddef
 
-fu debug#local_plugin#complete(arglead, cmdline, pos) abort "{{{1
-    let from_dash_to_cursor = matchstr(a:cmdline, '.*\s\zs-.*\%' .. (a:pos + 1) .. 'c')
+def debug#local_plugin#complete(arglead: string, cmdline: string, pos: number): string #{{{1
+    var from_dash_to_cursor = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
 
-    if from_dash_to_cursor =~# '^-filetype\s*\S*$'
-        let filetypes = getcompletion('', 'filetype')
+    if from_dash_to_cursor =~ '^-filetype\s*\S*$'
+        var filetypes = getcompletion('', 'filetype')
         return join(filetypes, "\n")
 
-    elseif from_dash_to_cursor =~# '^-kind\s*\S*$'
-        let kinds = ['ftplugin', 'indent', 'syntax']
+    elseif from_dash_to_cursor =~ '^-kind\s*\S*$'
+        var kinds = ['ftplugin', 'indent', 'syntax']
         return join(kinds, "\n")
 
-    elseif empty(a:arglead) || a:arglead[0] is# '-'
-        let options = ['-kind', '-filetype']
+    elseif empty(arglead) || arglead[0] == '-'
+        var options = ['-kind', '-filetype']
         return join(options, "\n")
     endif
 
     return ''
-endfu
+enddef
 

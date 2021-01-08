@@ -1,85 +1,89 @@
-if exists('g:autoloaded_debug#verbose')
-    finish
-endif
-let g:autoloaded_debug#verbose = 1
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
 
 import Catch from 'lg.vim'
-const s:OPTIONS_DOC = readfile($VIMRUNTIME .. '/doc/options.txt')
+const OPTIONS_DOC = readfile($VIMRUNTIME .. '/doc/options.txt')
 
-" Interface {{{1
-fu debug#verbose#option(opt) abort "{{{2
+# Interface {{{1
+def debug#verbose#option(arg_opt: string) #{{{2
+    var opt: string
     try
-        " Why not just `a-z`?  To support terminal options.
-        let opt = execute('set ' .. a:opt .. '?')->matchstr('[a-z0-9<>_-]\+')
-    " many errors are possible when you write nonsense (E518, E846, E488, ...)
+        # Why not just `a-z`?  To support terminal options.
+        opt = execute('set ' .. arg_opt .. '?')->matchstr('[a-z0-9<>_-]\+')
+    # many errors are possible when you write nonsense (E518, E846, E488, ...)
     catch
-        return s:Catch()
+        Catch()
+        return
     endtry
-    " necessary for a reset boolean option (like 'paste')
-    let opt = substitute(opt, '^no', '', '')
+    # necessary for a reset boolean option (like 'paste')
+    opt = substitute(opt, '^no', '', '')
 
-    let msg = s:get_current_value(opt)
+    var msg = GetCurrentValue(opt)
     if exists('b:orig_' .. opt)
-        let msg += s:get_original_value(opt)
+        msg += GetOriginalValue(opt)
     endif
 
-    call s:display(msg)
-endfu
-"}}}1
-" Core {{{1
-fu s:get_current_value(opt) abort "{{{2
-    let vlocal = execute('verb setl ' .. a:opt .. '?')->matchstr('\_s*\zs\S.*')
-    let vglobal = execute('verb setg ' .. a:opt .. '?')->matchstr('\_s*\zs\S.*')
-    if a:opt[: 1] is# 't_' || a:opt[0] .. a:opt[-1 : -1] is# '<>'
-        let type = 'terminal'
+    Display(msg)
+enddef
+#}}}1
+# Core {{{1
+def GetCurrentValue(opt: string): list<string> #{{{2
+    var vlocal = execute('verb setl ' .. opt .. '?')->matchstr('\_s*\zs\S.*')
+    var vglobal = execute('verb setg ' .. opt .. '?')->matchstr('\_s*\zs\S.*')
+    var type: string
+    if opt[: 1] == 't_' || opt[0] .. opt[-1 : -1] == '<>'
+        type = 'terminal'
     else
-        let type = join(s:OPTIONS_DOC, "\n")
-            \ ->matchstr('\n''' .. a:opt .. '''\s\+\%(''[a-z]\{2,}''\s\+\)\=\%(boolean\|number\|string\)'
-            \ .. '\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
+        type = join(OPTIONS_DOC, "\n")
+            ->matchstr('\n''' .. opt .. '''\s\+\%(''[a-z]\{2,}''\s\+\)\=\%(boolean\|number\|string\)'
+            .. '\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
     endif
-    if type =~# '^\%(global\|terminal\)$'
-        let msg = [type .. ':  ' .. vglobal]
+    var msg: list<string>
+    if type =~ '^\%(global\|terminal\)$'
+        msg = [type .. ':  ' .. vglobal]
     else
-        let msg =<< trim END
+        msg =<< trim END
             local:   %s
             global:  %s
             type:    %s
         END
-        call map(msg, {i, v -> substitute(v, '%s', escape([vlocal, vglobal, type][i], '&\'), 'g')})
+        map(msg, (i, v) => substitute(v, '%s', escape([vlocal, vglobal, type][i], '&\'), 'g'))
     endif
     return msg
-endfu
+enddef
 
-fu s:get_original_value(opt) abort "{{{2
-    let curval = execute('setl ' .. a:opt .. '?')->matchstr('=\zs.*')
-    let origval = b:orig_{a:opt}
-    let is_boolean = empty(curval)
+def GetOriginalValue(opt: string): list<string> #{{{2
+    var curval = execute('setl ' .. opt .. '?')->matchstr('=\zs.*')
+    var origval = eval('b:orig_' .. opt)
+    var is_boolean = empty(curval)
     if is_boolean
-        let curval = execute('setl ' .. a:opt .. '?')[1 :]
-        let origval = s:bool2name(origval, curval)
+        curval = execute('setl ' .. opt .. '?')[1 :]
+        origval = Bool2name(origval, curval)
     endif
-    if curval isnot# origval
+    if curval != origval
         return ['original value: ' .. origval]
     endif
     return []
-endfu
+enddef
 
-fu s:display(msg) abort "{{{2
-    let msg = join(a:msg, "\n\n")
-    " a horizontal rule makes the output easier to read when we execute several `:Vo` consecutively
-    let horizontal_rule = substitute(msg, '.*\n', '', '')
-    let horizontal_rule = substitute(horizontal_rule, '^\t', '\=repeat(" ", &l:ts)', '')
-    let horizontal_rule = substitute(horizontal_rule, '.', '-', 'g')
-    echo msg .. (msg =~# "\n" ? "\n" .. horizontal_rule : '')
-endfu
-"}}}1
-" Util {{{1
-fu s:bool2name(origval, curval) abort "{{{2
-    let is_set = a:curval !~# '^no'
+def Display(arg_msg: list<string>) #{{{2
+    var msg = join(arg_msg, "\n\n")
+    # a horizontal rule makes the output easier to read when we execute several `:Vo` consecutively
+    var horizontal_rule = substitute(msg, '.*\n', '', '')
+    horizontal_rule = substitute(horizontal_rule, '^\t', '\=repeat(" ", &l:ts)', '')
+    horizontal_rule = substitute(horizontal_rule, '.', '-', 'g')
+    echo msg .. (msg =~ "\n" ? "\n" .. horizontal_rule : '')
+enddef
+#}}}1
+# Util {{{1
+def Bool2name(origval: string, curval: string): string #{{{2
+    var is_set = curval !~ '^no'
     if is_set
-        return a:origval ? a:curval : 'no' .. a:curval
+        return origval ? curval : 'no' .. curval
     else
-        return a:origval ? substitute(a:curval, '^no', '', '') : a:curval
+        return origval ? substitute(curval, '^no', '', '') : curval
     endif
-endfu
+enddef
 

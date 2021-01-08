@@ -1,11 +1,16 @@
-fu debug#scriptnames#main() abort
-    let lines = execute('scriptnames')->split('\n')
-    call setqflist([], ' ', {
-        \ 'lines': lines,
-        \ 'efm': '%m: %f',
-        \ 'title': ':Scriptnames',
-        \ 'quickfixtextfunc': {-> []},
-        \ })
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
+
+def debug#scriptnames#main()
+    var lines = execute('scriptnames')->split('\n')
+    setqflist([], ' ', {
+        lines: lines,
+        efm: '%m: %f',
+        title: ':Scriptnames',
+        quickfixtextfunc: () => [],
+        })
     do <nomodeline> QuickFixCmdPost cwindow
-endfu
+enddef
 

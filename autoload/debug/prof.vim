@@ -1,15 +1,15 @@
-if exists('g:autoloaded_debug#prof')
-    finish
-endif
-let g:autoloaded_debug#prof = 1
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
 
 import FuncComplete from 'lg.vim'
 
-const s:DIR = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
+const DIR = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
 
-const s:ARGUMENTS = getcompletion('profile ', 'cmdline')
-"                                         ^
-"                                         necessary
+const ARGUMENTS = getcompletion('profile ', 'cmdline')
+#                                       ^
+#                                       necessary
 
 fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
     let l:Filter = {l -> filter(l, {_, v -> stridx(v, a:arglead) == 0})}
@@ -54,9 +54,9 @@ fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
     return []
 endfu
 
-fu debug#prof#wrapper(bang, ...) abort "{{{1
-    if index(['', '-h', '--help'], a:1) >= 0
-        let usage =<< trim END
+def debug#prof#wrapper(bang: string, args: string) #{{{1
+    if index(['', '-h', '--help'], args) >= 0
+        var usage =<< trim END
             usage:
                 :Prof continue
                 :Prof[!] file {pattern}
@@ -70,101 +70,107 @@ fu debug#prof#wrapper(bang, ...) abort "{{{1
         return
     endif
 
-    let bang = a:bang ? '!' : ''
-    if a:1 =~# '^\C\%(' .. join(s:ARGUMENTS, '\|') .. '\)\s*$'
-        \ .. '\|^\%(start\|file\|func\)\s\+\S\+\s*$'
+    if args =~ '^\C\%(' .. join(ARGUMENTS, '\|') .. '\)\s*$'
+        .. '\|^\%(start\|file\|func\)\s\+\S\+\s*$'
         try
-            exe printf('prof%s %s', bang, a:1)
+            exe printf('prof%s %s', bang, args)
         catch
             echohl ErrorMsg
             echom v:exception
             echohl NONE
         endtry
         return
-    elseif a:1 is# '-read_last_profile'
-        return s:read_last_profile()
+    elseif args == '-read_last_profile'
+        ReadLastProfile()
+        return
     endif
 
-    let plugin_name = substitute(a:1, '-plugin\s\+', '', '')
-    let cmdline = 'Prof -plugin '
+    var plugin_name = substitute(args, '-plugin\s\+', '', '')
+    var cmdline = 'Prof -plugin '
     if debug#prof#completion('', cmdline, strchars(cmdline, v:true))->index(plugin_name) == -1
         echo 'There''s no plugin named:  ' .. plugin_name
         return
     endif
 
-    let start_cmd = 'profile start ' .. s:DIR .. '/profile.log'
-    if plugin_name is# 'fzf'
-        let file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.fzf/**/*.vim'
+    var start_cmd = 'profile start ' .. DIR .. '/profile.log'
+    var plugin_files: list<string>
+    var file_cmd: string
+    if plugin_name == 'fzf'
+        file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.fzf/**/*.vim'
         exe start_cmd | exe file_cmd
-        let plugin_files = glob($HOME .. '/.fzf/**/*.vim', 0, 1)
+        plugin_files = glob($HOME .. '/.fzf/**/*.vim', false, true)
     else
-        let file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim'
+        file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim'
         exe start_cmd | exe file_cmd
-        let plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', 0, 1)
+        plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', false, true)
     endif
 
-    call filter(plugin_files, {_, v -> v !~# '\m\c/t\%[est]/'})
-    call map(plugin_files, {_, v -> 'so ' .. v})
-    call writefile(plugin_files, s:DIR .. '/profile.log')
-    sil! exe 'so ' .. s:DIR .. '/profile.log'
+    filter(plugin_files, (_, v) => v !~ '\m\c/t\%[est]/')
+    map(plugin_files, (_, v) => 'so ' .. v)
+    writefile(plugin_files, DIR .. '/profile.log')
+    sil! exe 'so ' .. DIR .. '/profile.log'
 
     echo printf("Executing:\n    %s\n    %s\n%s\n\n",
-        \ start_cmd,
-        \ file_cmd,
-        \ map(plugin_files, {_, v -> '    ' .. v})->join("\n"),
-        \ )
+        start_cmd,
+        file_cmd,
+        map(plugin_files, (_, v) => '    ' .. v)->join("\n"),
+        )
 
-    " TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{
-    " We could see the log from the current session.
-    "
-    " Would it be a good idea?
-    "
-    " Should we ask `dump` as a feature request?
-    " If you do, ask about `stop` too.
-    "}}}
-    " Why not with `:echo`?{{{
-    "
-    " Because we want it logged.
-    "}}}
-    " Why not everything (i.e. including the previous messages) with `:echom`?{{{
-    "
-    " Because `:echom` doesn't translate `\n` into a newline.
-    " It prints a NUL `^@` instead.
-    "}}}
+    # TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{
+    # We could see the log from the current session.
+    #
+    # Would it be a good idea?
+    #
+    # Should we ask `dump` as a feature request?
+    # If you do, ask about `stop` too.
+    #}}}
+    # Why not with `:echo`?{{{
+    #
+    # Because we want it logged.
+    #}}}
+    # Why not everything (i.e. including the previous messages) with `:echom`?{{{
+    #
+    # Because `:echom` doesn't translate `\n` into a newline.
+    # It prints a NUL `^@` instead.
+    #}}}
     echom 'Recreate the issue, restart Vim, and execute:  :Prof -read_last_profile'
-endfu
+enddef
 
-fu s:read_last_profile() abort "{{{1
-    let logfile = s:DIR .. '/profile.log'
+def ReadLastProfile() #{{{1
+    var logfile = DIR .. '/profile.log'
     if !filereadable(logfile)
         echo 'There are no results to read'
         return
     endif
-    exe 'sp ' .. s:DIR .. '/profile.log'
+    exe 'sp ' .. DIR .. '/profile.log'
     sil TW
 
-    " folding may interfere, disable it
-    let [fen_save, winid, bufnr] = [&l:fen, win_getid(), bufnr('%')]
-    let &l:fen = 0
+    # folding may interfere, disable it
+    var fen_save = &l:fen
+    var winid = win_getid()
+    var bufnr = bufnr('%')
+    &l:fen = false
     try
-        " create an empty fold before the first profiled function for better readability;
-        " we use `silent!` because if we reopen the log, the pattern won't be found anymore
-        sil! 1/^FUNCTION /-put_ | s/^/#/
-        " create an empty fold before the summary at the end
-        sil! 1/^FUNCTIONS SORTED/-put_ | s/^/#/
+        # create an empty fold before the first profiled function for better readability;
+        # we use `silent!` because if we reopen the log, the pattern won't be found anymore
+        sil! :1/^FUNCTION /-put _ | s/^/#/
+        # create an empty fold before the summary at the end
+        sil! :1/^FUNCTIONS SORTED/-put _ | s/^/#/
     finally
         if winbufnr(winid) == bufnr
-            let [tabnr, winnr] = win_id2tabwin(winid)
-            call settabwinvar(tabnr, winnr, '&fen', fen_save)
+            var tabnr: number
+            var winnr: number
+            [tabnr, winnr] = win_id2tabwin(winid)
+            settabwinvar(tabnr, winnr, '&fen', fen_save)
         endif
     endtry
 
-    " fold every function, every script, and the ending summaries
-    sil %s/^FUNCTION\s\+/## /e
-    sil %s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /e
-    sil! call fold#adhoc#main()
+    # fold every function, every script, and the ending summaries
+    sil :%s/^FUNCTION\s\+/## /e
+    sil :%s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /e
+    sil! fold#adhoc#main()
     norm! 1G
     sil! FoldAutoOpen 1
     sil update
-endfu
+enddef
 

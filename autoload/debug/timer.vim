@@ -1,113 +1,121 @@
-" call timer_start(9296123, {-> execute('echom "hello"')})
-fu s:fold_section() abort "{{{1
-    let new_line = getline('.')->substitute('^', '# ', '')
-    call setline('.', ['#'] + [new_line])
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
+
+def FoldSection() #{{{1
+    var new_line = getline('.')->substitute('^', '# ', '')
+    setline('.', ['#'] + [new_line])
     if line('.') != 1
-        call append(line('.') - 1, '')
+        append(line('.') - 1, '')
     endif
-endfu
+enddef
 
-fu s:format_info(v) abort "{{{1
+def FormatInfo(v: dict<any>): list<string> #{{{1
     return [
-        \ "id\x01 " .. a:v.id,
-        \ "repeat\x01 " .. a:v.repeat,
-        \ "remaining\x01 " .. s:format_time(a:v.remaining),
-        \ "time\x01 " .. s:format_time(a:v.time),
-        \ "paused\x01 " .. a:v.paused,
-        \ "callback\x01 " .. string(a:v.callback),
-        \ ]
-endfu
+        "id\x01 " .. v.id,
+        "repeat\x01 " .. v.repeat,
+        "remaining\x01 " .. FormatTime(v.remaining),
+        "time\x01 " .. FormatTime(v.time),
+        "paused\x01 " .. v.paused,
+        "callback\x01 " .. string(v.callback),
+        ]
+enddef
 
-fu s:format_time(v) abort "{{{1
-    return a:v <= 999
-        \ ?        a:v .. 'ms'
-        \ :    a:v <= 59999
-        \ ?        (a:v / 1000) .. 's ' .. fmod(a:v, 1000)->float2nr()->s:format_time()
-        \ :    a:v <= 3600000
-        \ ?        (a:v / 60000) .. 'm ' .. fmod(a:v, 60000)->float2nr()->s:format_time()
-        \ :        (a:v / 3600000) .. 'h ' .. fmod(a:v, 3600000)->float2nr()->s:format_time()
-endfu
+def FormatTime(v: number): string #{{{1
+    return v <= 999
+        ?        v .. 'ms'
+        :    v <= 59'999
+        ?        (v / 1000) .. 's ' .. fmod(v, 1000)->float2nr()->FormatTime()
+        :    v <= 3'600'000
+        ?        (v / 60'000) .. "m " .. fmod(v, 60000)->float2nr()->FormatTime()
+        :        (v / 3'600'000) .. 'h ' .. fmod(v, 3600000)->float2nr()->FormatTime()
+enddef
 
-fu debug#timer#info_open() abort "{{{1
-    " Why saving the info in a script-local variable?{{{
-    "
-    " To pass it to the function which will populate the buffer.
-    " The  latter  is not  called  from  here,  but  from an  autocmd  installed
-    " elsewhere.
-    "}}}
-    " Ok but why not re-capturing the info from `debug#timer#populate()`?{{{
-    "
-    " `populate()` will be called by an autocmd listening to `BufNewFile`.
-    " When this event will  be fired, some timers may be  started by our plugins
-    " (example: `vim-save`).  They're noise; we don't want them.
-    "
-    " We must save the info now, before any event is fired and interferes.
-    "}}}
-    " Why the filter?{{{
-    "
-    " In `vim-readline`, we have an autocmd which starts a timer after 0ms every
-    " time we enter the command-line.
-    " Without the filter, we would see this timer all the time.
-    " It's noise.
-    "
-    " Besides, we don't care about a timer which we can't control (stop/pause).
-    "}}}
-    let s:infos = timer_info()->filter({_, v -> v.time > 0})
-    if empty(s:infos)
+def debug#timer#infoOpen() #{{{1
+    # Why saving the info in a script-local variable?{{{
+    #
+    # To pass it to the function which will populate the buffer.
+    # The  latter  is not  called  from  here,  but  from an  autocmd  installed
+    # elsewhere.
+    #}}}
+    # Ok but why not re-capturing the info from `debug#timer#populate()`?{{{
+    #
+    # `populate()` will be called by an autocmd listening to `BufNewFile`.
+    # When this event will  be fired, some timers may be  started by our plugins
+    # (example: `vim-save`).  They're noise; we don't want them.
+    #
+    # We must save the info now, before any event is fired and interferes.
+    #}}}
+    # Why the filter?{{{
+    #
+    # In `vim-readline`, we have an autocmd which starts a timer after 0ms every
+    # time we enter the command-line.
+    # Without the filter, we would see this timer all the time.
+    # It's noise.
+    #
+    # Besides, we don't care about a timer which we can't control (stop/pause).
+    #}}}
+    infos = timer_info()->filter((_, v) => v.time > 0)
+    if empty(infos)
         echo 'no timer is currently running'
         return
     endif
-    let tempfile = tempname() .. '/timer_info'
-    exe 'to ' .. (&columns / 3) .. 'vnew ' .. tempfile
-    let &l:pvw = 1
+    var tempfile = tempname() .. '/timer_info'
+    exe 'to :' .. (&columns / 3) .. 'vnew ' .. tempfile
+    &l:pvw = true
     wincmd p
-endfu
+enddef
 
-fu debug#timer#measure() abort "{{{1
-    if !exists('s:date')
+def debug#timer#measure() #{{{1
+    if date == []
         echom '  go!'
-        let s:date = reltime()
+        date = reltime()
     else
-        echom reltime(s:date)->reltimestr()->matchstr('.*\....') .. ' seconds to do the task'
-        unlet! s:date
+        echom reltime(date)
+            ->reltimestr()
+            ->matchstr('.*\....') .. ' seconds to do the task'
+        date = []
     endif
-endfu
+enddef
+var date: list<number>
 
-fu debug#timer#populate() abort "{{{1
-    if !exists('s:infos')
-        let s:infos = timer_info()
+def debug#timer#populate() #{{{1
+    if infos == []
+        infos = timer_info()
     endif
-    let infos = map(s:infos, {_, v -> s:format_info(v)})
-    unlet! s:infos
-    let lines = []
-    for info in infos
-        let lines += info
+    var formatted_infos = map(infos, (_, v) => FormatInfo(v))
+    infos = []
+    var lines = []
+    for info in formatted_infos
+        lines += info
     endfor
-    call setline(1, lines)
-    sil %!column -s $'\x01' -t
-    " `s:put_definition()` calls `append()` which is silent, so why `:silent`?{{{
-    "
-    " Somehow, `:g` has priority, and it's not silent by default.
-    "
-    " MWE:
-    "
-    "     nno cd <cmd>call FuncA()<cr>
-    "     fu FuncA() abort
-    "         .g/^/call FuncB()
-    "     endfu
-    "     fu FuncB() abort
-    "         call append('.', ['abc', 'def', 'ghi'])
-    "     endfu
-    "
-    " Press `cd`:
-    "
-    "     3 more lines
-    "}}}
-    sil keepj keepp g/^callback\s\+function('.\{-}')$/call s:put_definition()
-    keepj keepp g/^id\s\+/call s:fold_section()
-endfu
+    setline(1, lines)
+    sil :%!column -s $'\x01' -t
+    # `PutDefinition()` calls `append()` which is silent, so why `:silent`?{{{
+    #
+    # Somehow, `:g` has priority, and it's not silent by default.
+    #
+    # MWE:
+    #
+    #     nno cd <cmd>call FuncA()<cr>
+    #     fu FuncA() abort
+    #         .g/^/call FuncB()
+    #     endfu
+    #     fu FuncB() abort
+    #         call append('.', ['abc', 'def', 'ghi'])
+    #     endfu
+    #
+    # Press `cd`:
+    #
+    #     3 more lines
+    #}}}
+    sil keepj keepp g/^callback\s\+function('.\{-}')$/PutDefinition()
+    keepj keepp g/^id\s\+/FoldSection()
+enddef
+var infos: list<dict<any>>
 
-fu s:put_definition() abort "{{{1
+fu PutDefinition() abort "{{{1
     let line = getline('.')
     if line =~# '^callback\s\+function(''<lambda>\d\+'')$'
         let lambda_id = matchstr(line, '\d\+')

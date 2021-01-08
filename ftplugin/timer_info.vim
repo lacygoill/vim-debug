@@ -17,5 +17,5 @@ let b:did_ftplugin = 1
 " Teardown {{{1
 
 let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ .. '| call debug#timer_info#undo_ftplugin()'
+    \ .. '| call debug#timerInfo#undoFtplugin()'
 

@@ -1,166 +1,212 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
 
 import Catch from 'lg.vim'
 
-fu debug#help_about_last_errors() abort "{{{1
-    let messages = execute('messages')->split('\n')->reverse()
-    "                    ┌ When an error occurs inside a try conditional,{{{
-    "                    │ Vim prefixes an error message with:
-    "                    │
-    "                    │     Vim:
-    "                    │ or:
-    "                    │     Vim({cmd}):
-    "                    ├───────────────┐}}}
-    let pat_error = '^\%(Vim\%((\a\+)\)\=:\|".\{-}"\s\)\=\zsE\d\+'
-    "                                       ├───────┘{{{
-    "                                       └ in a buffer containing the word 'the', execute:
-    "
-    "                                               g/the/ .w >>/tmp/some_file
-    "
-    "                                         It raises this error message:
-    "
-    "                                               /tmp/file_1" E212: Can't open file for writing
-    "}}}
+def debug#helpAboutLastErrors(): string #{{{1
+    var messages = execute('messages')->split('\n')->reverse()
+    #                    ┌ When an error occurs inside a try conditional,{{{
+    #                    │ Vim prefixes an error message with:
+    #                    │
+    #                    │     Vim:
+    #                    │ or:
+    #                    │     Vim({cmd}):
+    #                    ├───────────────┐}}}
+    var pat_error = '^\%(Vim\%((\a\+)\)\=:\|".\{-}"\s\)\=\zsE\d\+'
+    #                                       ├───────┘{{{
+    #                                       └ in a buffer containing the word 'the', execute:
+    #
+    #                                               g/the/ .w >>/tmp/some_file
+    #
+    #                                         It raises this error message:
+    #
+    #                                               /tmp/file_1" E212: Can't open file for writing
+    #}}}
 
-    " index of most recent error
-    let i = match(messages, pat_error)
-    " index of next line which isn't an error, nor belongs to a stack trace
-    let j = match(messages, '^\%(' .. pat_error .. '\|Error\|line\)\@!', i+1)
+    # index of most recent error
+    var i = match(messages, pat_error)
+    # index of next line which isn't an error, nor belongs to a stack trace
+    var j = match(messages, '^\%(' .. pat_error .. '\|Error\|line\)\@!', i + 1)
     if j == -1
-        let j = i+1
+        j = i + 1
     endif
 
-    let errors = map(messages[i : j - 1], {idx, v -> matchstr(v, pat_error)})
-    " remove lines  which don't contain  an error,  or which contain  the errors
-    " E662 / E663 / E664 (they aren't interesting and come frequently)
-    call filter(errors, {_, v -> !empty(v) && v !~# '^E66[234]$'})
+    var errors = map(messages[i : j - 1], (idx, v) => matchstr(v, pat_error))
+    # remove lines  which don't contain  an error,  or which contain  the errors
+    # E662 / E663 / E664 (they aren't interesting and come frequently)
+    filter(errors, (_, v) => !empty(v) && v !~ '^E66[234]$')
     if empty(errors)
         return 'echo "no last errors"'
     endif
 
-    let s:last_errors = get(s:, 'last_errors', {'taglist' : [], 'pos': -1})
-    " the current latest errors are identical to the ones we saved the last time
-    " we invoked this function
-    if errors ==# s:last_errors.taglist
-        " just update our position in the list of visited errors
-        let s:last_errors.pos = (s:last_errors.pos + 1) % len(s:last_errors.taglist)
+    # the current latest errors are identical to the ones we saved the last time
+    # we invoked this function
+    if errors == last_errors.taglist
+        # just update our position in the list of visited errors
+        last_errors.pos = (last_errors.pos + 1) % len(last_errors.taglist)
     else
-        " reset our position in the list of visited errors
-        let s:last_errors.pos = 0
-        " reset the list of errors
-        let s:last_errors.taglist = errors
+        # reset our position in the list of visited errors
+        last_errors.pos = 0
+        # reset the list of errors
+        last_errors.taglist = errors
     endif
 
-    return 'h ' .. get(s:last_errors.taglist, s:last_errors.pos, s:last_errors.taglist[0])
-endfu
+    return 'h ' .. get(last_errors.taglist, last_errors.pos, last_errors.taglist[0])
+enddef
+var last_errors = {taglist: [], pos: -1}
 
-fu debug#messages() abort "{{{1
-    0Verbose messages
-    " If `:Verbose` encountered an error, we could still be in a regular window,
-    " instead  of the  preview window.   If that's  the case,  we don't  want to
-    " remove any text in the current buffer, nor install any match.
-    if !&l:pvw | return | endif
+def debug#messages() #{{{1
+    :0Verbose messages
+    # If `:Verbose` encountered an error, we could still be in a regular window,
+    # instead  of the  preview window.   If that's  the case,  we don't  want to
+    # remove any text in the current buffer, nor install any match.
+    if !&l:pvw
+        return
+    endif
 
-    " From a help buffer, the buffer displayed in a newly opened preview
-    " window inherits some settings, such as 'nomodifiable' and 'readonly'.
-    " Make sure they're disabled so that we can remove noise.
+    # From a help buffer, the buffer displayed in a newly opened preview
+    # window inherits some settings, such as 'nomodifiable' and 'readonly'.
+    # Make sure they're disabled so that we can remove noise.
     setl ma noro
 
-    let noises = {
-        \ '[fewer|more] lines': '\d\+ \%(fewer\|more\) lines\%(; \%(before\|after\) #\d\+.*\)\=',
-        \ '1 more line less':   '1 \%(more \)\=line\%( less\)\=\%(; \%(before\|after\) #\d\+.*\)\=',
-        \ 'change':             'Already at \%(new\|old\)est change',
-        \ 'changes':            '\d\+ changes\=; \%(before\|after\) #\d\+.*' ,
-        \ 'E21':                "E21: Cannot make changes, 'modifiable' is off",
-        \ 'E387':               'E387: Match is on current line',
-        \ 'E486':               'E486: Pattern not found: \S*',
-        \ 'E492':               'E492: Not an editor command: \S\+',
-        \ 'E553':               'E553: No more items',
-        \ 'E663':               'E663: At end of changelist',
-        \ 'E664':               'E664: changelist is empty',
-        \ 'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
-        \ 'empty lines':        '\s*',
-        \ 'lines filtered':     '\d\+ lines filtered',
-        \ 'lines indented':     '\d\+ lines [><]ed \d\+ times\=',
-        \ 'file loaded':        '".\{-}"\%( \[RO\]\)\= line \d\+ of \d\+ --\d\+%-- col \d\+\%(-\d\+\)\=',
-        \ 'file reloaded':      '".\{-}".*\d\+L, \d\+C',
-        \ 'g C-g':              'col \d\+ of \d\+; line \d\+ of \d\+; word \d\+ of \d\+;'
-        \                   .. ' char \d\+ of \d\+; byte \d\+ of \d\+',
-        \ 'C-c':           'Type\s*:qa!\s*and press <Enter> to abandon all changes and exit Vim',
-        \ 'maintainer':    'Messages maintainer: Bram Moolenaar <Bram@vim.org>',
-        \ 'Scanning':      'Scanning:.*',
-        \ 'substitutions': '\d\+ substitutions\= on \d\+ lines\=',
-        \ 'verbose':       ':0Verbose messages',
-        \ 'W10':           'W10: Warning: Changing a readonly file',
-        \ 'yanked lines':  '\%(block of \)\=\d\+ lines yanked',
-        \ }
+    var noises = {
+        '[fewer|more] lines': '\d\+ \%(fewer\|more\) lines\%(; \%(before\|after\) #\d\+.*\)\=',
+        '1 more line less':   '1 \%(more \)\=line\%( less\)\=\%(; \%(before\|after\) #\d\+.*\)\=',
+        'change':             'Already at \%(new\|old\)est change',
+        'changes':            '\d\+ changes\=; \%(before\|after\) #\d\+.*',
+        'E21':                "E21: Cannot make changes, 'modifiable' is off",
+        'E387':               'E387: Match is on current line',
+        'E486':               'E486: Pattern not found: \S*',
+        'E492':               'E492: Not an editor command: \S\+',
+        'E553':               'E553: No more items',
+        'E663':               'E663: At end of changelist',
+        'E664':               'E664: changelist is empty',
+        'Ex mode':            'Entering Ex mode.  Type "visual" to go to Normal mode.',
+        'empty lines':        '\s*',
+        'lines filtered':     '\d\+ lines filtered',
+        'lines indented':     '\d\+ lines [><]ed \d\+ times\=',
+        'file loaded':        '".\{-}"\%( \[RO\]\)\= line \d\+ of \d\+ --\d\+%-- col \d\+\%(-\d\+\)\=',
+        'file reloaded':      '".\{-}".*\d\+L, \d\+C',
+        'g C-g':              'col \d\+ of \d\+; line \d\+ of \d\+; word \d\+ of \d\+;'
+                          .. ' char \d\+ of \d\+; byte \d\+ of \d\+',
+        'C-c':           'Type\s*:qa!\s*and press <Enter> to abandon all changes and exit Vim',
+        'maintainer':    'Messages maintainer: Bram Moolenaar <Bram@vim.org>',
+        'Scanning':      'Scanning:.*',
+        'substitutions': '\d\+ substitutions\= on \d\+ lines\=',
+        'verbose':       ':0Verbose messages',
+        'W10':           'W10: Warning: Changing a readonly file',
+        'yanked lines':  '\%(block of \)\=\d\+ lines yanked',
+        }
 
     for noise in values(noises)
-        sil exe 'g/^' .. noise .. '$/d_'
+        sil exe 'g/^' .. noise .. '$/d _'
     endfor
 
-    call matchadd('ErrorMsg', '^E\d\+:\s\+.*', 0)
-    call matchadd('ErrorMsg', '^Vim.\{-}:E\d\+:\s\+.*', 0)
-    call matchadd('ErrorMsg', '^Error detected while processing.*', 0)
-    call matchadd('LineNr', '^line\s\+\d\+:$', 0)
-    exe '$'
-endfu
+    matchadd('ErrorMsg', '^E\d\+:\s\+.*', 0)
+    matchadd('ErrorMsg', '^Vim.\{-}:E\d\+:\s\+.*', 0)
+    matchadd('ErrorMsg', '^Error detected while processing.*', 0)
+    matchadd('LineNr', '^line\s\+\d\+:$', 0)
+    cursor('$', 0)
+enddef
 
-fu debug#time(cmd, cnt) "{{{1
-    let time = reltime()
+def debug#time(cmd: string, cnt: number) #{{{1
+    var time = reltime()
     try
-        " We could  get rid of the  if/else/endif, and shorten the  code, but we
-        " won't do it, because the most usual case is `a:cnt = 1`.  And we want to
-        " execute `a:cmd` as  fast as possible (no let, no  while loop), because
-        " Ex commands are slow.
-        if a:cnt > 1
-            let i = 0
-            while i < a:cnt
-                exe a:cmd
-                let i += 1
+        # We could  get rid of the  if/else/endif, and shorten the  code, but we
+        # won't do it, because the most usual case is `cnt = 1`.  And we want to
+        # execute `cmd` as fast as possible  (no let, no while loop), because Ex
+        # commands are slow.
+        if cnt > 1
+            var i = 0
+            while i < cnt
+                exe cmd
+                i += 1
             endwhile
         else
-            exe a:cmd
+            exe cmd
         endif
     catch
-        return s:Catch()
+        Catch()
     finally
-        " We clear the screen before displaying the results, to erase the
-        " possible messages displayed by the command.
+        # We  clear the  screen  before  displaying the  results,  to erase  the
+        # possible messages displayed by the command.
         redraw
-        echom reltime(time)->reltimestr()->matchstr('.*\..\{,3}') .. ' seconds to run :' .. a:cmd
+        echom reltime(time)
+            ->reltimestr()
+            ->matchstr('.*\..\{,3}') .. ' seconds to run :' .. cmd
     endtry
-endfu
+enddef
 
-fu debug#unused_functions() abort "{{{1
-    " look for all function definitions in the current repo
-    sil noa lvim /^\s*fu\%[nction]\s\+/ ./**/*.vim
-    let functions = getloclist(0)->map({_, v -> v.text->matchstr('[^ (]*\ze(')})
+def debug#unusedFunctions() #{{{1
+    # TODO: I think it would be useful if `InRepo()` was a libary function.
+    # And maybe it should return the path to the root of the repo.
+    # Look at `vim-cwd` for inspiration.
+    if !InRepo()
+        echo 'Not in a repo'
+        return
+    endif
 
-    " build a list of unused functions
-    let unused = []
+    # look for all function definitions in the current repo
+    try
+        # Do *not* use `:noa`.{{{
+        #
+        # If `:lvim` needs to look into a  file which is already open in another
+        # Vim instance,  there is  a risk  that `E325` is  raised.  And  if that
+        # happens, you might not be able to see the message, which is confusing,
+        # because it  looks like Vim  is blocked.  The  issue is triggered  by a
+        # combination of `:sil` and `try/catch`.
+        #
+        # You  can work  around it  with an  autocmd listening  to `SwapExists`,
+        # which we currently have in our vimrc.  But `:noa` would suppress it.
+        #
+        # ---
+        #
+        # Also, `:noa` would suppress `Syntax`,  which in turn would prevent the
+        # files in which `:lvim` looks for from being highlighted:
+        #
+        #     $ vim -Nu NONE --cmd 'syn on' +'noa lvim /autocmd/ $VIMRUNTIME/filetype.vim'
+        #}}}
+        sil lvim /^\C\s*\%(fu\%[nction]\|def\)\s\+/ ./**/*.vim
+    # E480: No match: ...
+    catch /^Vim\%((\a\+)\)\=:E480:/
+        echo 'Could not find any function in the repo'
+        return
+    endtry
+    var functions = getloclist(0)->map((_, v) => v.text->matchstr('[^ (]*\ze('))
+
+    # build a list of unused functions
+    var unused = []
     for afunc in functions
-        let pat = afunc
-        if afunc[: 1] is# 's:'
-            let pat ..= '\|<sid>' .. afunc[2 :]
+        var pat = afunc
+        if afunc[: 1] == 's:'
+            pat ..= '\|<sid>' .. afunc[2 :]
         endif
-        exe 'sil noa lvim /' .. pat .. '/ ./**/*.vim'
-        " the name of an unused function appears only once
-        if getloclist(0, {'size': 0}).size <= 1
-            let unused += [afunc]
+        exe 'sil lvim /\C\%(' .. pat .. '\)(/ ./**/*.vim'
+        # the name of an unused function appears only once
+        if getloclist(0, {size: 0}).size <= 1
+            unused += [afunc]
         endif
     endfor
 
-    " report unused functions if any
+    # report unused functions if any
     if empty(unused)
-        echom 'no unused function in ' .. getcwd()
+        lclose
+        echo 'No unused function in ' .. getcwd()
     else
-        exe 'lvim /' .. join(unused, '\|') .. '/ ./**/*.vim'
+        setloclist(0, [], 'f')
+        exe 'lvim /\C\%(' .. join(unused, '\|')  .. '\)(/ ./**/*.vim'
     endif
-endfu
+enddef
+
+def InRepo(): bool
+    var bufname = expand('<afile>:p')->resolve()
+    var dir = isdirectory(bufname) ? bufname : fnamemodify(bufname, ':h')
+    var dir_escaped = escape(dir, ' ')
+    var match = finddir('.git/', dir_escaped .. ';')
+    return !empty(match)
+enddef
 
 def debug#vimPatches(n: string, append = v:false) #{{{1
     if n == ''
@@ -292,4 +338,3 @@ const MAJOR_VERSIONS =<< trim END
     8.1
     8.2
 END
-

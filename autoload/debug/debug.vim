@@ -1,28 +1,28 @@
-if exists('g:autoloaded_debug#debug')
-    finish
-endif
-let g:autoloaded_debug#debug = 1
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
 
 import {Catch, FuncComplete} from 'lg.vim'
 
-fu debug#debug#completion(arglead, cmdline, _p) abort
+def debug#debug#completion(arglead: string, cmdline: string, _p: any): list<string>
     return getcompletion('', 'command')
-        \ ->copy()
-        \ ->filter({_, v -> stridx(v, a:arglead) == 0})
-        \ + s:FuncComplete(a:arglead, '', 0)
-endfu
+        ->copy()
+        ->filter((_, v) => stridx(v, arglead) == 0)
+        + FuncComplete(arglead, '', 0)
+enddef
 
-fu debug#debug#wrapper(cmd) abort
+def debug#debug#wrapper(cmd: string)
     try
         ToggleEditingCommands 0
         au! MyGranularUndo
-        exe 'debug ' .. a:cmd
+        exe 'debug ' .. cmd
     catch
-        return s:Catch()
+        Catch()
     finally
         unlet! g:autoloaded_readline
         ru autoload/readline.vim
         ToggleEditingCommands 1
     endtry
-endfu
+enddef
 

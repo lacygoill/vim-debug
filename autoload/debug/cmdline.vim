@@ -1,39 +1,46 @@
-fu debug#cmdline#eval_var_under_cursor() abort "{{{1
-    let cmdline = getcmdline()
-    let pos = getcmdpos()
-    let pat = '\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)\+\&' .. '\([bwtgv]:\)\=\%(\a\w*\)'
-    "         ├─────────────────────────────────────────┘    ├────────────────────────┘{{{
-    "         │                                              └ a variable name
-    "         │
-    "         └ make sure the matched variable name is the one where our cursor is
-    "}}}
-    let var_name = matchstr(cmdline, pat)
-    if var_name !~# ':'
-        let var_name = 'g:' .. var_name
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
+
+def debug#cmdline#evalVarUnderCursor(): string #{{{1
+    var cmdline = getcmdline()
+    var pos = getcmdpos()
+    var pat = '\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)\+\&' .. '\([bwtgv]:\)\=\%(\a\w*\)'
+    #         ├─────────────────────────────────────────┘    ├────────────────────────┘{{{
+    #         │                                              └ a variable name
+    #         │
+    #         └ make sure the matched variable name is the one where our cursor is
+    #}}}
+    var var_name = matchstr(cmdline, pat)
+    if var_name !~ ':'
+        var_name = 'g:' .. var_name
     endif
     if !exists(var_name)
         return cmdline
     endif
-    let text_until_var = matchstr(cmdline, '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)*')
-    " Why `string()`?{{{
-    "
-    " If the value of  the variable is a string, we want it  to be quoted on the
-    " command-line.
-    " If  it's not,  it  needs to  be  converted into  a  string, otherwise  the
-    " substitution would fail.
-    "}}}
-    let rep = '\=eval(var_name)->string()'
+    var text_until_var = matchstr(cmdline, '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)*')
+    # Why `string()`?{{{
+    #
+    # If the value of  the variable is a string, we want it  to be quoted on the
+    # command-line.
+    # If  it's not,  it  needs to  be  converted into  a  string, otherwise  the
+    # substitution would fail.
+    #}}}
+    Rep = () => eval(var_name)->string()
+    var new_pos: number
     if eval(var_name)->type() == v:t_string
-        let new_pos = strlen(text_until_var .. eval(var_name)) + 3
+        new_pos = strlen(text_until_var .. eval(var_name)) + 3
     else
-        let new_pos = strlen(text_until_var .. eval(var_name)->string()) + 1
+        new_pos = strlen(text_until_var .. eval(var_name)->string()) + 1
     endif
-    let new_cmdline = substitute(cmdline, pat, rep, '')
-    call setcmdpos(new_pos)
-    " allow us to undo the evaluation
+    var new_cmdline = substitute(cmdline, pat, Rep, '')
+    setcmdpos(new_pos)
+    # allow us to undo the evaluation
     if exists('#User#AddToUndolistC')
         do <nomodeline> User AddToUndolistC
     endif
     return new_cmdline
-endfu
+enddef
 
+var Rep: func(): string

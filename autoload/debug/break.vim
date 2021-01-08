@@ -1,56 +1,56 @@
-if exists('g:autoloaded_debug#break')
-    finish
-endif
-let g:autoloaded_debug#break = 1
+vim9 noclear
+
+if exists('loaded') | finish | endif
+var loaded = true
 
 import FuncComplete from 'lg.vim'
 
-" We can't use `getcompletion('breakadd ', 'cmdline')`.{{{
-"
-" Because `:breakadd` – contrary to `:profile` – doesn't provide any completion.
-"}}}
-const s:ADD_ARGUMENTS =<< trim END
+# We can't use `getcompletion('breakadd ', 'cmdline')`.{{{
+#
+# Because `:breakadd` – contrary to `:profile` – doesn't provide any completion.
+#}}}
+const ADD_ARGUMENTS =<< trim END
     expr
     file
     func
 END
-const s:DEL_ARGUMENTS =<< trim END
+const DEL_ARGUMENTS =<< trim END
     *
     file
     func
 END
 
-fu debug#break#completion(arglead, cmdline, _p) abort
-    if a:cmdline =~# '^\CBreak\%(add\|del\) func\s\+\%(\d\+\s\+\)\='
-    \ && a:cmdline !~# '^\CBreak\%(add\|del\) func\s\+\%(\%(\d\+\s\+\)\=\)\@>\S\+\s\+'
-        return s:FuncComplete(a:arglead, '', 0)
-    elseif a:cmdline =~# '^\CBreak\%(add\|del\) file\s\+'
-    \ && a:cmdline !~# '^\CBreak\%(add\|del\) file\s\+\S\+\s\+'
-        if a:arglead =~# '$\h\w*$'
-            return getcompletion(a:arglead[1 :], 'environment')
-                \ ->map({_, v -> '$' .. v})
+def debug#break#completion(arglead: string, cmdline: string, _p: any): list<string>
+    if cmdline =~ '^\CBreak\%(add\|del\) func\s\+\%(\d\+\s\+\)\='
+    && cmdline !~ '^\CBreak\%(add\|del\) func\s\+\%(\%(\d\+\s\+\)\=\)\@>\S\+\s\+'
+        return FuncComplete(arglead, '', 0)
+    elseif cmdline =~ '^\CBreak\%(add\|del\) file\s\+'
+        && cmdline !~ '^\CBreak\%(add\|del\) file\s\+\S\+\s\+'
+        if arglead =~ '$\h\w*$'
+            return getcompletion(arglead[1 :], 'environment')
+                ->map((_, v) => '$' .. v)
         else
-            return getcompletion(a:arglead, 'file')
+            return getcompletion(arglead, 'file')
         endif
-    elseif a:cmdline =~# '^\CBreakadd \%(' .. join(s:ADD_ARGUMENTS, '\|') .. '\)'
-    \ || a:cmdline =~# '^\CBreakdel \%('
-    \     .. mapnew(s:DEL_ARGUMENTS, {_, v -> escape(v, '*')})
-    \     ->join('\|') .. '\)'
+    elseif cmdline =~ '^\CBreakadd \%(' .. join(ADD_ARGUMENTS, '\|') .. '\)'
+        || cmdline =~ '^\CBreakdel \%('
+        .. mapnew(DEL_ARGUMENTS, (_, v) => escape(v, '*'))
+        ->join('\|') .. '\)'
         return []
     else
-        return copy(a:cmdline =~# '^\CBreakadd\s' ? s:ADD_ARGUMENTS : s:DEL_ARGUMENTS)
-            \ ->filter({_, v -> stridx(v, a:arglead) == 0})
+        return copy(cmdline =~ '^\CBreakadd\s' ? ADD_ARGUMENTS : DEL_ARGUMENTS)
+            ->filter((_, v) => stridx(v, arglead) == 0)
     endif
     return []
-endfu
+enddef
 
-fu debug#break#wrapper(suffix, arguments) abort
+def debug#break#wrapper(suffix: string, args: string)
     try
-        exe 'break' .. a:suffix .. ' ' .. a:arguments
+        exe 'break' .. suffix .. ' ' .. args
     catch
         echohl ErrorMsg
         echom v:exception
         echohl NONE
     endtry
-endfu
+enddef
 

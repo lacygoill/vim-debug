@@ -1,4 +1,4 @@
-vim9script noclear
+vim9 noclear
 
 if exists('loaded') | finish | endif
 var loaded = true
@@ -49,7 +49,7 @@ com -bar -nargs=1 -complete=customlist,debug#debug#completion Debug debug#debug#
 cnorea <expr> ba getcmdtype() is# ':' && getcmdpos() == 3 ? 'Breakadd' : 'ba'
 com -bar -nargs=1 -complete=customlist,debug#break#completion Breakadd debug#break#wrapper('add', <q-args>)
 com -bar -nargs=1 -complete=customlist,debug#break#completion Breakdel debug#break#wrapper('del', <q-args>)
-com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#prof#wrapper(<bang>0, <q-args>)
+com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#prof#wrapper(<q-bang>, <q-args>)
 
 # Purpose:{{{
 # Wrapper around commands such as `:breakadd file */ftplugin/sh.vim`.
@@ -60,7 +60,7 @@ com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#pr
 com -bar -nargs=* -complete=custom,debug#local_plugin#complete DebugLocalPlugin
     \ debug#local_plugin#main(<q-args>)
 
-com -bar DebugMappingsFunctionKeys debug#mappings#using_function_keys()
+com -bar DebugMappingsFunctionKeys debug#mappings#usingFunctionKeys()
 
 # `:DebugTerminfo` dumps the termcap db of the current Vim instance
 # `:DebugTerminfo!` prettifies the termcap db written in the current file
@@ -68,9 +68,9 @@ com -bar -bang -nargs=0 -complete=file DebugTerminfo debug#terminfo#main(<bang>0
 
 # Sometimes, after a  refactoring, we forget to remove some  functions which are
 # no longer necessary.  This command should list them in the location window.
-# Warning: It may give false positives, because  a function may appear only once
-# in a plugin, but still be called from another plugin.
-com -bar DebugUnusedFunctions debug#unused_functions()
+# Warning: It might  give false  positives, because a  function may  appear only
+# once in a plugin, but still be called from another plugin.
+com -bar DebugUnusedFunctions debug#unusedFunctions()
 
 com -bar Scriptnames debug#scriptnames#main()
 
@@ -112,7 +112,7 @@ com -bar -nargs=? -complete=custom,debug#vimPatchesCompletion VimPatches debug#v
 # Mappings {{{1
 # C-x C-v   evaluate variable under cursor while on command-line{{{2
 
-cno <unique> <c-x><c-v> <c-\>e debug#cmdline#eval_var_under_cursor()<cr>
+cno <unique> <c-x><c-v> <c-\>e debug#cmdline#evalVarUnderCursor()<cr>
 
 # g!        last page in the output of last command {{{2
 
@@ -146,7 +146,7 @@ nno <unique> !d <cmd>call debug#capture#dump()<cr>
 
 #             ┌ error
 #             │
-nno <unique> !e <cmd>exe debug#help_about_last_errors()<cr>
+nno <unique> !e <cmd>exe debug#helpAboutLastErrors()<cr>
 
 # !m        show messages {{{2
 
@@ -158,7 +158,7 @@ nno <unique> !M <cmd>messages clear <bar> echo 'messages cleared'<cr>
 
 # !o        paste Output of last ex command  {{{2
 
-nmap <expr><unique> !o debug#output#last_ex_command()
+nmap <expr><unique> !o debug#output#lastExCommand()
 
 # !s        show syntax groups under cursor {{{2
 
@@ -181,5 +181,5 @@ nno <unique> !T <cmd>call debug#timer#measure()<cr>
 
 # !t        show info about running timers {{{2
 
-nno <unique> !t <cmd>call debug#timer#info_open()<cr>
+nno <unique> !t <cmd>call debug#timer#infoOpen()<cr>
 
