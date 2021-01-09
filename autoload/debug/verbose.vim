@@ -33,7 +33,7 @@ def GetCurrentValue(opt: string): list<string> #{{{2
     var vlocal = execute('verb setl ' .. opt .. '?')->matchstr('\_s*\zs\S.*')
     var vglobal = execute('verb setg ' .. opt .. '?')->matchstr('\_s*\zs\S.*')
     var type: string
-    if opt[: 1] == 't_' || opt[0] .. opt[-1 : -1] == '<>'
+    if opt[: 1] == 't_' || opt[0] .. opt[-1] == '<>'
         type = 'terminal'
     else
         type = join(OPTIONS_DOC, "\n")

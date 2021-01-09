@@ -64,6 +64,7 @@ def debug#timer#infoOpen() #{{{1
     var tempfile = tempname() .. '/timer_info'
     exe 'to :' .. (&columns / 3) .. 'vnew ' .. tempfile
     &l:pvw = true
+    &l:wrap = false
     wincmd p
 enddef
 
@@ -115,15 +116,16 @@ def debug#timer#populate() #{{{1
 enddef
 var infos: list<dict<any>>
 
-fu PutDefinition() abort "{{{1
-    let line = getline('.')
-    if line =~# '^callback\s\+function(''<lambda>\d\+'')$'
-        let lambda_id = matchstr(line, '\d\+')
-        let definition = execute('fu {''<lambda>' .. lambda_id .. '''}')->split('\n')
+def PutDefinition() #{{{1
+    var line = getline('.')
+    var definition: list<string>
+    if line =~ '^callback\s\+function(''<lambda>\d\+'')$'
+        var lambda_id = matchstr(line, '\d\+')
+        definition = execute('verb fu <lambda>' .. lambda_id)->split('\n')
     else
-        let func_name = matchstr(line, '^callback\s\+function(''\zs.\{-}\ze'')$')
-        let definition = execute('fu ' .. func_name)->split('\n')
+        var func_name = matchstr(line, '^callback\s\+function(''\zs.\{-}\ze'')$')
+        definition = execute('verb fu ' .. func_name)->split('\n')
     endif
-    call append('.', ['---'] + map(definition, {_, v -> '    ' .. v}))
-endfu
+    append('.', ['---'] + map(definition, (_, v) => '    ' .. v))
+enddef
 
