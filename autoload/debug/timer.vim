@@ -85,9 +85,9 @@ def debug#timer#populate() #{{{1
     if infos == []
         infos = timer_info()
     endif
-    var formatted_infos = map(infos, (_, v) => FormatInfo(v))
+    var formatted_infos = mapnew(infos, (_, v) => FormatInfo(v))
     infos = []
-    var lines = []
+    var lines: list<string> = []
     for info in formatted_infos
         lines += info
     endfor

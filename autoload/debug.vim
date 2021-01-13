@@ -174,10 +174,10 @@ def debug#unusedFunctions() #{{{1
         echo 'Could not find any function in the repo'
         return
     endtry
-    var functions = getloclist(0)->map((_, v) => v.text->matchstr('[^ (]*\ze('))
+    var functions = getloclist(0)->mapnew((_, v) => v.text->matchstr('[^ (]*\ze('))
 
     # build a list of unused functions
-    var unused = []
+    var unused: list<string> = []
     for afunc in functions
         var pat = afunc
         if afunc[: 1] == 's:'

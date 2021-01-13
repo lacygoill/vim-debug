@@ -41,7 +41,6 @@ def debug#break#completion(arglead: string, cmdline: string, _p: any): list<stri
         return copy(cmdline =~ '^\CBreakadd\s' ? ADD_ARGUMENTS : DEL_ARGUMENTS)
             ->filter((_, v) => stridx(v, arglead) == 0)
     endif
-    return []
 enddef
 
 def debug#break#wrapper(suffix: string, args: string)

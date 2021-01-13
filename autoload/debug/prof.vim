@@ -11,48 +11,53 @@ const ARGUMENTS = getcompletion('profile ', 'cmdline')
 #                                       ^
 #                                       necessary
 
-fu debug#prof#completion(arglead, cmdline, pos) abort "{{{1
-    let l:Filter = {l -> filter(l, {_, v -> stridx(v, a:arglead) == 0})}
+def debug#prof#completion( #{{{1
+    arglead: string,
+    cmdline: string,
+    pos: number
+    ): list<string>
 
-    if a:cmdline =~# '^\CProf\s\+func\s\+'
-    \ && a:cmdline !~# '^\CProf\s\+func\s\+\S\+\s\+'
-        return s:FuncComplete(a:arglead, '', 0)
+    var Filter = (l) => filter(l, (_, v) => stridx(v, arglead) == 0)
 
-    elseif a:cmdline =~# '^\CProf\s\+\%(file\|start\)\s\+'
-    \ && a:cmdline !~# '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
-        if a:arglead =~# '$\h\w*$'
-            return getcompletion(a:arglead[1 :], 'environment')
-                \ ->map({_, v -> '$' .. v})
+    if cmdline =~ '^\CProf\s\+func\s\+'
+    && cmdline !~ '^\CProf\s\+func\s\+\S\+\s\+'
+        return FuncComplete(arglead, '', 0)
+
+    elseif cmdline =~ '^\CProf\s\+\%(file\|start\)\s\+'
+    && cmdline !~ '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
+        if arglead =~ '$\h\w*$'
+            return getcompletion(arglead[1 :], 'environment')
+                ->map((_, v) => '$' .. v)
         else
-            return getcompletion(a:arglead, 'file')
+            return getcompletion(arglead, 'file')
         endif
 
-    elseif a:cmdline =~# '^\CProf\s\+\%(' .. join(s:ARGUMENTS, '\|') .. '\)'
-        \ || count(a:cmdline, ' -') >= 2
+    elseif cmdline =~ '^\CProf\s\+\%(' .. join(ARGUMENTS, '\|') .. '\)'
+        || count(cmdline, ' -') >= 2
         return []
 
-    elseif a:cmdline !~# '-'
-        return copy(s:ARGUMENTS)->l:Filter()
+    elseif cmdline !~ '-'
+        return copy(ARGUMENTS)->Filter()
     endif
 
-    " Warning: if you try to refactor this block, make some tests.{{{
-    "
-    " In particular, check how the function completes this:
-    "
-    "     :Prof -plu
-    "     :Prof -plugin vim-
-    "}}}
-    let last_dash_to_cursor = matchstr(a:cmdline, '.*\s\zs-.*\%' .. (a:pos + 1) .. 'c')
-    if last_dash_to_cursor =~# '^-\%[plugin]$\|^-\%[read_last_profile]$'
-        return l:Filter(['-plugin', '-read_last_profile'])
+    # Warning: if you try to refactor this block, make some tests.{{{
+    #
+    # In particular, check how the function completes this:
+    #
+    #     :Prof -plu
+    #     :Prof -plugin vim-
+    #}}}
+    var last_dash_to_cursor = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
+    if last_dash_to_cursor =~ '^-\%[plugin]$\|^-\%[read_last_profile]$'
+        return Filter(['-plugin', '-read_last_profile'])
 
-    elseif last_dash_to_cursor =~# '^-plugin\s\+\S*$'
-        let paths_to_plugins = glob($HOME .. '/.vim/plugged/*', 0, 1)
-        let plugin_names = map(paths_to_plugins, {_, v -> matchstr(v, '.*/\zs.*')}) + ['fzf']
-        return l:Filter(plugin_names)
+    elseif last_dash_to_cursor =~ '^-plugin\s\+\S*$'
+        var paths_to_plugins = glob($HOME .. '/.vim/plugged/*', false, true)
+        var plugin_names = map(paths_to_plugins, (_, v) => matchstr(v, '.*/\zs.*')) + ['fzf']
+        return Filter(plugin_names)
     endif
     return []
-endfu
+enddef
 
 def debug#prof#wrapper(bang: string, args: string) #{{{1
     if index(['', '-h', '--help'], args) >= 0

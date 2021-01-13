@@ -18,7 +18,7 @@ enddef
 
 def EchoSynstack()
     echo synstack('.', col('.'))
-        ->map((_, v) => synIDattr(v, 'name'))
+        ->mapnew((_, v) => synIDattr(v, 'name'))
         ->reverse()
         ->join()
 enddef

@@ -25,6 +25,8 @@ def Synnames(): list<string> #{{{1
     # They are sorted from the outermost syntax group, to the innermost.
     #
     # The last one is what `synID()` returns.
-    return synstack('.', col('.'))->map((_, v) => synIDattr(v, 'name'))->reverse()
+    return synstack('.', col('.'))
+        ->mapnew((_, v) => synIDattr(v, 'name'))
+        ->reverse()
 enddef
 
