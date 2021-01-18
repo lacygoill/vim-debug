@@ -95,7 +95,7 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
 
     var plugin_name: string = substitute(args, '-plugin\s\+', '', '')
     var cmdline: string = 'Prof -plugin '
-    if debug#prof#completion('', cmdline, strchars(cmdline, v:true))->index(plugin_name) == -1
+    if debug#prof#completion('', cmdline, strchars(cmdline, true))->index(plugin_name) == -1
         echo 'There''s no plugin named:  ' .. plugin_name
         return
     endif

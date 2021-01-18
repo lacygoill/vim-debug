@@ -214,7 +214,7 @@ def InRepo(): bool
     return !empty(match)
 enddef
 
-def debug#vimPatches(n: string, append = v:false) #{{{1
+def debug#vimPatches(n: string, append = false) #{{{1
     if n == ''
         var msg: list<string> =<< trim END
             provide a major Vim version number
