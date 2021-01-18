@@ -24,9 +24,9 @@ def debug#log#output(what: dict<any>) #{{{1
         return
     endif
 
-    var tempfile = tempname()
+    var tempfile: string = tempname()
 
-    var excmd = what.excmd
+    var excmd: string = what.excmd
     # Don't run any single-character command.{{{
     #
     # This would raise an error in the next line; specifically because of:
@@ -44,20 +44,20 @@ def debug#log#output(what: dict<any>) #{{{1
         echohl NONE
         return
     endif
-    var pfx = exists(':' .. split(excmd)[0]) == 2
+    var pfx: string = exists(':' .. split(excmd)[0]) == 2
         || split(excmd[1 :])[0]->executable()
         ? ':' : ''
     if has_key(what, 'lines')
-        var title = pfx .. excmd
-        var lines = what.lines
+        var title: string = pfx .. excmd
+        var lines: list<string> = what.lines
         writefile([title], tempfile)
         writefile(lines, tempfile, 'a')
     else
-        var level = what.level
-        #                   ┌ if the level is 1, just write `:Verbose`
-        #                   │ instead of `:1Verbose`
-        #                   ├─────────────────────┐
-        var title = pfx .. (level == 1 ? '' : level) .. 'Verbose ' .. excmd
+        var level: number = what.level
+        var title: string = pfx
+            # if the level is 1, just write `:Verbose` instead of `:1Verbose`
+            .. (level == 1 ? '' : level)
+            .. 'Verbose ' .. excmd
         writefile([title], tempfile, 'b')
         #                             │
         #                             └ don't add a linefeed at the end
@@ -113,20 +113,22 @@ enddef
 def RedirectToTempfile(tempfile: string, level: number, arg_excmd: string): any #{{{1
     try
         # Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
-        var excmd = arg_excmd[0] == '!'
+        var excmd: string = arg_excmd[0] == '!'
             ? 'echo system(' .. string(arg_excmd[1 :]) .. ')'
             : arg_excmd
 
-        var output = execute(level .. 'verbose exe ' .. string(excmd))
-        #                                      │{{{
-        #                                      └ From `:h :verb`:
-        #
-        #                                                 When concatenating another command,
-        #                                                 the ":verbose" only applies to the first one.
-        #
-        #                                         We want `:Verbose` to apply to the whole “pipeline“.
-        #                                         Not just the part before the 1st bar.
-        #}}}
+        var output: string = execute(
+            level .. 'verbose '
+            # From `:h :verb`:{{{
+            #
+            #           When concatenating another command,
+            #           the ":verbose" only applies to the first one.
+            #
+            # We want `:Verbose` to apply to the whole “pipeline“.
+            # Not just the part before the 1st bar.
+            #}}}
+            .. 'exe '
+            .. string(excmd))
 
         # We set `'vfile'` to `tempfile`.
         # It will redirect (append) all messages to the end of this file.

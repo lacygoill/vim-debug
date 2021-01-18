@@ -5,11 +5,11 @@ var loaded = true
 
 import FuncComplete from 'lg.vim'
 
-const DIR = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
+const DIR: string = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
 
-const ARGUMENTS = getcompletion('profile ', 'cmdline')
-#                                       ^
-#                                       necessary
+const ARGUMENTS: list<string> = getcompletion('profile ', 'cmdline')
+#                                                     ^
+#                                                     necessary
 
 def debug#prof#completion( #{{{1
     arglead: string,
@@ -17,7 +17,8 @@ def debug#prof#completion( #{{{1
     pos: number
     ): list<string>
 
-    var Filter = (l) => filter(l, (_, v) => stridx(v, arglead) == 0)
+    var Filter: func = (l: list<string>): list<string> =>
+        filter(l, (_, v: string): bool => stridx(v, arglead) == 0)
 
     if cmdline =~ '^\CProf\s\+func\s\+'
     && cmdline !~ '^\CProf\s\+func\s\+\S\+\s\+'
@@ -47,13 +48,15 @@ def debug#prof#completion( #{{{1
     #     :Prof -plu
     #     :Prof -plugin vim-
     #}}}
-    var last_dash_to_cursor = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
+    var last_dash_to_cursor: string = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
     if last_dash_to_cursor =~ '^-\%[plugin]$\|^-\%[read_last_profile]$'
         return Filter(['-plugin', '-read_last_profile'])
 
     elseif last_dash_to_cursor =~ '^-plugin\s\+\S*$'
-        var paths_to_plugins = glob($HOME .. '/.vim/plugged/*', false, true)
-        var plugin_names = map(paths_to_plugins, (_, v) => matchstr(v, '.*/\zs.*')) + ['fzf']
+        var paths_to_plugins: list<string> =
+            glob($HOME .. '/.vim/plugged/*', false, true)
+        var plugin_names: list<string> =
+            map(paths_to_plugins, (_, v) => matchstr(v, '.*/\zs.*')) + ['fzf']
         return Filter(plugin_names)
     endif
     return []
@@ -61,7 +64,7 @@ enddef
 
 def debug#prof#wrapper(bang: string, args: string) #{{{1
     if index(['', '-h', '--help'], args) >= 0
-        var usage =<< trim END
+        var usage: list<string> =<< trim END
             usage:
                 :Prof continue
                 :Prof[!] file {pattern}
@@ -90,14 +93,14 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
         return
     endif
 
-    var plugin_name = substitute(args, '-plugin\s\+', '', '')
-    var cmdline = 'Prof -plugin '
+    var plugin_name: string = substitute(args, '-plugin\s\+', '', '')
+    var cmdline: string = 'Prof -plugin '
     if debug#prof#completion('', cmdline, strchars(cmdline, v:true))->index(plugin_name) == -1
         echo 'There''s no plugin named:  ' .. plugin_name
         return
     endif
 
-    var start_cmd = 'profile start ' .. DIR .. '/profile.log'
+    var start_cmd: string = 'profile start ' .. DIR .. '/profile.log'
     var plugin_files: list<string>
     var file_cmd: string
     if plugin_name == 'fzf'
@@ -142,7 +145,7 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
 enddef
 
 def ReadLastProfile() #{{{1
-    var logfile = DIR .. '/profile.log'
+    var logfile: string = DIR .. '/profile.log'
     if !filereadable(logfile)
         echo 'There are no results to read'
         return
@@ -151,9 +154,9 @@ def ReadLastProfile() #{{{1
     sil TW
 
     # folding may interfere, disable it
-    var fen_save = &l:fen
-    var winid = win_getid()
-    var bufnr = bufnr('%')
+    var fen_save: bool = &l:fen
+    var winid: number = win_getid()
+    var bufnr: number = bufnr('%')
     &l:fen = false
     try
         # create an empty fold before the first profiled function for better readability;

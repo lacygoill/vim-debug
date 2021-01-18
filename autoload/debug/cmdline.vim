@@ -4,22 +4,23 @@ if exists('loaded') | finish | endif
 var loaded = true
 
 def debug#cmdline#evalVarUnderCursor(): string #{{{1
-    var cmdline = getcmdline()
-    var pos = getcmdpos()
-    var pat = '\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)\+\&' .. '\([bwtgv]:\)\=\%(\a\w*\)'
-    #         ├─────────────────────────────────────────┘    ├────────────────────────┘{{{
-    #         │                                              └ a variable name
-    #         │
-    #         └ make sure the matched variable name is the one where our cursor is
+    var cmdline: string = getcmdline()
+    var pos: number = getcmdpos()
+    var pat: string =
+        # make sure the matched variable name is the one where our cursor is
+        '\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)\+\&'
+        # a variable name
+        .. '\([bwtgv]:\)\=\%(\a\w*\)'
     #}}}
-    var var_name = matchstr(cmdline, pat)
+    var var_name: string = matchstr(cmdline, pat)
     if var_name !~ ':'
         var_name = 'g:' .. var_name
     endif
     if !exists(var_name)
         return cmdline
     endif
-    var text_until_var = matchstr(cmdline, '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)*')
+    var text_until_var: string = matchstr(cmdline,
+        '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)*')
     # Why `string()`?{{{
     #
     # If the value of  the variable is a string, we want it  to be quoted on the
@@ -34,7 +35,7 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     else
         new_pos = strlen(text_until_var .. eval(var_name)->string()) + 1
     endif
-    var new_cmdline = substitute(cmdline, pat, Rep, '')
+    var new_cmdline: string = substitute(cmdline, pat, Rep, '')
     setcmdpos(new_pos)
     # allow us to undo the evaluation
     if exists('#User#AddToUndolistC')

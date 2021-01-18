@@ -9,12 +9,12 @@ import FuncComplete from 'lg.vim'
 #
 # Because `:breakadd` – contrary to `:profile` – doesn't provide any completion.
 #}}}
-const ADD_ARGUMENTS =<< trim END
+const ADD_ARGUMENTS: list<string> =<< trim END
     expr
     file
     func
 END
-const DEL_ARGUMENTS =<< trim END
+const DEL_ARGUMENTS: list<string> =<< trim END
     *
     file
     func

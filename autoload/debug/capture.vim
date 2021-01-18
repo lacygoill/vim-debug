@@ -15,7 +15,7 @@ enddef
 var verbosity: number
 
 def debug#capture#variable(_: any) #{{{2
-    var pat =
+    var pat: string =
         # this part is optional because, in Vim9 script, there might be no assignment command
            '\%(\%(let\|var\|const\=\)\s\+\)\='
         .. '\([bwtglsav]:\)\=\(\h\w*\)\s*[+-.*]\{,2}[=:].*'
@@ -26,15 +26,15 @@ def debug#capture#variable(_: any) #{{{2
         return
     endif
     copy .
-    var cmd = IsVim9() ? '' : 'let '
-    var rep = verbosity
+    var cmd: string = IsVim9() ? '' : 'let '
+    var rep: string = verbosity
         ? cmd .. 'g:d_\2 = get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
         : cmd .. 'g:d_\2 = deepcopy(\1\2)'
     sil exe 'keepj keepp s/' .. pat .. '/' .. rep .. '/e'
 enddef
 
 def debug#capture#dump() #{{{2
-    var vars = getcompletion('d_*', 'var')
+    var vars: list<string> = getcompletion('d_*', 'var')
     if empty(vars)
         echo 'there are no debugging variables'
         return

@@ -6,34 +6,38 @@ var loaded = true
 import Catch from 'lg.vim'
 
 def debug#helpAboutLastErrors(): string #{{{1
-    var messages = execute('messages')->split('\n')->reverse()
-    #                    ┌ When an error occurs inside a try conditional,{{{
-    #                    │ Vim prefixes an error message with:
-    #                    │
-    #                    │     Vim:
-    #                    │ or:
-    #                    │     Vim({cmd}):
-    #                    ├───────────────┐}}}
-    var pat_error = '^\%(Vim\%((\a\+)\)\=:\|".\{-}"\s\)\=\zsE\d\+'
-    #                                       ├───────┘{{{
-    #                                       └ in a buffer containing the word 'the', execute:
-    #
-    #                                               g/the/ .w >>/tmp/some_file
-    #
-    #                                         It raises this error message:
-    #
-    #                                               /tmp/file_1" E212: Can't open file for writing
-    #}}}
+    var messages: list<string> = execute('messages')->split('\n')->reverse()
+    var pat_error: string = '^\%('
+        # When an error occurs inside a try conditional, Vim prefixes an error message with:{{{
+        #
+        #     Vim:
+        #
+        # or:
+        #
+        #     Vim({cmd}):
+        #}}}
+        .. 'Vim\%((\a\+)\)\=:'
+        # In a buffer containing the word 'the', execute:{{{
+        #
+        #     :g/the/ .w >>/tmp/some_file
+        #
+        # It raises this error message:
+        #
+        #     "/tmp/some_file" E212: Can't open file for writing~
+        #}}}
+        .. '\|".\{-}"\s\)'
+        .. '\=\zsE\d\+'
 
     # index of most recent error
-    var i = match(messages, pat_error)
+    var i: number = match(messages, pat_error)
     # index of next line which isn't an error, nor belongs to a stack trace
-    var j = match(messages, '^\%(' .. pat_error .. '\|Error\|line\)\@!', i + 1)
+    var j: number = match(messages, '^\%(' .. pat_error .. '\|Error\|line\)\@!', i + 1)
     if j == -1
         j = i + 1
     endif
 
-    var errors = map(messages[i : j - 1], (idx, v) => matchstr(v, pat_error))
+    var errors: list<string> = map(messages[i : j - 1],
+        (_, v) => matchstr(v, pat_error))
     # remove lines  which don't contain  an error,  or which contain  the errors
     # E662 / E663 / E664 (they aren't interesting and come frequently)
     filter(errors, (_, v) => !empty(v) && v !~ '^E66[234]$')
@@ -55,7 +59,7 @@ def debug#helpAboutLastErrors(): string #{{{1
 
     return 'h ' .. get(last_errors.taglist, last_errors.pos, last_errors.taglist[0])
 enddef
-var last_errors = {taglist: [], pos: -1}
+var last_errors: dict<any> = {taglist: [], pos: -1}
 
 def debug#messages() #{{{1
     :0Verbose messages
@@ -71,7 +75,7 @@ def debug#messages() #{{{1
     # Make sure they're disabled so that we can remove noise.
     setl ma noro
 
-    var noises = {
+    var noises: dict<string> = {
         '[fewer|more] lines': '\d\+ \%(fewer\|more\) lines\%(; \%(before\|after\) #\d\+.*\)\=',
         '1 more line less':   '1 \%(more \)\=line\%( less\)\=\%(; \%(before\|after\) #\d\+.*\)\=',
         'change':             'Already at \%(new\|old\)est change',
@@ -112,14 +116,14 @@ def debug#messages() #{{{1
 enddef
 
 def debug#time(cmd: string, cnt: number) #{{{1
-    var time = reltime()
+    var time: list<number> = reltime()
     try
         # We could  get rid of the  if/else/endif, and shorten the  code, but we
         # won't do it, because the most usual case is `cnt = 1`.  And we want to
         # execute `cmd` as fast as possible  (no let, no while loop), because Ex
         # commands are slow.
         if cnt > 1
-            var i = 0
+            var i: number = 0
             while i < cnt
                 exe cmd
                 i += 1
@@ -129,6 +133,7 @@ def debug#time(cmd: string, cnt: number) #{{{1
         endif
     catch
         Catch()
+        return
     finally
         # We  clear the  screen  before  displaying the  results,  to erase  the
         # possible messages displayed by the command.
@@ -174,12 +179,13 @@ def debug#unusedFunctions() #{{{1
         echo 'Could not find any function in the repo'
         return
     endtry
-    var functions = getloclist(0)->mapnew((_, v) => v.text->matchstr('[^ (]*\ze('))
+    var functions: list<string> = getloclist(0)
+        ->mapnew((_, v) => v.text->matchstr('[^ (]*\ze('))
 
     # build a list of unused functions
     var unused: list<string> = []
     for afunc in functions
-        var pat = afunc
+        var pat: string = afunc
         if afunc[: 1] == 's:'
             pat ..= '\|<sid>' .. afunc[2 :]
         endif
@@ -201,16 +207,16 @@ def debug#unusedFunctions() #{{{1
 enddef
 
 def InRepo(): bool
-    var bufname = expand('<afile>:p')->resolve()
-    var dir = isdirectory(bufname) ? bufname : fnamemodify(bufname, ':h')
-    var dir_escaped = escape(dir, ' ')
-    var match = finddir('.git/', dir_escaped .. ';')
+    var bufname: string = expand('<afile>:p')->resolve()
+    var dir: string = isdirectory(bufname) ? bufname : fnamemodify(bufname, ':h')
+    var dir_escaped: string = escape(dir, ' ')
+    var match: string = finddir('.git/', dir_escaped .. ';')
     return !empty(match)
 enddef
 
 def debug#vimPatches(n: string, append = v:false) #{{{1
     if n == ''
-        var msg =<< trim END
+        var msg: list<string> =<< trim END
             provide a major Vim version number
 
             usage example:
@@ -220,9 +226,9 @@ def debug#vimPatches(n: string, append = v:false) #{{{1
         END
         echo join(msg, "\n")
     elseif index(MAJOR_VERSIONS, n) != -1
-        var filename = 'ftp://ftp.vim.org/pub/vim/patches/' .. n .. '/README'
+        var filename: string = 'ftp://ftp.vim.org/pub/vim/patches/' .. n .. '/README'
         if append
-            var bufnr = bufadd(filename)
+            var bufnr: number = bufadd(filename)
             bufload(bufnr)
             getbufline(bufnr, 1, '$')->append('$')
             exe 'bw! ' .. bufnr
@@ -258,16 +264,16 @@ def debug#vimPatches(n: string, append = v:false) #{{{1
         elseif index(MAJOR_VERSIONS, last) == -1
             Error(last .. ' is not a valid major Vim version')
         endif
-        var filename = 'VimPatches ' .. n
+        var filename: string = 'VimPatches ' .. n
         if bufloaded(filename)
             Display(filename)
             return
         endif
         new
         exe 'file ' .. fnameescape(filename)
-        var ifirst = index(MAJOR_VERSIONS, first)
-        var ilast = index(MAJOR_VERSIONS, last)
-        var numbers = MAJOR_VERSIONS[ifirst : ilast]
+        var ifirst: number = index(MAJOR_VERSIONS, first)
+        var ilast: number = index(MAJOR_VERSIONS, last)
+        var numbers: list<string> = MAJOR_VERSIONS[ifirst : ilast]
         for number in numbers
             debug#vimPatches(number, true)
         endfor
@@ -283,7 +289,7 @@ def Mapping()
 enddef
 
 def Display(filename: string)
-    var winid = bufnr(filename)->win_findbuf()->get(-1)
+    var winid: number = bufnr(filename)->win_findbuf()->get(-1)
     if winid > 0
         win_gotoid(winid)
     else
@@ -326,7 +332,7 @@ def debug#vimPatchesCompletion(_a: any, _l: any, _p: any): string #{{{1
     return join(MAJOR_VERSIONS, "\n")
 enddef
 
-const MAJOR_VERSIONS =<< trim END
+const MAJOR_VERSIONS: list<string> =<< trim END
     6.3
     6.4
     7.0

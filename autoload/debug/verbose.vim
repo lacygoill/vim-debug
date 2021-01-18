@@ -4,7 +4,7 @@ if exists('loaded') | finish | endif
 var loaded = true
 
 import Catch from 'lg.vim'
-const OPTIONS_DOC = readfile($VIMRUNTIME .. '/doc/options.txt')
+const OPTIONS_DOC: list<string> = readfile($VIMRUNTIME .. '/doc/options.txt')
 
 # Interface {{{1
 def debug#verbose#option(arg_opt: string) #{{{2
@@ -20,7 +20,7 @@ def debug#verbose#option(arg_opt: string) #{{{2
     # necessary for a reset boolean option (like 'paste')
     opt = substitute(opt, '^no', '', '')
 
-    var msg = GetCurrentValue(opt)
+    var msg: list<string> = GetCurrentValue(opt)
     if exists('b:orig_' .. opt)
         msg += GetOriginalValue(opt)
     endif
@@ -30,8 +30,10 @@ enddef
 #}}}1
 # Core {{{1
 def GetCurrentValue(opt: string): list<string> #{{{2
-    var vlocal = execute('verb setl ' .. opt .. '?')->matchstr('\_s*\zs\S.*')
-    var vglobal = execute('verb setg ' .. opt .. '?')->matchstr('\_s*\zs\S.*')
+    var vlocal: string = execute('verb setl ' .. opt .. '?')
+        ->matchstr('\_s*\zs\S.*')
+    var vglobal: string = execute('verb setg ' .. opt .. '?')
+        ->matchstr('\_s*\zs\S.*')
     var type: string
     if opt[: 1] == 't_' || opt[0] .. opt[-1] == '<>'
         type = 'terminal'
@@ -55,9 +57,10 @@ def GetCurrentValue(opt: string): list<string> #{{{2
 enddef
 
 def GetOriginalValue(opt: string): list<string> #{{{2
-    var curval = execute('setl ' .. opt .. '?')->matchstr('=\zs.*')
-    var origval = eval('b:orig_' .. opt)
-    var is_boolean = empty(curval)
+    var curval: string = execute('setl ' .. opt .. '?')
+        ->matchstr('=\zs.*')
+    var origval: any = eval('b:orig_' .. opt)
+    var is_boolean: bool = empty(curval)
     if is_boolean
         curval = execute('setl ' .. opt .. '?')[1 :]
         origval = Bool2name(origval, curval)
@@ -69,9 +72,9 @@ def GetOriginalValue(opt: string): list<string> #{{{2
 enddef
 
 def Display(arg_msg: list<string>) #{{{2
-    var msg = join(arg_msg, "\n\n")
+    var msg: string = join(arg_msg, "\n\n")
     # a horizontal rule makes the output easier to read when we execute several `:Vo` consecutively
-    var horizontal_rule = substitute(msg, '.*\n', '', '')
+    var horizontal_rule: string = substitute(msg, '.*\n', '', '')
     horizontal_rule = substitute(horizontal_rule, '^\t', '\=repeat(" ", &l:ts)', '')
     horizontal_rule = substitute(horizontal_rule, '.', '-', 'g')
     echo msg .. (msg =~ "\n" ? "\n" .. horizontal_rule : '')
@@ -79,7 +82,7 @@ enddef
 #}}}1
 # Util {{{1
 def Bool2name(origval: string, curval: string): string #{{{2
-    var is_set = curval !~ '^no'
+    var is_set: bool = curval !~ '^no'
     if is_set
         return origval ? curval : 'no' .. curval
     else

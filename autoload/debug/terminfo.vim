@@ -39,7 +39,7 @@ def SetFt() #{{{2
 enddef
 
 def SplitWindow() #{{{2
-    var tempfile = tempname() .. '/termcap.vim'
+    var tempfile: string = tempname() .. '/termcap.vim'
     exe 'sp ' .. tempfile
 enddef
 
@@ -202,7 +202,7 @@ def InstallMappings() #{{{2
 enddef
 
 def GetHelp() #{{{2
-    var tag = getline('.')->matchstr('\%(^set \|" \)\@4<=t_[^=]*')
+    var tag: string = getline('.')->matchstr('\%(^set \|" \)\@4<=t_[^=]*')
     if tag != ''
         try
             exe "h '" .. tag
@@ -218,7 +218,7 @@ def GetHelp() #{{{2
 enddef
 
 def PrintHelp() #{{{2
-    var help =<< trim END
+    var help: list<string> =<< trim END
         Enter    open relevant help tag to get more info about the terminal option under the cursor
         !!       compare value on current line with the one in output of `:set termcap`
         g?       print this help

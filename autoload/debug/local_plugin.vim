@@ -4,12 +4,12 @@ if exists('loaded') | finish | endif
 var loaded = true
 
 def debug#local_plugin#main(args: string) #{{{1
-    var args = split(args)
-    var kind = matchstr(args, '-kind\s\+\zs[^ -]\S*')
-    var filetype = matchstr(args, '-filetype\s\+\zs[^-]\S*')
+    var splitted_args: list<string> = split(args)
+    var kind: string = matchstr(args, '-kind\s\+\zs[^ -]\S*')
+    var filetype: string = matchstr(args, '-filetype\s\+\zs[^-]\S*')
 
-    if index(args, '-kind') == -1 || index(args, '-filetype') == -1
-        var usage =<< trim END
+    if index(splitted_args, '-kind') == -1 || index(splitted_args, '-filetype') == -1
+        var usage: list<string> =<< trim END
             usage:
                 DebugLocalPlugin -kind ftplugin -filetype sh
                 DebugLocalPlugin -kind indent   -filetype awk
@@ -70,18 +70,18 @@ def AddBreakpoints(kind: string, filetype: string, glob = '') #{{{1
 enddef
 
 def debug#local_plugin#complete(arglead: string, cmdline: string, pos: number): string #{{{1
-    var from_dash_to_cursor = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
+    var from_dash_to_cursor: string = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
 
     if from_dash_to_cursor =~ '^-filetype\s*\S*$'
-        var filetypes = getcompletion('', 'filetype')
+        var filetypes: list<string> = getcompletion('', 'filetype')
         return join(filetypes, "\n")
 
     elseif from_dash_to_cursor =~ '^-kind\s*\S*$'
-        var kinds = ['ftplugin', 'indent', 'syntax']
+        var kinds: list<string> = ['ftplugin', 'indent', 'syntax']
         return join(kinds, "\n")
 
     elseif empty(arglead) || arglead[0] == '-'
-        var options = ['-kind', '-filetype']
+        var options: list<string> = ['-kind', '-filetype']
         return join(options, "\n")
     endif
 

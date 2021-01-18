@@ -16,8 +16,8 @@ def GetOutput(): string #{{{1
     catch
         # If the last command failed and produced an error, it will fail again.
         # But we still want something to be inserted: the error message(s).
-        var messages = execute('messages')->split('\n')->reverse()
-        var idx = match(messages, '^E\d\+')
+        var messages: list<string> = execute('messages')->split('\n')->reverse()
+        var idx: number = match(messages, '^E\d\+')
         remove(messages, idx + 1, -1)
         filter(messages, (_, v) => v =~ '\C^E\d\+')
         return reverse(messages)->join("\n")

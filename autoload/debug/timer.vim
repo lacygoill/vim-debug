@@ -4,7 +4,7 @@ if exists('loaded') | finish | endif
 var loaded = true
 
 def FoldSection() #{{{1
-    var new_line = getline('.')->substitute('^', '# ', '')
+    var new_line: string = getline('.')->substitute('^', '# ', '')
     setline('.', ['#'] + [new_line])
     if line('.') != 1
         append(line('.') - 1, '')
@@ -61,7 +61,7 @@ def debug#timer#infoOpen() #{{{1
         echo 'no timer is currently running'
         return
     endif
-    var tempfile = tempname() .. '/timer_info'
+    var tempfile: string = tempname() .. '/timer_info'
     exe 'to :' .. (&columns / 3) .. 'vnew ' .. tempfile
     &l:pvw = true
     &l:wrap = false
@@ -85,7 +85,7 @@ def debug#timer#populate() #{{{1
     if infos == []
         infos = timer_info()
     endif
-    var formatted_infos = mapnew(infos, (_, v) => FormatInfo(v))
+    var formatted_infos: list<list<string>> = mapnew(infos, (_, v) => FormatInfo(v))
     infos = []
     var lines: list<string> = []
     for info in formatted_infos
@@ -117,13 +117,14 @@ enddef
 var infos: list<dict<any>>
 
 def PutDefinition() #{{{1
-    var line = getline('.')
+    var line: string = getline('.')
     var definition: list<string>
     if line =~ '^callback\s\+function(''<lambda>\d\+'')$'
-        var lambda_id = matchstr(line, '\d\+')
+        var lambda_id: string = matchstr(line, '\d\+')
         definition = execute('verb fu <lambda>' .. lambda_id)->split('\n')
     else
-        var func_name = matchstr(line, '^callback\s\+function(''\zs.\{-}\ze'')$')
+        var func_name: string = matchstr(line,
+            '^callback\s\+function(''\zs.\{-}\ze'')$')
         definition = execute('verb fu ' .. func_name)->split('\n')
     endif
     append('.', ['---'] + map(definition, (_, v) => '    ' .. v))

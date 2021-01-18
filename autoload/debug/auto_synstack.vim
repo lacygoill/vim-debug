@@ -3,7 +3,7 @@ vim9 noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-const MINIVIMRC = (getenv('XDG_RUNTIME_VIM') ?? '/tmp') .. '/debug_syntax_plugin.vim'
+const MINIVIMRC: string = (getenv('XDG_RUNTIME_VIM') ?? '/tmp') .. '/debug_syntax_plugin.vim'
 
 def debug#auto_synstack#main() #{{{1
     augroup DebugSyntax | au!

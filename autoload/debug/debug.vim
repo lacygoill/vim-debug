@@ -19,6 +19,7 @@ def debug#debug#wrapper(cmd: string)
         exe 'debug ' .. cmd
     catch
         Catch()
+        return
     finally
         unlet! g:autoloaded_readline
         ru autoload/readline.vim
