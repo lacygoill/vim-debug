@@ -261,8 +261,10 @@ def debug#vimPatches(n: string, append = false) #{{{1
         [first, last] = matchlist(n, '\(\d\.\d\)\s*-\s*\(\d\.\d\)')[1 : 2]
         if index(MAJOR_VERSIONS, first) == -1
             Error(first .. ' is not a valid major Vim version')
+            return
         elseif index(MAJOR_VERSIONS, last) == -1
             Error(last .. ' is not a valid major Vim version')
+            return
         endif
         var filename: string = 'VimPatches ' .. n
         if bufloaded(filename)
