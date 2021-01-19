@@ -103,7 +103,7 @@ com -bar Scriptnames debug#scriptnames#main()
 com -range=1 -addr=other -nargs=+ -complete=command Time debug#time(<q-args>, <count>)
 # Do *not* give the `-bar` attribute to `:Verbose`.
 com -range=1 -addr=other -nargs=1 -complete=command Verbose
-    \ debug#log#output({'level': <count>, 'excmd': <q-args>})
+    \ debug#log#output({level: <count>, excmd: <q-args>})
 
 com -bar -nargs=1 -complete=option Vo debug#verbose#option(<q-args>)
 
