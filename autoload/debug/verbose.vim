@@ -81,12 +81,12 @@ def Display(arg_msg: list<string>) #{{{2
 enddef
 #}}}1
 # Util {{{1
-def Bool2name(origval: string, curval: string): string #{{{2
+def Bool2name(was_set: bool, curval: string): string #{{{2
     var is_set: bool = curval !~ '^no'
     if is_set
-        return origval ? curval : 'no' .. curval
+        return was_set ? curval : 'no' .. curval
     else
-        return origval ? substitute(curval, '^no', '', '') : curval
+        return was_set ? substitute(curval, '^no', '', '') : curval
     endif
 enddef
 
