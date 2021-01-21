@@ -64,7 +64,7 @@ com -bar DebugMappingsFunctionKeys debug#mappings#usingFunctionKeys()
 
 # `:DebugTerminfo` dumps the termcap db of the current Vim instance
 # `:DebugTerminfo!` prettifies the termcap db written in the current file
-com -bar -bang -nargs=0 -complete=file DebugTerminfo debug#terminfo#main(<bang>0)
+com -bar -bang -nargs=0 DebugTerminfo debug#terminfo#main(<bang>0)
 
 # Sometimes, after a  refactoring, we forget to remove some  functions which are
 # no longer necessary.  This command should list them in the location window.
