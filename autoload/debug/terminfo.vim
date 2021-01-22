@@ -44,9 +44,7 @@ def SplitWindow() #{{{2
 enddef
 
 def DumpTermcap(use_curfile: bool) #{{{2
-    if !use_curfile
-        execute('set termcap')->split('\n')->setline(1)
-    endif
+    execute('set termcap')->split('\n')->setline(1)
     append(1, '')
     # The bang after silent is necessary to suppress `E486` in gVim, where there
     # may be no `Terminal keys` section.
