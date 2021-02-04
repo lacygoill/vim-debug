@@ -225,7 +225,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
                 VimPatches 7.4 - 8.2
         END
         echo join(msg, "\n")
-    elseif index(MAJOR_VERSIONS, n) != -1
+    elseif index(MAJOR_VERSIONS, n) >= 0
         var filename: string = 'ftp://ftp.vim.org/pub/vim/patches/' .. n .. '/README'
         if append
             var bufnr: number = bufadd(filename)

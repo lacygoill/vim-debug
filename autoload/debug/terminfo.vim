@@ -46,8 +46,8 @@ enddef
 def DumpTermcap(use_curfile: bool) #{{{2
     execute('set termcap')->split('\n')->setline(1)
     append(1, '')
-    # The bang after silent is necessary to suppress `E486` in gVim, where there
-    # may be no `Terminal keys` section.
+    # The bang  after silent is necessary  to suppress `E486` in  the GUI, where
+    # there may be no `Terminal keys` section.
     sil! :1/Terminal keys/ | append(line('.') - 1, '')
     sil! :1/Terminal keys/ | append('.', '')
     sil keepj keepp :%s/^ *//e
@@ -59,7 +59,7 @@ def SplitCodes() #{{{2
     #                                 ├───┘
     #                                 └ to support the GUI where there is no "Terminal keys" section
 
-    if !search('Terminal keys', 'n')
+    if search('Terminal keys', 'n') == 0
         return
     endif
     # split terminal keys; one per line
