@@ -81,7 +81,7 @@ def debug#log#output(what: dict<any>) #{{{1
         #
         #        it should be `0`
         #        if, instead, it's a string, then an error has occurred: bail out
-        if RedirectToTempfile(tempfile, level, excmd)->type() == v:t_string
+        if RedirectToTempfile(tempfile, level, excmd)->typename() == 'string'
             return
         endif
     endif

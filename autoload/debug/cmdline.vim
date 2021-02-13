@@ -30,7 +30,7 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     #}}}
     Rep = () => eval(var_name)->string()
     var new_pos: number
-    if eval(var_name)->type() == v:t_string
+    if eval(var_name)->typename() == 'string'
         new_pos = strlen(text_until_var .. eval(var_name)) + 3
     else
         new_pos = strlen(text_until_var .. eval(var_name)->string()) + 1
