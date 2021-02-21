@@ -3,12 +3,15 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-import {Catch, FuncComplete} from 'lg.vim'
+import {
+    Catch,
+    FuncComplete,
+    } from 'lg.vim'
 
 def debug#debug#completion(arglead: string, cmdline: string, _p: any): list<string>
     return getcompletion('', 'command')
         ->copy()
-        ->filter((_, v) => stridx(v, arglead) == 0)
+        ->filter((_, v: string): bool => stridx(v, arglead) == 0)
         + FuncComplete(arglead, '', 0)
 enddef
 

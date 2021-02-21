@@ -36,11 +36,11 @@ def debug#helpAboutLastErrors(): string #{{{1
         j = i + 1
     endif
 
-    var errors: list<string> = map(messages[i : j - 1],
-        (_, v) => matchstr(v, pat_error))
-    # remove lines  which don't contain  an error,  or which contain  the errors
-    # E662 / E663 / E664 (they aren't interesting and come frequently)
-    filter(errors, (_, v) => !empty(v) && v !~ '^E66[234]$')
+    var errors: list<string> = messages[i : j - 1]
+        ->map((_, v: string): string => matchstr(v, pat_error))
+        # remove lines  which don't contain  an error,  or which contain  the errors
+        # E662 / E663 / E664 (they aren't interesting and come frequently)
+        ->filter((_, v: string): bool => !empty(v) && v !~ '^E66[234]$')
     if empty(errors)
         return 'echo "no last errors"'
     endif
@@ -180,7 +180,7 @@ def debug#unusedFunctions() #{{{1
         return
     endtry
     var functions: list<string> = getloclist(0)
-        ->mapnew((_, v) => v.text->matchstr('[^ (]*\ze('))
+        ->mapnew((_, v: dict<any>): string => v.text->matchstr('[^ (]*\ze('))
 
     # build a list of unused functions
     var unused: list<string> = []

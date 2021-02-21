@@ -28,18 +28,18 @@ def debug#break#completion(arglead: string, cmdline: string, _p: any): list<stri
         && cmdline !~ '^\CBreak\%(add\|del\) file\s\+\S\+\s\+'
         if arglead =~ '$\h\w*$'
             return getcompletion(arglead[1 :], 'environment')
-                ->map((_, v) => '$' .. v)
+                ->map((_, v: string): string => '$' .. v)
         else
             return getcompletion(arglead, 'file')
         endif
     elseif cmdline =~ '^\CBreakadd \%(' .. join(ADD_ARGUMENTS, '\|') .. '\)'
         || cmdline =~ '^\CBreakdel \%('
-        .. mapnew(DEL_ARGUMENTS, (_, v) => escape(v, '*'))
+        .. mapnew(DEL_ARGUMENTS, (_, v: string): string => escape(v, '*'))
         ->join('\|') .. '\)'
         return []
     else
         return copy(cmdline =~ '^\CBreakadd\s' ? ADD_ARGUMENTS : DEL_ARGUMENTS)
-            ->filter((_, v) => stridx(v, arglead) == 0)
+            ->filter((_, v: string): bool => stridx(v, arglead) == 0)
     endif
 enddef
 

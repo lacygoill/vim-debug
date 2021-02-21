@@ -26,7 +26,7 @@ def Synnames(): list<string> #{{{1
     #
     # The last one is what `synID()` returns.
     return synstack('.', col('.'))
-        ->mapnew((_, v) => synIDattr(v, 'name'))
+        ->mapnew((_, v: number): string => synIDattr(v, 'name'))
         ->reverse()
 enddef
 

@@ -3,7 +3,11 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-import {Catch, IsVim9} from 'lg.vim'
+import {
+    Catch,
+    IsVim9,
+    } from 'lg.vim'
+
 import WinScratch from 'lg/window.vim'
 
 # Interface {{{1
@@ -39,7 +43,7 @@ def debug#capture#dump() #{{{2
         echo 'there are no debugging variables'
         return
     endif
-    map(vars, (_, v) => v .. ' = ' .. eval('g:' .. v)->string())
+    map(vars, (_, v: string): string => v .. ' = ' .. eval('g:' .. v)->string())
     try
         WinScratch(vars)
     catch /^Vim\%((\a\+)\)\=:E994:/

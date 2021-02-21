@@ -11,7 +11,6 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
         '\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)\+\&'
         # a variable name
         .. '\([bwtgv]:\)\=\%(\a\w*\)'
-    #}}}
     var var_name: string = matchstr(cmdline, pat)
     if var_name !~ ':'
         var_name = 'g:' .. var_name
@@ -28,7 +27,7 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     # If  it's not,  it  needs to  be  converted into  a  string, otherwise  the
     # substitution would fail.
     #}}}
-    Rep = () => eval(var_name)->string()
+    var Rep: func = (): string => eval(var_name)->string()
     var new_pos: number
     if eval(var_name)->typename() == 'string'
         new_pos = strlen(text_until_var .. eval(var_name)) + 3
@@ -44,4 +43,3 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     return new_cmdline
 enddef
 
-var Rep: func(): string

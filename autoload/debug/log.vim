@@ -152,7 +152,7 @@ def RedirectToTempfile(tempfile: string, level: number, arg_excmd: string): any 
         # Second, sometimes, you would get undesired messages:
         #
         #     &vfile = '/tmp/log'
-        #     echo execute('au')->split('\n')->filter((_, v) => v =~ 'fugitive')
+        #     echo execute('au')->split('\n')->filter((_, v: string): bool => v =~ 'fugitive')
         #     &vfile = ''
         #
         # The  previous snippet  should have  output only  the lines  containing

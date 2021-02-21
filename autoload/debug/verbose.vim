@@ -51,7 +51,9 @@ def GetCurrentValue(opt: string): list<string> #{{{2
             global:  %s
             type:    %s
         END
-        map(msg, (i, v) => substitute(v, '%s', escape([vlocal, vglobal, type][i], '&\'), 'g'))
+        map(msg, (i: number, v: string): string =>
+            substitute(v, '%s', escape([vlocal, vglobal, type][i], '&\'), 'g')
+            )
     endif
     return msg
 enddef

@@ -28,7 +28,7 @@ def debug#prof#completion( #{{{1
     && cmdline !~ '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
         if arglead =~ '$\h\w*$'
             return getcompletion(arglead[1 :], 'environment')
-                ->map((_, v) => '$' .. v)
+                ->map((_, v: string): string => '$' .. v)
         else
             return getcompletion(arglead, 'file')
         endif
@@ -55,8 +55,9 @@ def debug#prof#completion( #{{{1
     elseif last_dash_to_cursor =~ '^-plugin\s\+\S*$'
         var paths_to_plugins: list<string> =
             glob($HOME .. '/.vim/plugged/*', false, true)
-        var plugin_names: list<string> =
-            map(paths_to_plugins, (_, v) => matchstr(v, '.*/\zs.*')) + ['fzf']
+        var plugin_names: list<string> = paths_to_plugins
+            ->map((_, v: string): string => matchstr(v, '.*/\zs.*'))
+            + ['fzf']
         return Filter(plugin_names)
     endif
     return []
@@ -113,15 +114,18 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
         plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', false, true)
     endif
 
-    filter(plugin_files, (_, v) => v !~ '\m\c/t\%[est]/')
-    map(plugin_files, (_, v) => 'so ' .. v)
-    writefile(plugin_files, DIR .. '/profile.log')
-    sil! exe 'so ' .. DIR .. '/profile.log'
+    plugin_files
+        ->filter((_, v: string): bool => v !~ '\m\c/t\%[est]/')
+        ->map((_, v: string): string => 'so ' .. v)
+        ->writefile(DIR .. '/profile.log')
+    exe 'sil! so ' .. DIR .. '/profile.log'
 
     echo printf("Executing:\n    %s\n    %s\n%s\n\n",
         start_cmd,
         file_cmd,
-        map(plugin_files, (_, v) => '    ' .. v)->join("\n"),
+        plugin_files
+            ->map((_, v: string): string => '    ' .. v)
+            ->join("\n"),
         )
 
     # TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{

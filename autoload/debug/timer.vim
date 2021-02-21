@@ -56,7 +56,8 @@ def debug#timer#infoOpen() #{{{1
     #
     # Besides, we don't care about a timer which we can't control (stop/pause).
     #}}}
-    infos = timer_info()->filter((_, v) => v.time > 0)
+    infos = timer_info()
+        ->filter((_, v: dict<any>): bool => v.time > 0)
     if empty(infos)
         echo 'no timer is currently running'
         return
@@ -85,7 +86,8 @@ def debug#timer#populate() #{{{1
     if infos == []
         infos = timer_info()
     endif
-    var formatted_infos: list<list<string>> = mapnew(infos, (_, v) => FormatInfo(v))
+    var formatted_infos: list<list<string>> = infos
+        ->mapnew((_, v: dict<any>): list<string> => FormatInfo(v))
     infos = []
     var lines: list<string> = []
     for info in formatted_infos
@@ -127,6 +129,6 @@ def PutDefinition() #{{{1
             '^callback\s\+function(''\zs.\{-}\ze'')$')
         definition = execute('verb fu ' .. func_name)->split('\n')
     endif
-    append('.', ['---'] + map(definition, (_, v) => '    ' .. v))
+    append('.', ['---'] + definition->map((_, v: string): string => '    ' .. v))
 enddef
 
