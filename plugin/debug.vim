@@ -8,6 +8,54 @@ var loaded = true
 # https://vi.stackexchange.com/a/25338/17449
 # https://vi.stackexchange.com/a/25204/17449
 
+# Log Channel Activity {{{1
+
+const LOG_CHANNEL_ACTIVITY: bool = true
+const LOGFILE_CHAN: string = '/tmp/vim_channel_activity.log'
+
+augroup LogChannelActivity
+    # we need to delay until `VimEnter` so that `v:servername` has been set
+    au VimEnter * LogChannelActivity()
+augroup END
+
+def LogChannelActivity()
+    if LOG_CHANNEL_ACTIVITY
+    # only log the activity of our main Vim instance
+    && v:servername != ''
+        ch_logfile(LOGFILE_CHAN, 'w')
+        def ReduceLogfile()
+            # For now, we're only interested in the keys we've typed (interactively).
+            var keep_only_this: string = 'raw key input'
+            var cmd: string = printf(
+                # Do *not* use `sed(1)`.{{{
+                #
+                #     sed -i '/pattern/!d' "$LOGFILE_CHAN"
+                #         ^^
+                #         ✘
+                #
+                # It would temporarily  delete the logfile which  would stop Vim
+                # from logging channel activity.
+                #}}}
+                'vim -es -Nu NONE -U NONE -i NONE +"v/%s/d _" +"update | qa!" "%s"',
+                keep_only_this,
+                LOGFILE_CHAN
+                )
+            job_start(cmd, {
+                mode: 'raw',
+                noblock: true,
+                })
+        enddef
+        # The logged channel activity is very verbose.
+        # Reduce it on a regular interval.
+        # 10 minutes sounds good.
+        #
+        #     timer_start(1'000'000, () => ReduceLogfile(), {repeat: -1})
+        #
+        # Commented at  the moment because we  need as much info  as possible to
+        # debug this: https://github.com/vim/vim/issues/7891
+    endif
+enddef
+
 # Autocmds {{{1
 
 augroup TimerInfoPopulate | au!
@@ -114,6 +162,10 @@ com -bar -nargs=? -complete=custom,debug#vimPatchesCompletion VimPatches debug#v
 
 cno <unique> <c-x><c-v> <c-\>e debug#cmdline#evalVarUnderCursor()<cr>
 
+# dg C-l    clean log {{{2
+
+nno dg<c-l> <cmd>call debug#CleanLog()<cr>
+
 # g!        last page in the output of last command {{{2
 
 # Why?{{{
@@ -159,6 +211,10 @@ nno <unique> !M <cmd>messages clear <bar> echo 'messages cleared'<cr>
 # !o        paste Output of last ex command  {{{2
 
 nmap <expr><unique> !o debug#output#lastExCommand()
+
+# !O        log Vim options {{{2
+
+nno !O <cmd>call <sid>debug#LogOptions()<cr>
 
 # !s        show syntax groups under cursor {{{2
 

@@ -5,6 +5,60 @@ var loaded = true
 
 import Catch from 'lg.vim'
 
+def debug#CleanLog() #{{{1
+    # clean Vim keylog (obtained with `$ vim -w keylog`)
+    if search('\%x80') > 0
+        # Those sequences don't match any key pressed interactively.{{{
+        #
+        # For example, this one:
+        #
+        #     <80>ý`
+        #
+        # matches the pseudo-key `<CursorHold>`:
+        #
+        #     :echo "\<CursorHold>"
+        #     <80><fd>`~
+        #}}}
+        sil keepj keepp :%s/\%x80ý[`a]//ge
+        # Those sequences match meta chords.{{{
+        #
+        # For example:
+        #
+        #     <80>F2 ⇔ M-a
+        #     ...
+        #     <80>F9 ⇔ M-h
+        #     <80>FA ⇔ M-i
+        #     ...
+        #     <80>FR ⇔ M-z
+        #}}}
+        sil keepj keepp :%s/\%x80F\([2-9A-R]\)/\=CleanVimKeylogRep()/ge
+        return
+    endif
+
+    # clean event log (obtained with `:LogEvents`)
+    if getline(1) !~ '\d\{2}:\d{2}'
+        :1d _
+        if getline(1) =~ '\<VimResized\>'
+            sil :1,/^\S/- d _
+        endif
+    endif
+    sil keepj keepp :%s/^.\{7}//e
+    sil keepj keepp g/^\%(OptionSet\|SourcePre\|SourcePost\)\s/ :.,/^\S\|\%$/- d _
+    sil keepj keepp g/^\s*afile: "$/d _
+    exe 'sil keepj keepp :%s/^\S\+\s\+amatch:\s*\zs' .. $HOME->escape('/') .. '/\~/e'
+enddef
+
+def CleanVimKeylogRep(): string
+    var s: string = "\e"
+    var m: string = submatch(1)
+    if m =~ '^\d$'
+        s ..= (m->char2nr() + 47)->nr2char()
+    else
+        s ..= (m->char2nr() + 40)->nr2char()
+    endif
+    return s
+enddef
+
 def debug#helpAboutLastErrors(): string #{{{1
     var messages: list<string> = execute('messages')->split('\n')->reverse()
     var pat_error: string = '^\%('
@@ -60,6 +114,12 @@ def debug#helpAboutLastErrors(): string #{{{1
     return 'h ' .. get(last_errors.taglist, last_errors.pos, last_errors.taglist[0])
 enddef
 var last_errors: dict<any> = {taglist: [], pos: -1}
+
+def debug#LogOptions() #{{{1
+    execute('set!')
+        ->split('\n')
+        ->writefile('/tmp/vim_options.txt')
+enddef
 
 def debug#messages() #{{{1
     :0Verbose messages
@@ -183,7 +243,7 @@ def debug#unusedFunctions() #{{{1
         ->mapnew((_, v: dict<any>): string => v.text->matchstr('[^ (]*\ze('))
 
     # build a list of unused functions
-    var unused: list<string> = []
+    var unused: list<string>
     for afunc in functions
         var pat: string = afunc
         if afunc[: 1] == 's:'
@@ -330,7 +390,7 @@ def Prettify()
     setl cole=3 cocu=nc
 enddef
 
-def debug#vimPatchesCompletion(_a: any, _l: any, _p: any): string #{{{1
+def debug#vimPatchesCompletion(...l: any): string #{{{1
     return join(MAJOR_VERSIONS, "\n")
 enddef
 

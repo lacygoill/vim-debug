@@ -89,7 +89,7 @@ def debug#timer#populate() #{{{1
     var formatted_infos: list<list<string>> = infos
         ->mapnew((_, v: dict<any>): list<string> => FormatInfo(v))
     infos = []
-    var lines: list<string> = []
+    var lines: list<string>
     for info in formatted_infos
         lines += info
     endfor
