@@ -105,8 +105,8 @@ com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#pr
 #
 # Useful to debug a filetype/indent/syntax plugin.
 #}}}
-com -bar -nargs=* -complete=custom,debug#local_plugin#complete DebugLocalPlugin
-    \ debug#local_plugin#main(<q-args>)
+com -bar -nargs=* -complete=custom,debug#localPlugin#complete DebugLocalPlugin
+    \ debug#localPlugin#main(<q-args>)
 
 com -bar DebugMappingsFunctionKeys debug#mappings#usingFunctionKeys()
 
@@ -229,7 +229,7 @@ nno <unique> !s <cmd>call debug#synnames#main(v:count)<cr>
 
 # !S        autoprint stack items under the cursor {{{2
 
-nno <unique> !S <cmd>call debug#auto_synstack#main()<cr>
+nno <unique> !S <cmd>call debug#autoSynstack#main()<cr>
 
 # !T        measure time to do task {{{2
 

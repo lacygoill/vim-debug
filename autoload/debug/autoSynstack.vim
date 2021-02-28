@@ -5,7 +5,7 @@ var loaded = true
 
 const MINIVIMRC: string = (getenv('XDG_RUNTIME_VIM') ?? '/tmp') .. '/debug_syntax_plugin.vim'
 
-def debug#auto_synstack#main() #{{{1
+def debug#autoSynstack#main() #{{{1
     augroup DebugSyntax | au!
         au CursorMoved <buffer> EchoSynstack()
         au BufEnter <buffer> exe 'so ' .. MINIVIMRC

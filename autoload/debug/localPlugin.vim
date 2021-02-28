@@ -3,7 +3,7 @@ vim9script noclear
 if exists('loaded') | finish | endif
 var loaded = true
 
-def debug#local_plugin#main(args: string) #{{{1
+def debug#localPlugin#main(args: string) #{{{1
     var splitted_args: list<string> = split(args)
     var kind: string = matchstr(args, '-kind\s\+\zs[^ -]\S*')
     var filetype: string = matchstr(args, '-filetype\s\+\zs[^-]\S*')
@@ -69,7 +69,7 @@ def AddBreakpoints(kind: string, filetype: string, glob = '') #{{{1
     exe cmd
 enddef
 
-def debug#local_plugin#complete(arglead: string, cmdline: string, pos: number): string #{{{1
+def debug#localPlugin#complete(arglead: string, cmdline: string, pos: number): string #{{{1
     var from_dash_to_cursor: string = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
 
     if from_dash_to_cursor =~ '^-filetype\s*\S*$'

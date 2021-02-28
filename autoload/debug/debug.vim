@@ -24,8 +24,6 @@ def debug#debug#wrapper(cmd: string)
         Catch()
         return
     finally
-        unlet! g:autoloaded_readline
-        ru autoload/readline.vim
         ToggleEditingCommands 1
     endtry
 enddef
