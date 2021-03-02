@@ -34,7 +34,7 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     else
         new_pos = strlen(text_until_var .. eval(var_name)->string()) + 1
     endif
-    var new_cmdline: string = substitute(cmdline, pat, Rep, '')
+    var new_cmdline: string = cmdline->substitute(pat, Rep, '')
     setcmdpos(new_pos)
     # allow us to undo the evaluation
     if exists('#User#AddToUndolistC')

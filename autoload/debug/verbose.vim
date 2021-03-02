@@ -18,7 +18,7 @@ def debug#verbose#option(arg_opt: string) #{{{2
         return
     endtry
     # necessary for a reset boolean option (like 'paste')
-    opt = substitute(opt, '^no', '', '')
+    opt = opt->substitute('^no', '', '')
 
     var msg: list<string> = GetCurrentValue(opt)
     if exists('b:orig_' .. opt)
@@ -51,9 +51,11 @@ def GetCurrentValue(opt: string): list<string> #{{{2
             global:  %s
             type:    %s
         END
-        map(msg, (i: number, v: string): string =>
-            substitute(v, '%s', escape([vlocal, vglobal, type][i], '&\'), 'g')
-            )
+        msg->map((i: number, v: string): string =>
+                    v->substitute(
+                        '%s',
+                        escape([vlocal, vglobal, type][i], '&\'),
+                        'g'))
     endif
     return msg
 enddef
@@ -76,9 +78,11 @@ enddef
 def Display(arg_msg: list<string>) #{{{2
     var msg: string = join(arg_msg, "\n\n")
     # a horizontal rule makes the output easier to read when we execute several `:Vo` consecutively
-    var horizontal_rule: string = substitute(msg, '.*\n', '', '')
-    horizontal_rule = substitute(horizontal_rule, '^\t', '\=repeat(" ", &l:ts)', '')
-    horizontal_rule = substitute(horizontal_rule, '.', '-', 'g')
+    var horizontal_rule: string = msg->substitute('.*\n', '', '')
+    horizontal_rule = horizontal_rule
+        ->substitute('^\t', '\=repeat(" ", &l:ts)', '')
+    horizontal_rule = horizontal_rule
+        ->substitute('.', '-', 'g')
     echo msg .. (msg =~ "\n" ? "\n" .. horizontal_rule : '')
 enddef
 #}}}1
@@ -88,7 +92,7 @@ def Bool2name(was_set: bool, curval: string): string #{{{2
     if is_set
         return was_set ? curval : 'no' .. curval
     else
-        return was_set ? substitute(curval, '^no', '', '') : curval
+        return was_set ? curval->substitute('^no', '', '') : curval
     endif
 enddef
 

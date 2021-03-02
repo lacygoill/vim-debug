@@ -34,8 +34,9 @@ def debug#break#completion(arglead: string, cmdline: string, _p: any): list<stri
         endif
     elseif cmdline =~ '^\CBreakadd \%(' .. join(ADD_ARGUMENTS, '\|') .. '\)'
         || cmdline =~ '^\CBreakdel \%('
-        .. mapnew(DEL_ARGUMENTS, (_, v: string): string => escape(v, '*'))
-        ->join('\|') .. '\)'
+            .. mapnew(DEL_ARGUMENTS, (_, v: string): string => escape(v, '*'))
+                ->join('\|')
+            .. '\)'
         return []
     else
         return copy(cmdline =~ '^\CBreakadd\s' ? ADD_ARGUMENTS : DEL_ARGUMENTS)

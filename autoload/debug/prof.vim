@@ -18,7 +18,7 @@ def debug#prof#completion( #{{{1
     ): list<string>
 
     var Filter: func = (l: list<string>): list<string> =>
-        filter(l, (_, v: string): bool => stridx(v, arglead) == 0)
+        l->filter((_, v: string): bool => stridx(v, arglead) == 0)
 
     if cmdline =~ '^\CProf\s\+func\s\+'
     && cmdline !~ '^\CProf\s\+func\s\+\S\+\s\+'
@@ -94,7 +94,7 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
         return
     endif
 
-    var plugin_name: string = substitute(args, '-plugin\s\+', '', '')
+    var plugin_name: string = args->substitute('-plugin\s\+', '', '')
     var cmdline: string = 'Prof -plugin '
     if debug#prof#completion('', cmdline, strchars(cmdline, true))->index(plugin_name) == -1
         echo 'There''s no plugin named:  ' .. plugin_name
@@ -115,18 +115,17 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
     endif
 
     plugin_files
-        ->filter((_, v: string): bool => v !~ '\m\c/t\%[est]/')
+        ->filter((_, v: string): bool => v !~ '\c/t\%[est]/')
         ->map((_, v: string): string => 'so ' .. v)
         ->writefile(DIR .. '/profile.log')
     exe 'sil! so ' .. DIR .. '/profile.log'
 
     echo printf("Executing:\n    %s\n    %s\n%s\n\n",
-        start_cmd,
-        file_cmd,
-        plugin_files
-            ->map((_, v: string): string => '    ' .. v)
-            ->join("\n"),
-        )
+            start_cmd,
+            file_cmd,
+            plugin_files
+                ->map((_, v: string): string => '    ' .. v)
+                ->join("\n"))
 
     # TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{
     # We could see the log from the current session.

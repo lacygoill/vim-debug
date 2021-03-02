@@ -19,8 +19,10 @@ def GetOutput(): string #{{{1
         var messages: list<string> = execute('messages')->split('\n')->reverse()
         var idx: number = match(messages, '^E\d\+')
         remove(messages, idx + 1, -1)
-        filter(messages, (_, v: string): bool => v =~ '\C^E\d\+')
-        return reverse(messages)->join("\n")
+        return messages
+            ->filter((_, v: string): bool => v =~ '\C^E\d\+')
+            ->reverse()
+            ->join("\n")
     endtry
     return ''
 enddef

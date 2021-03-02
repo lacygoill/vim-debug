@@ -18,7 +18,7 @@ def debug#capture#setup(arg_verbosity: number): string #{{{2
 enddef
 var verbosity: number
 
-def debug#capture#variable(_: any) #{{{2
+def debug#capture#variable(_a: any) #{{{2
     var pat: string =
         # this part is optional because, in Vim9 script, there might be no assignment command
            '\%(\%(let\|var\|const\=\)\s\+\)\='
@@ -43,7 +43,8 @@ def debug#capture#dump() #{{{2
         echo 'there are no debugging variables'
         return
     endif
-    map(vars, (_, v: string): string => v .. ' = ' .. eval('g:' .. v)->string())
+    vars->map((_, v: string): string =>
+                v .. ' = ' .. eval('g:' .. v)->string())
     try
         WinScratch(vars)
     catch /^Vim\%((\a\+)\)\=:E994:/

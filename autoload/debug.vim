@@ -45,7 +45,7 @@ def debug#CleanLog() #{{{1
     sil keepj keepp :%s/^.\{7}//e
     sil keepj keepp g/^\%(OptionSet\|SourcePre\|SourcePost\)\s/ :.,/^\S\|\%$/- d _
     sil keepj keepp g/^\s*afile: "$/d _
-    exe 'sil keepj keepp :%s/^\S\+\s\+amatch:\s*\zs' .. $HOME->escape('/') .. '/\~/e'
+    exe 'sil keepj keepp :%s/^\S\+\s\+amatch:\s*\zs' .. escape($HOME, '/') .. '/\~/e'
 enddef
 
 def CleanVimKeylogRep(): string
@@ -240,7 +240,7 @@ def debug#unusedFunctions() #{{{1
         return
     endtry
     var functions: list<string> = getloclist(0)
-        ->mapnew((_, v: dict<any>): string => v.text->matchstr('[^ (]*\ze('))
+        ->mapnew((_, v: dict<any>): string => matchstr(v.text, '[^ (]*\ze('))
 
     # build a list of unused functions
     var unused: list<string>

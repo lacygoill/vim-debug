@@ -129,6 +129,9 @@ def PutDefinition() #{{{1
             '^callback\s\+function(''\zs.\{-}\ze'')$')
         definition = execute('verb fu ' .. func_name)->split('\n')
     endif
-    append('.', ['---'] + definition->map((_, v: string): string => '    ' .. v))
+    (
+          ['---']
+        + definition->map((_, v: string): string => '    ' .. v)
+    )->append('.')
 enddef
 
