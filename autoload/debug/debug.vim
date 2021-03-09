@@ -18,7 +18,9 @@ enddef
 def debug#debug#wrapper(cmd: string)
     try
         ToggleEditingCommands 0
-        au! MyGranularUndo
+        if exists('#MyGranularUndo')
+            au! MyGranularUndo
+        endif
         exe 'debug ' .. cmd
     catch
         Catch()

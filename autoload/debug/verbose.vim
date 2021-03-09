@@ -61,8 +61,7 @@ def GetCurrentValue(opt: string): list<string> #{{{2
 enddef
 
 def GetOriginalValue(opt: string): list<string> #{{{2
-    var curval: string = execute('setl ' .. opt .. '?')
-        ->matchstr('=\zs.*')
+    var curval: string = execute('setl ' .. opt .. '?')->matchstr('=\zs.*')
     var origval: any = eval('b:orig_' .. opt)
     var is_boolean: bool = empty(curval)
     if is_boolean
