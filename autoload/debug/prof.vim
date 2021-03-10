@@ -53,11 +53,7 @@ def debug#prof#completion( #{{{1
         return Filter(['-plugin', '-read_last_profile'])
 
     elseif last_dash_to_cursor =~ '^-plugin\s\+\S*$'
-        var paths_to_plugins: list<string> =
-            glob($HOME .. '/.vim/plugged/*', false, true)
-        var plugin_names: list<string> = paths_to_plugins
-            ->map((_, v: string): string => matchstr(v, '.*/\zs.*'))
-            + ['fzf']
+        var plugin_names: list<string> = readdir($HOME .. '/.vim/plugged/') + ['fzf']
         return Filter(plugin_names)
     endif
     return []
@@ -107,11 +103,11 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
     if plugin_name == 'fzf'
         file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.fzf/**/*.vim'
         exe start_cmd | exe file_cmd
-        plugin_files = glob($HOME .. '/.fzf/**/*.vim', false, true)
+        plugin_files = glob($HOME .. '/.fzf/**/*.vim', true, true)
     else
         file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim'
         exe start_cmd | exe file_cmd
-        plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', false, true)
+        plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', true, true)
     endif
 
     plugin_files
