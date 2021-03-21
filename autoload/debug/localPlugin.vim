@@ -70,7 +70,8 @@ def AddBreakpoints(kind: string, filetype: string, glob = '') #{{{1
 enddef
 
 def debug#localPlugin#complete(arglead: string, cmdline: string, pos: number): string #{{{1
-    var from_dash_to_cursor: string = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
+    var from_dash_to_cursor: string = cmdline
+        ->matchstr('.*\s\zs-.*\%' .. (pos + 1) .. 'c')
 
     if from_dash_to_cursor =~ '^-filetype\s*\S*$'
         var filetypes: list<string> = getcompletion('', 'filetype')

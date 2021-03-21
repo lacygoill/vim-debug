@@ -19,8 +19,8 @@ def debug#log#output(what: dict<any>) #{{{1
     #             │
     #             └ lists of lines which we'll use as the output of the command
     #}}}
-    if !has_key(what, 'excmd')
-    && !(has_key(what, 'level') && has_key(what, 'lines'))
+    if !what->has_key('excmd')
+    && !(what->has_key('level') && what->has_key('lines'))
         return
     endif
 
@@ -47,7 +47,7 @@ def debug#log#output(what: dict<any>) #{{{1
     var pfx: string = exists(':' .. split(excmd)[0]) == 2
         || split(excmd[1 :])[0]->executable()
         ? ':' : ''
-    if has_key(what, 'lines')
+    if what->has_key('lines')
         var title: string = pfx .. excmd
         var lines: list<string> = what.lines
         writefile([title], tempfile)

@@ -125,8 +125,8 @@ def PutDefinition() #{{{1
         var lambda_id: string = matchstr(line, '\d\+')
         definition = execute('verb fu <lambda>' .. lambda_id)->split('\n')
     else
-        var func_name: string = matchstr(line,
-            '^callback\s\+function(''\zs.\{-}\ze'')$')
+        var func_name: string = line
+            ->matchstr('^callback\s\+function(''\zs.\{-}\ze'')$')
         definition = execute('verb fu ' .. func_name)->split('\n')
     endif
     (

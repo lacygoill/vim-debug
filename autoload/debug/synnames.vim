@@ -18,7 +18,7 @@ def Synnames(): list<string> #{{{1
     # The syntax  element under  the cursor  is part  of a  group, which  can be
     # contained in another one, and so on.
     #
-    # This imbrication  of syntax groups  can be  seen as a  stack. `synstack()`
+    # This imbrication  of syntax groups  can be  seen as a  stack.  `synstack()`
     # returns  the list  of IDs  for  all syntax  groups  in the  stack, at  the
     # position given.
     #

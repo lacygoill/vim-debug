@@ -38,7 +38,8 @@ def GetCurrentValue(opt: string): list<string> #{{{2
     if opt[: 1] == 't_' || opt[0] .. opt[-1] == '<>'
         type = 'terminal'
     else
-        type = join(OPTIONS_DOC, "\n")
+        type = OPTIONS_DOC
+            ->join("\n")
             ->matchstr('\n''' .. opt .. '''\s\+\%(''[a-z]\{2,}''\s\+\)\=\%(boolean\|number\|string\)'
             .. '\_.\{-}\zs\%(global\ze\n\|\%(global or \)\=local to \%(buffer\|window\)\)')
     endif

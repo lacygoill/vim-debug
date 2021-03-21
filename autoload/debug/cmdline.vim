@@ -18,8 +18,8 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     if !exists(var_name)
         return cmdline
     endif
-    var text_until_var: string = matchstr(cmdline,
-        '.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)*')
+    var text_until_var: string = cmdline
+        ->matchstr('.*[^a-zA-Z0-9_:]\ze\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)*')
     # Why `string()`?{{{
     #
     # If the value of  the variable is a string, we want it  to be quoted on the

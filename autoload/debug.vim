@@ -200,7 +200,7 @@ def debug#time(cmd: string, cnt: number) #{{{1
         redraw
         echom reltime(time)
             ->reltimestr()
-            ->matchstr('.*\..\{,3}') .. ' seconds to run :' .. cmd
+            ->matchstr('.*\....') .. ' seconds to run :' .. cmd
     endtry
 enddef
 
