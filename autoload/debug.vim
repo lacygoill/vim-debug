@@ -162,7 +162,7 @@ def debug#messages() #{{{1
         'verbose':       ':0Verbose messages',
         'W10':           'W10: Warning: Changing a readonly file',
         'yanked lines':  '\%(block of \)\=\d\+ lines yanked',
-        }
+    }
 
     for noise in values(noises)
         sil exe 'g/^' .. noise .. '$/d _'
@@ -262,7 +262,7 @@ def debug#unusedFunctions() #{{{1
         echo 'No unused function in ' .. getcwd()
     else
         setloclist(0, [], 'f')
-        exe 'lvim /\C\%(' .. join(unused, '\|')  .. '\)(/ ./**/*.vim'
+        exe 'lvim /\C\%(' .. unused->join('\|')  .. '\)(/ ./**/*.vim'
     endif
 enddef
 
@@ -284,7 +284,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
                 VimPatches 8.2
                 VimPatches 7.4 - 8.2
         END
-        echo join(msg, "\n")
+        echo msg->join("\n")
     elseif index(MAJOR_VERSIONS, n) >= 0
         var filename: string = 'ftp://ftp.vim.org/pub/vim/patches/' .. n .. '/README'
         if append
@@ -390,8 +390,8 @@ def Prettify()
     setl cole=3 cocu=nc
 enddef
 
-def debug#vimPatchesCompletion(...l: any): string #{{{1
-    return join(MAJOR_VERSIONS, "\n")
+def debug#vimPatchesCompletion(_, _, _): string #{{{1
+    return MAJOR_VERSIONS->join("\n")
 enddef
 
 const MAJOR_VERSIONS: list<string> =<< trim END

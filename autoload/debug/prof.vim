@@ -15,7 +15,7 @@ def debug#prof#completion( #{{{1
     arglead: string,
     cmdline: string,
     pos: number
-    ): list<string>
+): list<string>
 
     var Filter: func = (l: list<string>): list<string> =>
         l->filter((_, v: string): bool => stridx(v, arglead) == 0)
@@ -33,7 +33,7 @@ def debug#prof#completion( #{{{1
             return getcompletion(arglead, 'file')
         endif
 
-    elseif cmdline =~ '^\CProf\s\+\%(' .. join(ARGUMENTS, '\|') .. '\)'
+    elseif cmdline =~ '^\CProf\s\+\%(' .. ARGUMENTS->join('\|') .. '\)'
         || count(cmdline, ' -') >= 2
         return []
 
@@ -71,11 +71,11 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
                 :Prof -plugin {plugin name} profile a plugin
                 :Prof -read_last_profile    load last logged profile
         END
-        echo join(usage, "\n")
+        echo usage->join("\n")
         return
     endif
 
-    if args =~ '^\C\%(' .. join(ARGUMENTS, '\|') .. '\)\s*$'
+    if args =~ '^\C\%(' .. ARGUMENTS->join('\|') .. '\)\s*$'
         .. '\|^\%(start\|file\|func\)\s\+\S\+\s*$'
         try
             exe printf('prof%s %s', bang, args)

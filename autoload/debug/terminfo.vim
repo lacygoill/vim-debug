@@ -221,6 +221,6 @@ def PrintHelp() #{{{2
         !!       compare value on current line with the one in output of `:set termcap`
         g?       print this help
     END
-    echo join(help, "\n")
+    echo help->join("\n")
 enddef
 

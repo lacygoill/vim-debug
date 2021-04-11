@@ -39,17 +39,17 @@ def LogChannelActivity()
                 'vim -es -Nu NONE -U NONE -i NONE +"v/%s/d _" +"update | qa!" "%s"',
                 keep_only_this,
                 LOGFILE_CHAN
-                )
+            )
             job_start(cmd, {
                 mode: 'raw',
                 noblock: true,
-                })
+            })
         enddef
         # The logged channel activity is very verbose.
         # Reduce it on a regular interval.
         # 10 minutes sounds good.
         #
-        #     timer_start(1'000'000, () => ReduceLogfile(), {repeat: -1})
+        #     timer_start(1'000'000, (_) => ReduceLogfile(), {repeat: -1})
         #
         # Commented at  the moment because we  need as much info  as possible to
         # debug this: https://github.com/vim/vim/issues/7891

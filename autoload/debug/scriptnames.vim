@@ -9,8 +9,8 @@ def debug#scriptnames#main()
         lines: lines,
         efm: '%m: %f',
         title: ':Scriptnames',
-        quickfixtextfunc: () => [],
-        })
+        quickfixtextfunc: (_) => [],
+    })
     do <nomodeline> QuickFixCmdPost cwindow
 enddef
 

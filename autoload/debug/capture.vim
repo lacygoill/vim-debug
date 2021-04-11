@@ -6,7 +6,7 @@ var loaded = true
 import {
     Catch,
     IsVim9,
-    } from 'lg.vim'
+} from 'lg.vim'
 
 import WinScratch from 'lg/window.vim'
 
@@ -18,7 +18,7 @@ def debug#capture#setup(arg_verbosity: number): string #{{{2
 enddef
 var verbosity: number
 
-def debug#capture#variable(_a: any) #{{{2
+def debug#capture#variable(_) #{{{2
     var pat: string =
         # this part is optional because, in Vim9 script, there might be no assignment command
            '\%(\%(let\|var\|const\=\)\s\+\)\='

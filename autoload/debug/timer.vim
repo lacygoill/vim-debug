@@ -19,7 +19,7 @@ def FormatInfo(v: dict<any>): list<string> #{{{1
         "time\x01 " .. FormatTime(v.time),
         "paused\x01 " .. v.paused,
         "callback\x01 " .. string(v.callback),
-        ]
+    ]
 enddef
 
 def FormatTime(v: number): string #{{{1

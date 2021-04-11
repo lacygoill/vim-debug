@@ -76,7 +76,7 @@ def GetOriginalValue(opt: string): list<string> #{{{2
 enddef
 
 def Display(arg_msg: list<string>) #{{{2
-    var msg: string = join(arg_msg, "\n\n")
+    var msg: string = arg_msg->join("\n\n")
     # a horizontal rule makes the output easier to read when we execute several `:Vo` consecutively
     var horizontal_rule: string = msg->substitute('.*\n', '', '')
     horizontal_rule = horizontal_rule

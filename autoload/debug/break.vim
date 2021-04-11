@@ -20,7 +20,12 @@ const DEL_ARGUMENTS: list<string> =<< trim END
     func
 END
 
-def debug#break#completion(arglead: string, cmdline: string, _p: any): list<string>
+def debug#break#completion(
+    arglead: string,
+    cmdline: string,
+    _
+): list<string>
+
     if cmdline =~ '^\CBreak\%(add\|del\) func\s\+\%(\d\+\s\+\)\='
     && cmdline !~ '^\CBreak\%(add\|del\) func\s\+\%(\%(\d\+\s\+\)\=\)\@>\S\+\s\+'
         return FuncComplete(arglead, '', 0)
@@ -32,7 +37,7 @@ def debug#break#completion(arglead: string, cmdline: string, _p: any): list<stri
         else
             return getcompletion(arglead, 'file')
         endif
-    elseif cmdline =~ '^\CBreakadd \%(' .. join(ADD_ARGUMENTS, '\|') .. '\)'
+    elseif cmdline =~ '^\CBreakadd \%(' .. ADD_ARGUMENTS->join('\|') .. '\)'
         || cmdline =~ '^\CBreakdel \%('
             .. mapnew(DEL_ARGUMENTS, (_, v: string): string => escape(v, '*'))
                 ->join('\|')

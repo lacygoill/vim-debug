@@ -6,9 +6,9 @@ var loaded = true
 import {
     Catch,
     FuncComplete,
-    } from 'lg.vim'
+} from 'lg.vim'
 
-def debug#debug#completion(arglead: string, cmdline: string, _p: any): list<string>
+def debug#debug#completion(arglead: string, _, _): list<string>
     return getcompletion('', 'command')
         ->copy()
         ->filter((_, v: string): bool => stridx(v, arglead) == 0)

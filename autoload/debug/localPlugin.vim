@@ -21,7 +21,7 @@ def debug#localPlugin#main(args: string) #{{{1
             When you are finished, execute:
                 breakd *
         END
-        echo join(usage, "\n")
+        echo usage->join("\n")
         return
     endif
 
@@ -49,7 +49,11 @@ def debug#localPlugin#main(args: string) #{{{1
     endif
 enddef
 
-def AddBreakpoints(kind: string, filetype: string, glob = '') #{{{1
+def AddBreakpoints( #{{{1
+    kind: string,
+    filetype: string,
+    glob = ''
+)
     var cmd: string
     if glob != ''
         cmd = kind == 'ftplugin' && (glob == 'c_*.vim' || glob == 'c/*.vim')
@@ -69,21 +73,26 @@ def AddBreakpoints(kind: string, filetype: string, glob = '') #{{{1
     exe cmd
 enddef
 
-def debug#localPlugin#complete(arglead: string, cmdline: string, pos: number): string #{{{1
+def debug#localPlugin#complete( #{{{1
+    arglead: string,
+    cmdline: string,
+    pos: number
+): string
+
     var from_dash_to_cursor: string = cmdline
         ->matchstr('.*\s\zs-.*\%' .. (pos + 1) .. 'c')
 
     if from_dash_to_cursor =~ '^-filetype\s*\S*$'
         var filetypes: list<string> = getcompletion('', 'filetype')
-        return join(filetypes, "\n")
+        return filetypes->join("\n")
 
     elseif from_dash_to_cursor =~ '^-kind\s*\S*$'
         var kinds: list<string> = ['ftplugin', 'indent', 'syntax']
-        return join(kinds, "\n")
+        return kinds->join("\n")
 
     elseif empty(arglead) || arglead[0] == '-'
         var options: list<string> = ['-kind', '-filetype']
-        return join(options, "\n")
+        return options->join("\n")
     endif
 
     return ''

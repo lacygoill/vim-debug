@@ -77,7 +77,7 @@ def debug#log#output(what: dict<any>) #{{{1
         # 1. `Redirect...()` executes `excmd`,
         #     and redirects its output in a temporary file
         #
-        # 2. `type(...)` checks the output of `Redirect...()`
+        # 2. `typename(...)` checks the output of `Redirect...()`
         #
         #        it should be `0`
         #        if, instead, it's a string, then an error has occurred: bail out
@@ -110,7 +110,12 @@ def debug#log#output(what: dict<any>) #{{{1
     nno <buffer><nowait> DD <cmd>sil keepj keepp g/^\s*Last set from/d _<cr>
 enddef
 
-def RedirectToTempfile(tempfile: string, level: number, arg_excmd: string): any #{{{1
+def RedirectToTempfile( #{{{1
+    tempfile: string,
+    level: number,
+    arg_excmd: string
+): any
+
     try
         # Purpose: if `excmd` is `!ls` we want to capture the output of `ls(1)`, not `:ls`
         var excmd: string = arg_excmd[0] == '!'
