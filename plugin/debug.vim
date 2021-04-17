@@ -8,6 +8,7 @@ var loaded = true
 # https://vi.stackexchange.com/a/25338/17449
 # https://vi.stackexchange.com/a/25204/17449
 
+
 # Log Channel Activity {{{1
 
 const LOG_CHANNEL_ACTIVITY: bool = true
@@ -58,8 +59,9 @@ enddef
 
 # Autocmds {{{1
 
-augroup TimerInfoPopulate | au!
+augroup MyDebug | au!
     au BufNewFile /tmp/*/timer_info debug#timer#populate()
+    au BufReadPost ftp://ftp.vim.org/pub/vim/patches/*/README debug#vimPatchesPrettify()
 augroup END
 
 # Commands {{{1

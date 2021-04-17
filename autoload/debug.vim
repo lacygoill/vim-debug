@@ -312,7 +312,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
             return
         else
             sil exe 'sp ' .. filename
-            Prettify()
+            debug#vimPatchesPrettify()
             Mapping()
         endif
     elseif n =~ '^\d\.\d\s*-\s*\d\.\d$'
@@ -339,7 +339,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
         for number in numbers
             debug#vimPatches(number, true)
         endfor
-        Prettify()
+        debug#vimPatchesPrettify()
     else
         Error('invalid argument')
     endif
@@ -365,7 +365,7 @@ def Error(msg: string)
     echohl NONE
 enddef
 
-def Prettify()
+def debug#vimPatchesPrettify() #{{{1
     # no modified indicator in the status line if we edit the buffer
     setl bt=nofile nobl noswf nowrap
 
