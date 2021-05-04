@@ -5,8 +5,8 @@ var loaded = true
 
 def debug#localPlugin#main(args: string) #{{{1
     var splitted_args: list<string> = split(args)
-    var kind: string = matchstr(args, '-kind\s\+\zs[^ -]\S*')
-    var filetype: string = matchstr(args, '-filetype\s\+\zs[^-]\S*')
+    var kind: string = args->matchstr('-kind\s\+\zs[^ -]\S*')
+    var filetype: string = args->matchstr('-filetype\s\+\zs[^-]\S*')
 
     if index(splitted_args, '-kind') == -1 || index(splitted_args, '-filetype') == -1
         var usage: list<string> =<< trim END

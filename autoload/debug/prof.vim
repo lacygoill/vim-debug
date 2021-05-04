@@ -48,12 +48,17 @@ def debug#prof#completion( #{{{1
     #     :Prof -plu
     #     :Prof -plugin vim-
     #}}}
-    var last_dash_to_cursor: string = matchstr(cmdline, '.*\s\zs-.*\%' .. (pos + 1) .. 'c')
+    var last_dash_to_cursor: string = cmdline->matchstr('.*\s\zs-.*\%' .. (pos + 1) .. 'c')
     if last_dash_to_cursor =~ '^-\%[plugin]$\|^-\%[read_last_profile]$'
         return Filter(['-plugin', '-read_last_profile'])
 
     elseif last_dash_to_cursor =~ '^-plugin\s\+\S*$'
-        var plugin_names: list<string> = readdir($HOME .. '/.vim/plugged/') + ['fzf']
+        var plugin_names: list<string> = ['minpac/start', 'minpac/opt', 'mine/start', 'mine/opt']
+            ->map((_, v: string): string => $HOME .. '/.vim/pack/' .. v)
+            ->filter((_, v: string): bool => isdirectory(v))
+            ->mapnew((_, v: string): list<string> => readdir(v))
+            ->reduce((a: list<string>, v: list<string>): list<string> => a + v)
+            + ['fzf']
         return Filter(plugin_names)
     endif
     return []
@@ -105,9 +110,10 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
         exe start_cmd | exe file_cmd
         plugin_files = glob($HOME .. '/.fzf/**/*.vim', true, true)
     else
-        file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim'
+        file_cmd = 'prof' .. bang .. ' file '
+            .. $HOME .. '/.vim/pack/**/' .. plugin_name .. '/**/*.vim'
         exe start_cmd | exe file_cmd
-        plugin_files = glob($HOME .. '/.vim/plugged/' .. plugin_name .. '/**/*.vim', true, true)
+        plugin_files = glob($HOME .. '/.vim/pack/**/' .. plugin_name .. '/**/*.vim', true, true)
     endif
 
     plugin_files
@@ -150,31 +156,8 @@ def ReadLastProfile() #{{{1
         return
     endif
     exe 'sp ' .. DIR .. '/profile.log'
-    sil TW
+    sil keepj keepp :%s/\s*$//e
 
-    # folding may interfere, disable it
-    var fen_save: bool = &l:fen
-    var winid: number = win_getid()
-    var bufnr: number = bufnr('%')
-    &l:fen = false
-    try
-        # create an empty fold before the first profiled function for better readability;
-        # we use `silent!` because if we reopen the log, the pattern won't be found anymore
-        sil! :1/^FUNCTION /-put _ | s/^/#/
-        # create an empty fold before the summary at the end
-        sil! :1/^FUNCTIONS SORTED/-put _ | s/^/#/
-    finally
-        if winbufnr(winid) == bufnr
-            var tabnr: number
-            var winnr: number
-            [tabnr, winnr] = win_id2tabwin(winid)
-            settabwinvar(tabnr, winnr, '&fen', fen_save)
-        endif
-    endtry
-
-    # fold every function, every script, and the ending summaries
-    sil :%s/^FUNCTION\s\+/## /e
-    sil :%s/^SCRIPT\|^\zeFUNCTIONS SORTED/# /e
     sil! fold#adhoc#main()
     norm! 1G
     sil! FoldAutoOpen 1

@@ -11,7 +11,7 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
         '\%(\w\|:\)*\%' .. pos .. 'c\%(\w\|:\)\+\&'
         # a variable name
         .. '\([bwtgv]:\)\=\%(\a\w*\)'
-    var var_name: string = matchstr(cmdline, pat)
+    var var_name: string = cmdline->matchstr(pat)
     if var_name !~ ':'
         var_name = 'g:' .. var_name
     endif

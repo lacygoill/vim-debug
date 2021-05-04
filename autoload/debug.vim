@@ -4,8 +4,9 @@ if exists('loaded') | finish | endif
 var loaded = true
 
 import Catch from 'lg.vim'
+import LOGFILE_CHAN from '../plugin/debug.vim'
 
-def debug#CleanLog() #{{{1
+def debug#cleanLog() #{{{1
     # clean Vim keylog (obtained with `$ vim -w keylog`)
     if search('\%x80') > 0
         # Those sequences don't match any key pressed interactively.{{{
@@ -91,7 +92,7 @@ def debug#helpAboutLastErrors(): string #{{{1
     endif
 
     var errors: list<string> = messages[i : j - 1]
-        ->map((_, v: string): string => matchstr(v, pat_error))
+        ->map((_, v: string): string => v->matchstr(pat_error))
         # remove lines  which don't contain  an error,  or which contain  the errors
         # E662 / E663 / E664 (they aren't interesting and come frequently)
         ->filter((_, v: string): bool => !empty(v) && v !~ '^E66[234]$')
@@ -115,10 +116,32 @@ def debug#helpAboutLastErrors(): string #{{{1
 enddef
 var last_errors: dict<any> = {taglist: [], pos: -1}
 
-def debug#LogOptions() #{{{1
+def debug#lastPressedKeys() #{{{1
+    if stridx(&rtp, '/tmux,') == -1
+        echo 'vim-tmux needs to be installed'
+        return
+    elseif $VIMSERVER != ''
+        tmux#run#command('vim-debug: show me last pressed keys')
+    else
+        # don't dump the keys in an important buffer
+        if expand('%:p') != '' || (line('$') + 1)->line2byte() > 2
+            new
+        endif
+        exe 'sil r ' .. LOGFILE_CHAN
+        sil v/ : raw key input/d _
+        #     123.456 : raw key input: "x"
+        #     →
+        #     123s "x"
+        sil :%s/^\s*\(\d\+\)\.\d\+\s*:\s*raw key input\s*:\s*/\1s /e
+    endif
+enddef
+
+def debug#logOptions() #{{{1
+    var logfile: string = '/tmp/vim_options.txt'
     execute('set!')
         ->split('\n')
-        ->writefile('/tmp/vim_options.txt')
+        ->writefile(logfile)
+    exe 'sp ' .. logfile
 enddef
 
 def debug#messages() #{{{1
@@ -165,7 +188,7 @@ def debug#messages() #{{{1
     }
 
     for noise in values(noises)
-        sil exe 'g/^' .. noise .. '$/d _'
+        exe 'sil g/^' .. noise .. '$/d _'
     endfor
 
     matchadd('ErrorMsg', '^E\d\+:\s\+.*', 0)
@@ -186,7 +209,7 @@ def debug#time(cmd: string, cnt: number) #{{{1
             var i: number = 0
             while i < cnt
                 exe cmd
-                i += 1
+                ++i
             endwhile
         else
             exe cmd
@@ -240,7 +263,7 @@ def debug#unusedFunctions() #{{{1
         return
     endtry
     var functions: list<string> = getloclist(0)
-        ->mapnew((_, v: dict<any>): string => matchstr(v.text, '[^ (]*\ze('))
+        ->mapnew((_, v: dict<any>): string => v.text->matchstr('[^ (]*\ze('))
 
     # build a list of unused functions
     var unused: list<string>
@@ -268,7 +291,7 @@ enddef
 
 def InRepo(): bool
     var bufname: string = expand('<afile>:p')->resolve()
-    var dir: string = isdirectory(bufname) ? bufname : fnamemodify(bufname, ':h')
+    var dir: string = isdirectory(bufname) ? bufname : bufname->fnamemodify(':h')
     var dir_escaped: string = escape(dir, ' ')
     var match: string = finddir('.git/', dir_escaped .. ';')
     return !empty(match)
@@ -311,7 +334,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
             Mapping()
             return
         else
-            sil exe 'sp ' .. filename
+            exe 'sil sp ' .. filename
             debug#vimPatchesPrettify()
             Mapping()
         endif

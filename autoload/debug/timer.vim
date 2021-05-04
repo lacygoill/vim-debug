@@ -64,7 +64,7 @@ def debug#timer#infoOpen() #{{{1
     endif
     var tempfile: string = tempname() .. '/timer_info'
     exe 'to :' .. (&columns / 3) .. 'vnew ' .. tempfile
-    &l:pvw = true
+    &l:previewwindow = true
     &l:wrap = false
     wincmd p
 enddef
@@ -122,7 +122,7 @@ def PutDefinition() #{{{1
     var line: string = getline('.')
     var definition: list<string>
     if line =~ '^callback\s\+function(''<lambda>\d\+'')$'
-        var lambda_id: string = matchstr(line, '\d\+')
+        var lambda_id: string = line->matchstr('\d\+')
         definition = execute('verb fu <lambda>' .. lambda_id)->split('\n')
     else
         var func_name: string = line

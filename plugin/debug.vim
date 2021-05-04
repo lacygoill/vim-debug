@@ -12,7 +12,7 @@ var loaded = true
 # Log Channel Activity {{{1
 
 const LOG_CHANNEL_ACTIVITY: bool = true
-const LOGFILE_CHAN: string = '/tmp/vim_channel_activity.log'
+export const LOGFILE_CHAN: string = '/tmp/vim_channel_activity.log'
 
 augroup LogChannelActivity
     # we need to delay until `VimEnter` so that `v:servername` has been set
@@ -166,7 +166,7 @@ cno <unique> <c-x><c-v> <c-\>e debug#cmdline#evalVarUnderCursor()<cr>
 
 # dg C-l    clean log {{{2
 
-nno dg<c-l> <cmd>call debug#CleanLog()<cr>
+nno dg<c-l> <cmd>call debug#cleanLog()<cr>
 
 # g!        last page in the output of last command {{{2
 
@@ -184,8 +184,8 @@ nno <unique> g! g<
 
 # `!c` captures the latest value of a variable.
 # `!C` captures all the values of a variable during its lifetime.
-nno <expr><unique> !c debug#capture#setup(0)
-nno <expr><unique> !C debug#capture#setup(1)
+nno <expr><unique> !c debug#capture#setup(v:false)
+nno <expr><unique> !C debug#capture#setup(v:true)
 
 # !d        echo g:d_* {{{2
 
@@ -202,6 +202,10 @@ nno <unique> !d <cmd>call debug#capture#dump()<cr>
 #             │
 nno <unique> !e <cmd>exe debug#helpAboutLastErrors()<cr>
 
+# !K        show last pressed keys {{{2
+
+nno <unique> !K <cmd>call debug#lastPressedKeys()<cr>
+
 # !m        show messages {{{2
 
 nno <unique> !m <cmd>call debug#messages()<cr>
@@ -216,7 +220,7 @@ nmap <expr><unique> !o debug#output#lastExCommand()
 
 # !O        log Vim options {{{2
 
-nno !O <cmd>call <sid>debug#LogOptions()<cr>
+nno !O <cmd>call debug#logOptions()<cr>
 
 # !s        show syntax groups under cursor {{{2
 

@@ -33,7 +33,7 @@ enddef
 #}}}1
 # Core {{{1
 def SetFt() #{{{2
-    if &ft != 'vim'
+    if &filetype != 'vim'
         set ft=vim
     endif
 enddef
