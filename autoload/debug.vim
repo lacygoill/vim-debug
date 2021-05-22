@@ -121,7 +121,7 @@ def debug#lastPressedKeys() #{{{1
         echo 'vim-tmux needs to be installed'
         return
     elseif $VIMSERVER != ''
-        tmux#run#command('vim-debug: show me last pressed keys')
+        tmux#run#command('vim +"call debug#lastPressedKeys()"')
     else
         # don't dump the keys in an important buffer
         if expand('%:p') != '' || (line('$') + 1)->line2byte() > 2

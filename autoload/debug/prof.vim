@@ -160,7 +160,7 @@ def ReadLastProfile() #{{{1
 
     sil! fold#adhoc#main()
     norm! 1G
-    sil! FoldAutoOpen 1
+    sil! FoldAutoOpen
     sil update
 enddef
 
