@@ -32,7 +32,7 @@ def debug#log#output(what: dict<any>) #{{{1
     # This would raise an error in the next line; specifically because of:
     #
     #     split(excmd[1 :])[0]
-    #     E684: list index out of range: 0~
+    #     E684: list index out of range: 0˜
     #
     # We  could  fix it  with  `get()`,  but  there's  another issue  with  some
     # single-character commands, such as `:a` (and possibly `:c`, `:i`).
@@ -68,7 +68,7 @@ def debug#log#output(what: dict<any>) #{{{1
         #     :!touch /tmp/file
         #     :call writefile(['text'], '/tmp/file')
         #     :!xxd /tmp/file
-        #     00000000: 7465 7874 0a    text.~
+        #     00000000: 7465 7874 0a    text.˜
         #                         ├┘        │
         #                         │         └ LF glyph
         #                         └ LF hex code

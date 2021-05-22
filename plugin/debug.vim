@@ -133,7 +133,7 @@ com -bar Scriptnames debug#scriptnames#main()
 #     :com -range=1 Cmd echo ''
 #     :new
 #     :3Cmd
-#     E16: Invalid range~
+#     E16: Invalid range˜
 #
 # Here's the patch 8.1.1241:
 # https://github.com/vim/vim/commit/b731689e85b4153af7edc8f0a6b9f99d36d8b011

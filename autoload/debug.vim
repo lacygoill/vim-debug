@@ -18,7 +18,7 @@ def debug#cleanLog() #{{{1
         # matches the pseudo-key `<CursorHold>`:
         #
         #     :echo "\<CursorHold>"
-        #     <80><fd>`~
+        #     <80><fd>`˜
         #}}}
         sil keepj keepp :%s/\%x80ý[`a]//ge
         # Those sequences match meta chords.{{{
@@ -78,7 +78,7 @@ def debug#helpAboutLastErrors(): string #{{{1
         #
         # It raises this error message:
         #
-        #     "/tmp/some_file" E212: Can't open file for writing~
+        #     "/tmp/some_file" E212: Can't open file for writing˜
         #}}}
         .. '\|".\{-}"\s\)'
         .. '\=\zsE\d\+'
