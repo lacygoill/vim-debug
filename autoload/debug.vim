@@ -408,8 +408,8 @@ def debug#vimPatchesPrettify() #{{{1
     syn region xLink matchgroup=xLinkDelimiter
         \ start=/(/ end=/)/
         \ contained keepend conceal contains=xUrl
-    hi link xLinkText Underlined
-    hi link xUrl Float
+    hi def link xLinkText Underlined
+    hi def link xUrl Float
     setl cole=3 cocu=nc
 enddef
 

@@ -21,8 +21,8 @@ syn match timerInfoInteresting  '^\%(remaining\|#\sid\)\s\+\zs.*\|^paused\s\+\zs
 "}}}
 syn match timerInfoCallback     '^\s\{4}1\s\+return\s\zs.*'
 
-hi link timerInfoInteresting  Identifier
-hi link timerInfoCallback     WarningMsg
+hi def link timerInfoInteresting  Identifier
+hi def link timerInfoCallback     WarningMsg
 
 let b:current_syntax = 'timer_info'
 
@@ -56,8 +56,8 @@ let b:current_syntax = 'timer_info'
 "     syn match timerInfoCallback     '^\s\{4}1\s\+return\s\zs.*'
 "     syn match timerInfoInteresting  '^\s\{4}.*' contains=timerInfoCallback
 "
-"     hi link timerInfoInteresting  Identifier
-"     hi link timerInfoCallback     WarningMsg
+"     hi def link timerInfoInteresting  Identifier
+"     hi def link timerInfoCallback     WarningMsg
 "
 "     let b:current_syntax = 'timer_info'
 "
