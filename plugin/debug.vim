@@ -96,7 +96,7 @@ com -bar -nargs=1 -complete=customlist,debug#debug#completion Debug debug#debug#
 # It's especially useful to fix that for  the names of functions which are local
 # to a script.
 #}}}
-cnorea <expr> ba getcmdtype() is# ':' && getcmdpos() == 3 ? 'Breakadd' : 'ba'
+cnorea <expr> ba getcmdtype() ==# ':' && getcmdpos() == 3 ? 'Breakadd' : 'ba'
 com -bar -nargs=1 -complete=customlist,debug#break#completion Breakadd debug#break#wrapper('add', <q-args>)
 com -bar -nargs=1 -complete=customlist,debug#break#completion Breakdel debug#break#wrapper('del', <q-args>)
 com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#prof#wrapper(<q-bang>, <q-args>)
@@ -214,7 +214,7 @@ nno <unique> !m <cmd>call debug#messages()<cr>
 
 nno <unique> !M <cmd>messages clear <bar> echo 'messages cleared'<cr>
 
-# !o        paste Output of last ex command  {{{2
+# !o        paste Output of last Ex command  {{{2
 
 nmap <expr><unique> !o debug#output#lastExCommand()
 

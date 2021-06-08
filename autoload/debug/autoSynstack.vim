@@ -13,7 +13,7 @@ def debug#autoSynstack#main() #{{{1
 
     # open a new file to write our mini syntax plugin
     exe 'new ' .. MINIVIMRC
-    setline(1, 'syn clear')
+    'syn clear'->setline(1)
 enddef
 
 def EchoSynstack()

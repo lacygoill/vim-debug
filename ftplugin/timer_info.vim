@@ -1,3 +1,5 @@
+vim9script
+
 if exists('b:did_ftplugin')
     finish
 endif
@@ -5,17 +7,20 @@ endif
 runtime! ftplugin/markdown.vim
 unlet! b:did_ftplugin
 
-let b:title_like_in_markdown = 1
+b:title_like_in_markdown = true
 
-setl bh=delete bt=nofile fdl=99 wfw
+&l:bufhidden = 'delete'
+&l:buftype = 'nofile'
+&l:foldlevel = 99
+&l:winfixwidth = true
 
 nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
 nno <buffer><nowait> R <cmd>e<cr>
 
-let b:did_ftplugin = 1
+b:did_ftplugin = true
 
-" Teardown {{{1
+# Teardown {{{1
 
-let b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
-    \ .. '| call debug#timerInfo#undoFtplugin()'
+b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
+    .. '| call debug#timerInfo#undoFtplugin()'
 

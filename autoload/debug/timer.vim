@@ -28,7 +28,7 @@ def FormatTime(v: number): string #{{{1
         :    v <= 59'999
         ?        (v / 1000) .. 's ' .. fmod(v, 1000)->float2nr()->FormatTime()
         :    v <= 3'600'000
-        ?        (v / 60'000) .. "m " .. fmod(v, 60000)->float2nr()->FormatTime()
+        ?        (v / 60'000) .. 'm ' .. fmod(v, 60000)->float2nr()->FormatTime()
         :        (v / 3'600'000) .. 'h ' .. fmod(v, 3600000)->float2nr()->FormatTime()
 enddef
 
@@ -93,7 +93,7 @@ def debug#timer#populate() #{{{1
     for info in formatted_infos
         lines += info
     endfor
-    setline(1, lines)
+    lines->setline(1)
     sil :%!column -s $'\x01' -t
     # `PutDefinition()` calls `append()` which is silent, so why `:silent`?{{{
     #
@@ -101,7 +101,7 @@ def debug#timer#populate() #{{{1
     #
     # MWE:
     #
-    #     nno cd <cmd>call FuncA()<cr>
+    #     nno <F3> <cmd>call FuncA()<cr>
     #     fu FuncA() abort
     #         .g/^/call FuncB()
     #     endfu
@@ -109,7 +109,7 @@ def debug#timer#populate() #{{{1
     #         call append('.', ['abc', 'def', 'ghi'])
     #     endfu
     #
-    # Press `cd`:
+    # Press `F3`:
     #
     #     3 more lines
     #}}}

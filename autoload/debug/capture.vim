@@ -15,7 +15,7 @@ var all_values: bool
 # Interface {{{1
 def debug#capture#setup(arg_all_values: bool): string #{{{2
     all_values = arg_all_values
-    &opfunc = expand('<SID>') .. 'Variable'
+    &operatorfunc = expand('<SID>') .. 'Variable'
     return 'g@l'
 enddef
 
@@ -34,7 +34,7 @@ def debug#capture#dump() #{{{2
         return
     endtry
     wincmd P
-    if !&l:pvw
+    if !&l:previewwindow
         return
     endif
     nno <buffer><nowait> DD <cmd>call <sid>UnletVariableUnderCursor()<cr>

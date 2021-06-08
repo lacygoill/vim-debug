@@ -34,7 +34,7 @@ enddef
 # Core {{{1
 def SetFt() #{{{2
     if &filetype != 'vim'
-        set ft=vim
+        &filetype = 'vim'
     endif
 enddef
 
@@ -45,7 +45,7 @@ enddef
 
 def DumpTermcap(use_curfile: bool) #{{{2
     execute('set termcap')->split('\n')->setline(1)
-    append(1, '')
+    ''->append(1)
     # The bang  after silent is necessary  to suppress `E486` in  the GUI, where
     # there may be no `Terminal keys` section.
     sil! :1/Terminal keys/ | append(line('.') - 1, '')

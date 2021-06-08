@@ -80,7 +80,7 @@ def Display(arg_msg: list<string>) #{{{2
     # a horizontal rule makes the output easier to read when we execute several `:Vo` consecutively
     var horizontal_rule: string = msg->substitute('.*\n', '', '')
     horizontal_rule = horizontal_rule
-        ->substitute('^\t', (_) => repeat(' ', &l:ts), '')
+        ->substitute('^\t', (_) => repeat(' ', &l:tabstop), '')
     horizontal_rule = horizontal_rule
         ->substitute('.', '-', 'g')
     echo msg .. (msg =~ "\n" ? "\n" .. horizontal_rule : '')

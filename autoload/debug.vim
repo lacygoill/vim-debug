@@ -117,7 +117,7 @@ enddef
 var last_errors: dict<any> = {taglist: [], pos: -1}
 
 def debug#lastPressedKeys() #{{{1
-    if stridx(&rtp, '/tmux,') == -1
+    if stridx(&runtimepath, '/tmux,') == -1
         echo 'vim-tmux needs to be installed'
         return
     elseif $VIMSERVER != ''
@@ -149,14 +149,15 @@ def debug#messages() #{{{1
     # If `:Verbose` encountered an error, we could still be in a regular window,
     # instead  of the  preview window.   If that's  the case,  we don't  want to
     # remove any text in the current buffer, nor install any match.
-    if !&l:pvw
+    if !&l:previewwindow
         return
     endif
 
     # From a help buffer, the buffer displayed in a newly opened preview
     # window inherits some settings, such as 'nomodifiable' and 'readonly'.
     # Make sure they're disabled so that we can remove noise.
-    setl ma noro
+    &l:modifiable = true
+    &l:readonly = false
 
     var noises: dict<string> = {
         '[fewer|more] lines': '\d\+ \%(fewer\|more\) lines\%(; \%(before\|after\) #\d\+.*\)\=',
@@ -390,7 +391,10 @@ enddef
 
 def debug#vimPatchesPrettify() #{{{1
     # no modified indicator in the status line if we edit the buffer
-    setl bt=nofile nobl noswf nowrap
+    &l:buftype = 'nofile'
+    &l:buflisted = false
+    &l:swapfile = false
+    &l:wrap = false
 
     # remove noise
     sil g/^Patches for Vim/ :.;/^\s*SIZE/d _
@@ -410,7 +414,8 @@ def debug#vimPatchesPrettify() #{{{1
         \ contained keepend conceal contains=xUrl
     hi def link xLinkText Underlined
     hi def link xUrl Float
-    setl cole=3 cocu=nc
+    &l:conceallevel = 3
+    &l:concealcursor = 'nc'
 enddef
 
 def debug#vimPatchesCompletion(_, _, _): string #{{{1

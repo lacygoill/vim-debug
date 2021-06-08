@@ -101,10 +101,13 @@ def debug#log#output(what: dict<any>) #{{{1
     # Vim doesn't focus the preview window.  Jump to it.
     wincmd P
     # check we really got there ...
-    if !&l:pvw
+    if !&l:previewwindow
         return
     endif
-    setl bt=nofile nobl noswf nowrap
+    &l:buftype = 'nofile'
+    &l:buflisted = false
+    &l:swapfile = false
+    &l:wrap = false
     nmap <buffer><nowait> q <plug>(my_quit)
     search('Last set from \zs')
     nno <buffer><nowait> DD <cmd>sil keepj keepp g/^\s*Last set from/d _<cr>
@@ -135,9 +138,9 @@ def RedirectToTempfile( #{{{1
             .. 'exe '
             .. string(excmd))
 
-        # We set `'vfile'` to `tempfile`.
+        # We set `'verbosefile'` to `tempfile`.
         # It will redirect (append) all messages to the end of this file.
-        &vfile = tempfile
+        &verbosefile = tempfile
         # Why not executing the command and `:echo`ing its output in a single command?{{{
         #
         # Two issues.
@@ -156,9 +159,9 @@ def RedirectToTempfile( #{{{1
         #
         # Second, sometimes, you would get undesired messages:
         #
-        #     &vfile = '/tmp/log'
+        #     &verbosefile = '/tmp/log'
         #     echo execute('au')->split('\n')->filter((_, v: string): bool => v =~ 'fugitive')
-        #     &vfile = ''
+        #     &verbosefile = ''
         #
         # The  previous snippet  should have  output only  the lines  containing
         # `fugitive` inside the output of `:au`.
@@ -167,22 +170,22 @@ def RedirectToTempfile( #{{{1
         #     :Verb Filter /fugitive/ au
         #}}}
         sil echo output
-        &vfile = ''
+        &verbosefile = ''
 
         sil exe level .. 'verbose exe ' .. string(excmd)
     catch
         return Catch()
     finally
-        # We empty the value of `'vfile'` for 2 reasons:{{{
+        # We empty the value of `'verbosefile'` for 2 reasons:{{{
         #
         #    1. to restore the original value
         #
         #    2. writes are buffered, thus may not show up for some time
-        #       Writing to the file ends when [...] 'vfile' is made empty.
+        #       Writing to the file ends when [...] 'verbosefile' is made empty.
         #
-        # See `:h 'vfile'`.
+        # See `:h 'verbosefile'`.
         #}}}
-        &vfile = ''
+        &verbosefile = ''
     endtry
     return false
 enddef
