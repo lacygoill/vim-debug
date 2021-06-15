@@ -156,7 +156,7 @@ def ReadLastProfile() #{{{1
         return
     endif
     exe 'sp ' .. DIR .. '/profile.log'
-    sil keepj keepp :%s/\s*$//e
+    sil keepj keepp :% s/\s*$//e
 
     sil! fold#adhoc#main()
     norm! 1G

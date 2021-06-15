@@ -50,12 +50,12 @@ def DumpTermcap(use_curfile: bool) #{{{2
     # there may be no `Terminal keys` section.
     sil! :1/Terminal keys/ | append(line('.') - 1, '')
     sil! :1/Terminal keys/ | append('.', '')
-    sil keepj keepp :%s/^ *//e
+    sil keepj keepp :% s/^ *//e
 enddef
 
 def SplitCodes() #{{{2
     # split terminal codes; one per line
-    sil! keepj keepp :1,/Terminal keys\|\%$/s/ \{2,}/\r/ge
+    sil! keepj keepp :1,/Terminal keys\|\%$/ s/ \{2,}/\r/ge
     #                                 ├───┘
     #                                 └ to support the GUI where there is no "Terminal keys" section
 
@@ -63,8 +63,8 @@ def SplitCodes() #{{{2
         return
     endif
     # split terminal keys; one per line
-    sil! keepj keepp :/Terminal keys/,$s/ \zet_\S*/\r/ge
-    sil! keepj keepp :/Terminal keys/,$s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
+    sil! keepj keepp :/Terminal keys/,$ s/ \zet_\S*/\r/ge
+    sil! keepj keepp :/Terminal keys/,$ s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
     # Why this second substitution?{{{
     #
     # To handle terminal keys which are not associated to a terminal option.
@@ -81,7 +81,7 @@ enddef
 
 def SeparateTerminalKeysWithoutOptions() #{{{2
     # move terminal keys not associated to any terminal option at the end of the buffer
-    sil! keepj keepp :/Terminal keys/,$g/^</m $
+    sil! keepj keepp :/Terminal keys/,$ g/^</m $
     # separate them from the terminal keys associated with a terminal option{{{
     #
     #     t_kP <PageUp>    ^[[5~ 
@@ -93,14 +93,14 @@ def SeparateTerminalKeysWithoutOptions() #{{{2
     #
     #     <í>        ^[m
     #}}}
-    sil! :1/^<\%(.*" t_\S\S\)\@!/put! _
+    sil! :1/^<\%(.*" t_\S\S\)\@!/ put! _
 enddef
 
 def MoveKeynamesIntoInlineComments() #{{{2
     #     t_#2 <S-Home>    ^[[1;2H
     #     →
     #     <S-Home>    ^[[1;2H  " t_#2
-    sil! keepj keepp :/Terminal keys/,$s/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
+    sil! keepj keepp :/Terminal keys/,$ s/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
 enddef
 
 def AddAssignmentOperators() #{{{2
@@ -109,7 +109,7 @@ def AddAssignmentOperators() #{{{2
     #     <S-Home>    ^[[1;2H  " t_#2
     #     →
     #     <S-Home>=^[[1;2H  " t_#2
-    sil! keepj keepp :/Terminal keys/,$s/^<.\{-1,}>\zs \+/=/e
+    sil! keepj keepp :/Terminal keys/,$ s/^<.\{-1,}>\zs \+/=/e
 enddef
 
 def AlignInlineComment() #{{{2
@@ -132,11 +132,11 @@ def AlignInlineComment() #{{{2
     # We fix this by passing to `:EasyAlign` the optional argument `{'ig': []}`,
     # which tells it to ignore nothing.
     #}}}
-    sil! keepj keepp :/Terminal keys/+,$EasyAlign /"/ {'ig': []}
+    sil! keepj keepp :/Terminal keys/+,$ EasyAlign /"/ {'ig': []}
 enddef
 
 def AddSetCommands() #{{{2
-    sil keepj keepp :%s/^\ze\%(t_\|<\)/set /e
+    sil keepj keepp :% s/^\ze\%(t_\|<\)/set /e
 enddef
 
 def EscapeSpacesInOptionsValues() #{{{2
@@ -144,39 +144,39 @@ def EscapeSpacesInOptionsValues() #{{{2
     #     →
     #     set t_EI=^[[2\ q
     #                  ^
-    sil keepj keepp :%s/\%(set.\{-}=.*[^"]\)\@<= [^" ]/\\&/ge
+    sil keepj keepp :% s/\%(set.\{-}=.*[^"]\)\@<= [^" ]/\\&/ge
 enddef
 
 def TrimTrailingWhitespace() #{{{2
-    sil! keepj keepp :/Terminal keys/,$s/ \+$//e
+    sil! keepj keepp :/Terminal keys/,$ s/ \+$//e
 enddef
 
 def TranslateSpecialKeys() #{{{2
     # translate caret notation of control characters
-    sil keepj keepp :%s/\^\[/\="\e"/ge
-    sil keepj keepp :%s/\^\(\u\)/\=eval('"' .. '\x' .. (submatch(1)->char2nr() - 64) .. '"')/ge
-    sil keepj keepp :%s/\^?/\="\x7f"/ge
+    sil keepj keepp :% s/\^\[/\="\e"/ge
+    sil keepj keepp :% s/\^\(\u\)/\=eval('"' .. '\x' .. (submatch(1)->char2nr() - 64) .. '"')/ge
+    sil keepj keepp :% s/\^?/\="\x7f"/ge
 
     #     <á>=^[a    →    <M-a>=^[a
-    sil keepj keepp :%s/^set <\zs.\ze>=\e\(\l\)/M-\1/e
+    sil keepj keepp :% s/^set <\zs.\ze>=\e\(\l\)/M-\1/e
 enddef
 
 def SortLines() #{{{2
     # sort terminal codes: easier to find a given terminal option name
     # sort terminal keys: useful later when vimdiff'ing the output with another one
-    sil! keepj :1/Terminal codes/+,/Terminal keys/--sort
-    sil! keepj :1/Terminal keys/++;/^$/-sort
-    sil! keepj :1/Terminal keys//^$//^$/+;$sort
+    sil! keepj :1/Terminal codes/+,/Terminal keys/-- sort
+    sil! keepj :1/Terminal keys/++;/^$/- sort
+    sil! keepj :1/Terminal keys//^$//^$/+;$ sort
 enddef
 
 def CommentSectionHeaders() #{{{2
     #     --- Terminal codes ---    →    " Terminal codes
     #     --- Terminal keys ---     →    " Terminal keys
-    sil keepj keepp :%s/^--- Terminal \(\S*\).*/" Terminal \1/e
+    sil keepj keepp :% s/^--- Terminal \(\S*\).*/" Terminal \1/e
 enddef
 
 def Fold() #{{{2
-    sil keepj keepp :%s/^" .*\zs/\=' {{' .. '{1'/e
+    sil keepj keepp :% s/^" .*\zs/\=' {{' .. '{1'/e
 enddef
 
 def InstallMappings() #{{{2

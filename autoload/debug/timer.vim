@@ -26,10 +26,10 @@ def FormatTime(v: number): string #{{{1
     return v <= 999
         ?        v .. 'ms'
         :    v <= 59'999
-        ?        (v / 1000) .. 's ' .. fmod(v, 1000)->float2nr()->FormatTime()
+        ?        (v / 1'000) .. 's ' .. fmod(v, 1'000)->float2nr()->FormatTime()
         :    v <= 3'600'000
-        ?        (v / 60'000) .. 'm ' .. fmod(v, 60000)->float2nr()->FormatTime()
-        :        (v / 3'600'000) .. 'h ' .. fmod(v, 3600000)->float2nr()->FormatTime()
+        ?        (v / 60'000) .. 'm ' .. fmod(v, 60'000)->float2nr()->FormatTime()
+        :        (v / 3'600'000) .. 'h ' .. fmod(v, 3'600'000)->float2nr()->FormatTime()
 enddef
 
 def debug#timer#infoOpen() #{{{1
@@ -63,7 +63,7 @@ def debug#timer#infoOpen() #{{{1
         return
     endif
     var tempfile: string = tempname() .. '/timer_info'
-    exe 'to :' .. (&columns / 3) .. 'vnew ' .. tempfile
+    exe 'to :' .. (&columns / 3) .. ' vnew ' .. tempfile
     &l:previewwindow = true
     &l:wrap = false
     wincmd p
@@ -94,7 +94,7 @@ def debug#timer#populate() #{{{1
         lines += info
     endfor
     lines->setline(1)
-    sil :%!column -s $'\x01' -t
+    sil :% !column -s $'\x01' -t
     # `PutDefinition()` calls `append()` which is silent, so why `:silent`?{{{
     #
     # Somehow, `:g` has priority, and it's not silent by default.

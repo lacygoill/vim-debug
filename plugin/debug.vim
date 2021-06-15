@@ -132,7 +132,7 @@ com -bar Scriptnames debug#scriptnames#main()
 #
 #     :com -range=1 Cmd echo ''
 #     :new
-#     :3Cmd
+#     :3 Cmd
 #     E16: Invalid range˜
 #
 # Here's the patch 8.1.1241:
@@ -145,7 +145,7 @@ com -bar Scriptnames debug#scriptnames#main()
 #                   v---------v
 #     :com -range=1 -addr=other Cmd echo ''
 #     :new
-#     :3Cmd
+#     :3 Cmd
 #
 # I think it specifies that the type of  the range is not known (i.e. not a line
 # address, not a buffer number, not a window number, ...).

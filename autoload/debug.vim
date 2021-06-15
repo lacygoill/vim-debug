@@ -20,7 +20,7 @@ def debug#cleanLog() #{{{1
         #     :echo "\<CursorHold>"
         #     <80><fd>`˜
         #}}}
-        sil keepj keepp :%s/\%x80ý[`a]//ge
+        sil keepj keepp :% s/\%x80ý[`a]//ge
         # Those sequences match meta chords.{{{
         #
         # For example:
@@ -32,21 +32,21 @@ def debug#cleanLog() #{{{1
         #     ...
         #     <80>FR ⇔ M-z
         #}}}
-        sil keepj keepp :%s/\%x80F\([2-9A-R]\)/\=CleanVimKeylogRep()/ge
+        sil keepj keepp :% s/\%x80F\([2-9A-R]\)/\=CleanVimKeylogRep()/ge
         return
     endif
 
     # clean event log (obtained with `:LogEvents`)
     if getline(1) !~ '\d\{2}:\d{2}'
-        :1d _
+        :1 d _
         if getline(1) =~ '\<VimResized\>'
             sil :1,/^\S/- d _
         endif
     endif
-    sil keepj keepp :%s/^.\{7}//e
+    sil keepj keepp :% s/^.\{7}//e
     sil keepj keepp g/^\%(OptionSet\|SourcePre\|SourcePost\)\s/ :.,/^\S\|\%$/- d _
     sil keepj keepp g/^\s*afile: "$/d _
-    exe 'sil keepj keepp :%s/^\S\+\s\+amatch:\s*\zs' .. escape($HOME, '/') .. '/\~/e'
+    exe 'sil keepj keepp :% s/^\S\+\s\+amatch:\s*\zs' .. escape($HOME, '/') .. '/\~/e'
 enddef
 
 def CleanVimKeylogRep(): string
@@ -132,7 +132,7 @@ def debug#lastPressedKeys() #{{{1
         #     123.456 : raw key input: "x"
         #     →
         #     123s "x"
-        sil :%s/^\s*\(\d\+\)\.\d\+\s*:\s*raw key input\s*:\s*/\1s /e
+        sil :% s/^\s*\(\d\+\)\.\d\+\s*:\s*raw key input\s*:\s*/\1s /e
     endif
 enddef
 
@@ -145,7 +145,7 @@ def debug#logOptions() #{{{1
 enddef
 
 def debug#messages() #{{{1
-    :0Verbose messages
+    :0 Verbose messages
     # If `:Verbose` encountered an error, we could still be in a regular window,
     # instead  of the  preview window.   If that's  the case,  we don't  want to
     # remove any text in the current buffer, nor install any match.
@@ -397,12 +397,12 @@ def debug#vimPatchesPrettify() #{{{1
     &l:wrap = false
 
     # remove noise
-    sil g/^Patches for Vim/ :.;/^\s*SIZE/d _
+    sil g/^Patches for Vim/ :.;/^\s*SIZE/ d _
     sil! g/^--- The story continues with Vim /d _
-    sil keepj keepp :%s/^\s*\d\+\s\+//e
+    sil keepj keepp :% s/^\s*\d\+\s\+//e
 
     # format links
-    sil keepj keepp :%s@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
+    sil keepj keepp :% s@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
 
     # conceal url (copied from the markdown syntax plugin)
     syn match xUrl /\S\+/ contained
