@@ -68,8 +68,9 @@ augroup END
 
 # Purpose:{{{
 #
-# Our command-line mappings may badly interfere when we use `:debug`.
-# We install `:Debug` as a thin wrapper which temporarily removes these mappings.
+# Our command-line mappings might badly interfere when we use `:debug`.
+# Same thing for some autocmds listening to `CmdlineLeave`.
+# We install `:Debug` as a thin wrapper which temporarily disable them.
 #
 # ---
 #

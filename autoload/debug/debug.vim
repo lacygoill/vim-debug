@@ -17,16 +17,13 @@ enddef
 
 def debug#debug#wrapper(cmd: string)
     try
-        ToggleEditingCommands 0
-        if exists('#MyGranularUndo')
-            au! MyGranularUndo
-        endif
+        g:debugging = true
         exe 'debug ' .. cmd
     catch
         Catch()
         return
     finally
-        ToggleEditingCommands 1
+        g:debugging = false
     endtry
 enddef
 
