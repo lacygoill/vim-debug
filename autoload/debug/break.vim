@@ -51,8 +51,10 @@ enddef
 
 def debug#break#wrapper(suffix: string, args: string)
     try
+        g:debugging = true
         exe 'break' .. suffix .. ' ' .. args
     catch
+        g:debugging = false
         echohl ErrorMsg
         echom v:exception
         echohl NONE
