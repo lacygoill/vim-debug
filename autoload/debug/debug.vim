@@ -23,7 +23,7 @@ def debug#debug#wrapper(cmd: string)
         Catch()
         return
     finally
-        g:debugging = false
+        g:debugging = false | redrawt
     endtry
 enddef
 

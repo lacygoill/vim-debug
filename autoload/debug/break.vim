@@ -54,10 +54,13 @@ def debug#break#wrapper(suffix: string, args: string)
         g:debugging = true
         exe 'break' .. suffix .. ' ' .. args
     catch
-        g:debugging = false
+        g:debugging = false | redrawt
         echohl ErrorMsg
         echom v:exception
         echohl NONE
     endtry
+    if suffix == 'del'
+        g:debugging = false | redrawt
+    endif
 enddef
 
