@@ -38,7 +38,7 @@ def debug#cmdline#evalVarUnderCursor(): string #{{{1
     setcmdpos(new_pos)
     # allow us to undo the evaluation
     if exists('#User#AddToUndolistC')
-        do <nomodeline> User AddToUndolistC
+        doautocmd <nomodeline> User AddToUndolistC
     endif
     return new_cmdline
 enddef

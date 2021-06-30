@@ -16,10 +16,10 @@ def debug#localPlugin#main(args: string) #{{{1
                 DebugLocalPlugin -kind syntax   -filetype python
 
             To get the list of breakpoints, execute:
-                breakl
+                breaklist
 
             When you are finished, execute:
-                breakd *
+                breakdel *
         END
         echo usage->join("\n")
         return
@@ -69,8 +69,8 @@ def AddBreakpoints( #{{{1
         return
     endif
 
-    echom '[:DebugLocalPlugin] executing:  ' .. cmd
-    exe cmd
+    echomsg '[:DebugLocalPlugin] executing:  ' .. cmd
+    execute cmd
 enddef
 
 def debug#localPlugin#complete( #{{{1

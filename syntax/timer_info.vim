@@ -5,15 +5,15 @@ if exists('b:current_syntax')
 endif
 
 # ✔
-#     syn match timerInfoNoise        '^#'
-#     syn match timerInfoInteresting  '\%(^#\)\@1<=\sid\s\+\zs.*' contains=timerInfoNoise
+#     syntax match timerInfoNoise        '^#'
+#     syntax match timerInfoInteresting  '\%(^#\)\@1<=\sid\s\+\zs.*' contains=timerInfoNoise
 
 
 
 
 
-syn match timerInfoNoise        '^\%(#\+\|---\)$\|^#\s\zeid' conceal
-syn match timerInfoInteresting  '^\%(remaining\|#\sid\)\s\+\zs.*\|^paused\s\+\zs1$\|^\s\{4}.*' contains=timerInfoCallback
+syntax match timerInfoNoise        '^\%(#\+\|---\)$\|^#\s\zeid' conceal
+syntax match timerInfoInteresting  '^\%(remaining\|#\sid\)\s\+\zs.*\|^paused\s\+\zs1$\|^\s\{4}.*' contains=timerInfoCallback
 # Why highlighting the text after the `:return` keyword?{{{
 #
 # Because  it's the  latter we  must  search if  there's an  issue with  the
@@ -21,10 +21,10 @@ syn match timerInfoInteresting  '^\%(remaining\|#\sid\)\s\+\zs.*\|^paused\s\+\zs
 # `:return` is  never written in the  original code from which  the timer is
 # started.
 #}}}
-syn match timerInfoCallback     '^\s\{4}1\s\+return\s\zs.*'
+syntax match timerInfoCallback     '^\s\{4}1\s\+return\s\zs.*'
 
-hi def link timerInfoInteresting  Identifier
-hi def link timerInfoCallback     WarningMsg
+highlight def link timerInfoInteresting  Identifier
+highlight def link timerInfoCallback     WarningMsg
 
 b:current_syntax = 'timer_info'
 
@@ -35,7 +35,7 @@ b:current_syntax = 'timer_info'
 # The following comments apply to the `timerInfoCallback` rule.
 #
 # Without `\zs`, the order of the rules matters.
-# This is expected; from `:h :syn-priority`:
+# This is expected; from `:help :syn-priority`:
 #
 #    > 1. When multiple Match or Region items start in the same position,
 #    >    the item defined last has priority.
@@ -55,11 +55,11 @@ b:current_syntax = 'timer_info'
 # doesn't apply for contained syntax items.
 # Find a MWE confirming this theory.
 #
-#     syn match timerInfoCallback     '^\s\{4}1\s\+return\s\zs.*'
-#     syn match timerInfoInteresting  '^\s\{4}.*' contains=timerInfoCallback
+#     syntax match timerInfoCallback     '^\s\{4}1\s\+return\s\zs.*'
+#     syntax match timerInfoInteresting  '^\s\{4}.*' contains=timerInfoCallback
 #
-#     hi def link timerInfoInteresting  Identifier
-#     hi def link timerInfoCallback     WarningMsg
+#     highlight def link timerInfoInteresting  Identifier
+#     highlight def link timerInfoCallback     WarningMsg
 #
 #     let b:current_syntax = 'timer_info'
 #

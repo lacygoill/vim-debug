@@ -37,7 +37,7 @@ def debug#capture#dump() #{{{2
     if !&l:previewwindow
         return
     endif
-    nno <buffer><nowait> DD <cmd>call <sid>UnletVariableUnderCursor()<cr>
+    nnoremap <buffer><nowait> DD <Cmd>call <SID>UnletVariableUnderCursor()<CR>
 enddef
 # }}}1
 # Core {{{1
@@ -57,14 +57,14 @@ def Variable(_) #{{{2
     var rep: string = all_values
         ? cmd .. 'g:d_\2 = get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
         : cmd .. 'g:d_\2 = deepcopy(\1\2)'
-    exe 'sil keepj keepp s/' .. pat .. '/' .. rep .. '/e'
+    execute 'silent keepjumps keeppatterns substitute/' .. pat .. '/' .. rep .. '/e'
 enddef
 #}}}1
 # Utilities {{{1
 def UnletVariableUnderCursor() #{{{2
-    exe 'unlet! g:' .. getline('.')->matchstr('^d_\S\+')
-    keepj d _
-    sil update
-    echom 'the variable has been removed'
+    execute 'unlet! g:' .. getline('.')->matchstr('^d_\S\+')
+    keepjumps delete _
+    silent update
+    echomsg 'the variable has been removed'
 enddef
 

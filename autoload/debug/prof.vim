@@ -83,10 +83,10 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
     if args =~ '^\C\%(' .. ARGUMENTS->join('\|') .. '\)\s*$'
         .. '\|^\%(start\|file\|func\)\s\+\S\+\s*$'
         try
-            exe printf('prof%s %s', bang, args)
+            execute printf('profile%s %s', bang, args)
         catch
             echohl ErrorMsg
-            echom v:exception
+            echomsg v:exception
             echohl NONE
         endtry
         return
@@ -106,21 +106,21 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
     var plugin_files: list<string>
     var file_cmd: string
     if plugin_name == 'fzf'
-        file_cmd = 'prof' .. bang .. ' file ' .. $HOME .. '/.fzf/**/*.vim'
-        exe start_cmd | exe file_cmd
+        file_cmd = 'profile' .. bang .. ' file ' .. $HOME .. '/.fzf/**/*.vim'
+        execute start_cmd | execute file_cmd
         plugin_files = glob($HOME .. '/.fzf/**/*.vim', true, true)
     else
-        file_cmd = 'prof' .. bang .. ' file '
+        file_cmd = 'profile' .. bang .. ' file '
             .. $HOME .. '/.vim/pack/**/' .. plugin_name .. '/**/*.vim'
-        exe start_cmd | exe file_cmd
+        execute start_cmd | execute file_cmd
         plugin_files = glob($HOME .. '/.vim/pack/**/' .. plugin_name .. '/**/*.vim', true, true)
     endif
 
     plugin_files
         ->filter((_, v: string): bool => v !~ '\c/t\%[est]/')
-        ->map((_, v: string): string => 'so ' .. v)
+        ->map((_, v: string): string => 'source ' .. v)
         ->writefile(DIR .. '/profile.log')
-    exe 'sil! so ' .. DIR .. '/profile.log'
+    execute 'silent! source ' .. DIR .. '/profile.log'
 
     echo printf("Executing:\n    %s\n    %s\n%s\n\n",
             start_cmd,
@@ -141,12 +141,12 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
     #
     # Because we want it logged.
     #}}}
-    # Why not everything (i.e. including the previous messages) with `:echom`?{{{
+    # Why not everything (i.e. including the previous messages) with `:echomsg`?{{{
     #
-    # Because `:echom` doesn't translate `\n` into a newline.
+    # Because `:echomsg` doesn't translate `\n` into a newline.
     # It prints a NUL `^@` instead.
     #}}}
-    echom 'Recreate the issue, restart Vim, and execute:  :Prof -read_last_profile'
+    echomsg 'Recreate the issue, restart Vim, and execute:  :Prof -read_last_profile'
 enddef
 
 def ReadLastProfile() #{{{1
@@ -155,12 +155,12 @@ def ReadLastProfile() #{{{1
         echo 'There are no results to read'
         return
     endif
-    exe 'sp ' .. DIR .. '/profile.log'
-    sil keepj keepp :% s/\s*$//e
+    execute 'split ' .. DIR .. '/profile.log'
+    silent keepjumps keeppatterns :% substitute/\s*$//e
 
-    sil! fold#adhoc#main()
-    norm! 1G
-    sil! FoldAutoOpen
-    sil update
+    silent! fold#adhoc#main()
+    normal! 1G
+    silent! FoldAutoOpen
+    silent update
 enddef
 

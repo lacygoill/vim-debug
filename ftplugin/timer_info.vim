@@ -14,13 +14,13 @@ b:title_like_in_markdown = true
 &l:foldlevel = 99
 &l:winfixwidth = true
 
-nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q<cr>'
-nno <buffer><nowait> R <cmd>e<cr>
+nnoremap <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<Cmd>quit<CR>'
+nnoremap <buffer><nowait> R <Cmd>edit<CR>
 
 b:did_ftplugin = true
 
 # Teardown {{{1
 
-b:undo_ftplugin = get(b:, 'undo_ftplugin', 'exe')
+b:undo_ftplugin = get(b:, 'undo_ftplugin', 'execute')
     .. '| call debug#timerInfo#undoFtplugin()'
 

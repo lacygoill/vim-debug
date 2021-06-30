@@ -11,6 +11,6 @@ def debug#scriptnames#main()
         title: ':Scriptnames',
         quickfixtextfunc: (_) => [],
     })
-    do <nomodeline> QuickFixCmdPost cwindow
+    doautocmd <nomodeline> QuickFixCmdPost cwindow
 enddef
 

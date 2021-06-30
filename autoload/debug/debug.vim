@@ -18,12 +18,12 @@ enddef
 def debug#debug#wrapper(cmd: string)
     try
         g:debugging = true
-        exe 'debug ' .. cmd
+        execute 'debug ' .. cmd
     catch
         Catch()
         return
     finally
-        g:debugging = false | redrawt
+        g:debugging = false | redrawtabline
     endtry
 enddef
 

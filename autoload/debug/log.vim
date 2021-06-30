@@ -40,7 +40,7 @@ def debug#log#output(what: dict<any>) #{{{1
     #}}}
     if strlen(excmd) < 2
         echohl ErrorMsg
-        echom 'Cannot run a single-character command; try to write it in its long form'
+        echomsg 'Cannot run a single-character command; try to write it in its long form'
         echohl NONE
         return
     endif
@@ -89,10 +89,10 @@ def debug#log#output(what: dict<any>) #{{{1
     # If we're in the command-line window, `:pedit` may fail.
     try
         # Load the file in the preview  window.  Useful to avoid having to close
-        # it if we execute another `:Verbose` command.  From `:h :ptag`:
+        # it if we execute another `:Verbose` command.  From `:help :ptag`:
         #    > If a "Preview" window already exists, it is re-used
         #    > (like a help window is).
-        exe 'pedit ' .. tempfile
+        execute 'pedit ' .. tempfile
     catch
         Catch()
         return
@@ -108,9 +108,9 @@ def debug#log#output(what: dict<any>) #{{{1
     &l:buflisted = false
     &l:swapfile = false
     &l:wrap = false
-    nmap <buffer><nowait> q <plug>(my_quit)
+    nmap <buffer><nowait> q <Plug>(my_quit)
     search('Last set from \zs')
-    nno <buffer><nowait> DD <cmd>sil keepj keepp g/^\s*Last set from/d _<cr>
+    nnoremap <buffer><nowait> DD <Cmd>silent keepjumps keeppatterns global/^\s*Last set from/delete _<CR>
 enddef
 
 def RedirectToTempfile( #{{{1
@@ -127,7 +127,7 @@ def RedirectToTempfile( #{{{1
 
         var output: string = execute(
             level .. 'verbose '
-            # From `:h :verb`:{{{
+            # From `:help :verbose`:{{{
             #
             #           When concatenating another command,
             #           the ":verbose" only applies to the first one.
@@ -135,7 +135,7 @@ def RedirectToTempfile( #{{{1
             # We want `:Verbose` to apply to the whole “pipeline“.
             # Not just the part before the 1st bar.
             #}}}
-            .. 'exe '
+            .. 'execute '
             .. string(excmd))
 
         # We set `'verbosefile'` to `tempfile`.
@@ -147,7 +147,7 @@ def RedirectToTempfile( #{{{1
         #
         # First, you would need to run the command silently:
         #
-        #     sil exe level .. 'verbose exe ' .. string(excmd)
+        #     silent execute level .. 'verbose execute ' .. string(excmd)
         #     │
         #     └ even though verbose messages are redirected to a file,
         #       regular messages are  still displayed on the  command-line;
@@ -160,19 +160,19 @@ def RedirectToTempfile( #{{{1
         # Second, sometimes, you would get undesired messages:
         #
         #     &verbosefile = '/tmp/log'
-        #     echo execute('au')->split('\n')->filter((_, v: string): bool => v =~ 'fugitive')
+        #     echo execute('autocmd')->split('\n')->filter((_, v: string): bool => v =~ 'fugitive')
         #     &verbosefile = ''
         #
         # The  previous snippet  should have  output only  the lines  containing
-        # `fugitive` inside the output of `:au`.
+        # `fugitive` inside the output of `:autocmd`.
         # Because of this, the next command wouldn't work as expected:
         #
-        #     :Verb Filter /fugitive/ au
+        #     :Verb Filter /fugitive/ autocmd
         #}}}
-        sil echo output
+        silent echo output
         &verbosefile = ''
 
-        sil exe level .. 'verbose exe ' .. string(excmd)
+        silent execute level .. 'verbose execute ' .. string(excmd)
     catch
         return Catch()
     finally
@@ -183,7 +183,7 @@ def RedirectToTempfile( #{{{1
         #    2. writes are buffered, thus may not show up for some time
         #       Writing to the file ends when [...] 'verbosefile' is made empty.
         #
-        # See `:h 'verbosefile'`.
+        # See `:help 'verbosefile'`.
         #}}}
         &verbosefile = ''
     endtry

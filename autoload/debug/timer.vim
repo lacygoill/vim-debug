@@ -63,7 +63,7 @@ def debug#timer#infoOpen() #{{{1
         return
     endif
     var tempfile: string = tempname() .. '/timer_info'
-    exe 'to :' .. (&columns / 3) .. ' vnew ' .. tempfile
+    execute 'topleft :' .. (&columns / 3) .. ' vnew ' .. tempfile
     &l:previewwindow = true
     &l:wrap = false
     wincmd p
@@ -71,10 +71,10 @@ enddef
 
 def debug#timer#measure() #{{{1
     if date == []
-        echom '  go!'
+        echomsg '  go!'
         date = reltime()
     else
-        echom reltime(date)
+        echomsg reltime(date)
             ->reltimestr()
             ->matchstr('.*\....') .. ' seconds to do the task'
         date = []
@@ -94,27 +94,27 @@ def debug#timer#populate() #{{{1
         lines += info
     endfor
     lines->setline(1)
-    sil :% !column -s $'\x01' -t
+    silent :% !column -s $'\x01' -t
     # `PutDefinition()` calls `append()` which is silent, so why `:silent`?{{{
     #
     # Somehow, `:g` has priority, and it's not silent by default.
     #
     # MWE:
     #
-    #     nno <F3> <cmd>call FuncA()<cr>
-    #     fu FuncA() abort
-    #         .g/^/call FuncB()
-    #     endfu
-    #     fu FuncB() abort
+    #     nnoremap <F3> <Cmd>call FuncA()<CR>
+    #     function FuncA() abort
+    #         :. global/^/call FuncB()
+    #     endfunction
+    #     function FuncB() abort
     #         call append('.', ['abc', 'def', 'ghi'])
-    #     endfu
+    #     endfunction
     #
     # Press `F3`:
     #
     #     3 more lines
     #}}}
-    sil keepj keepp g/^callback\s\+function('.\{-}')$/PutDefinition()
-    keepj keepp g/^id\s\+/FoldSection()
+    silent keepjumps keeppatterns global/^callback\s\+function('.\{-}')$/PutDefinition()
+    keepjumps keeppatterns global/^id\s\+/FoldSection()
 enddef
 var infos: list<dict<any>>
 
@@ -123,11 +123,11 @@ def PutDefinition() #{{{1
     var definition: list<string>
     if line =~ '^callback\s\+function(''<lambda>\d\+'')$'
         var lambda_id: string = line->matchstr('\d\+')
-        definition = execute('verb fu <lambda>' .. lambda_id)->split('\n')
+        definition = execute('verbose function <lambda>' .. lambda_id)->split('\n')
     else
         var func_name: string = line
             ->matchstr('^callback\s\+function(''\zs.\{-}\ze'')$')
-        definition = execute('verb fu ' .. func_name)->split('\n')
+        definition = execute('verbose function ' .. func_name)->split('\n')
     endif
     (
           ['---']

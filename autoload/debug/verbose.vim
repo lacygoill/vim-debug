@@ -30,9 +30,9 @@ enddef
 #}}}1
 # Core {{{1
 def GetCurrentValue(opt: string): list<string> #{{{2
-    var vlocal: string = execute('verb setl ' .. opt .. '?')
+    var vlocal: string = execute('verbose setlocal ' .. opt .. '?')
         ->matchstr('\_s*\zs\S.*')
-    var vglobal: string = execute('verb setg ' .. opt .. '?')
+    var vglobal: string = execute('verbose setglobal ' .. opt .. '?')
         ->matchstr('\_s*\zs\S.*')
     var type: string
     if opt[: 1] == 't_' || opt[0] .. opt[-1] == '<>'
@@ -62,11 +62,11 @@ def GetCurrentValue(opt: string): list<string> #{{{2
 enddef
 
 def GetOriginalValue(opt: string): list<string> #{{{2
-    var curval: string = execute('setl ' .. opt .. '?')->matchstr('=\zs.*')
+    var curval: string = execute('setlocal ' .. opt .. '?')->matchstr('=\zs.*')
     var origval: any = eval('b:orig_' .. opt)
     var is_boolean: bool = empty(curval)
     if is_boolean
-        curval = execute('setl ' .. opt .. '?')[1 :]
+        curval = execute('setlocal ' .. opt .. '?')[1 :]
         origval = Bool2name(origval, curval)
     endif
     if curval != origval

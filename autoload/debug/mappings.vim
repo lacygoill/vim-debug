@@ -8,9 +8,9 @@ def debug#mappings#usingFunctionKeys() #{{{1
     var lines: list<string> = ['']
     for i in range(1, 37)
         for mode in ['n', 'v', 'o', 'i', 'c']
-            for modifier in ['', 's-']
-                sil var out: string = execute(
-                    'verb ' .. mode .. 'no <' .. modifier .. 'f' .. i .. '>',
+            for modifier in ['', 'S-']
+                silent var out: string = execute(
+                    'verbose ' .. mode .. 'map <' .. modifier .. 'F' .. i .. '>',
                     '')
                 if out !~ pat
                     lines += split(out, '\n')

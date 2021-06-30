@@ -26,9 +26,9 @@ def debug#terminfo#main(use_curfile: bool) #{{{2
     Fold()
     InstallMappings()
 
-    sil! update
-    #  │
-    #  └ error if we don't have our autocmd which creates a missing directory
+    # bang to  suppress error  when we  don't have our  autocmd which  creates a
+    # missing directory
+    silent! update
 enddef
 #}}}1
 # Core {{{1
@@ -40,7 +40,7 @@ enddef
 
 def SplitWindow() #{{{2
     var tempfile: string = tempname() .. '/termcap.vim'
-    exe 'sp ' .. tempfile
+    execute 'split ' .. tempfile
 enddef
 
 def DumpTermcap(use_curfile: bool) #{{{2
@@ -48,23 +48,23 @@ def DumpTermcap(use_curfile: bool) #{{{2
     ''->append(1)
     # The bang  after silent is necessary  to suppress `E486` in  the GUI, where
     # there may be no `Terminal keys` section.
-    sil! :1/Terminal keys/ | append(line('.') - 1, '')
-    sil! :1/Terminal keys/ | append('.', '')
-    sil keepj keepp :% s/^ *//e
+    silent! :1/Terminal keys/ | append(line('.') - 1, '')
+    silent! :1/Terminal keys/ | append('.', '')
+    silent keepjumps keeppatterns :% substitute/^ *//e
 enddef
 
 def SplitCodes() #{{{2
     # split terminal codes; one per line
-    sil! keepj keepp :1,/Terminal keys\|\%$/ s/ \{2,}/\r/ge
-    #                                 ├───┘
-    #                                 └ to support the GUI where there is no "Terminal keys" section
+    silent! keepjumps keeppatterns :1,/Terminal keys\|\%$/ substitute/ \{2,}/\r/ge
+    #                                               ├───┘
+    #                                               └ to support the GUI where there is no "Terminal keys" section
 
     if search('Terminal keys', 'n') == 0
         return
     endif
     # split terminal keys; one per line
-    sil! keepj keepp :/Terminal keys/,$ s/ \zet_\S*/\r/ge
-    sil! keepj keepp :/Terminal keys/,$ s/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
+    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/ \zet_\S*/\r/ge
+    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/\%(<.\{-}>.*\)\@<=<\S\{-1,}> \+.\{-}\ze\%( <.\{-1,}> \+\S\|$\)/\r&/ge
     # Why this second substitution?{{{
     #
     # To handle terminal keys which are not associated to a terminal option.
@@ -81,7 +81,7 @@ enddef
 
 def SeparateTerminalKeysWithoutOptions() #{{{2
     # move terminal keys not associated to any terminal option at the end of the buffer
-    sil! keepj keepp :/Terminal keys/,$ g/^</m $
+    silent! keepjumps keeppatterns :/Terminal keys/,$ global/^</move $
     # separate them from the terminal keys associated with a terminal option{{{
     #
     #     t_kP <PageUp>    ^[[5~ 
@@ -93,14 +93,14 @@ def SeparateTerminalKeysWithoutOptions() #{{{2
     #
     #     <í>        ^[m
     #}}}
-    sil! :1/^<\%(.*" t_\S\S\)\@!/ put! _
+    silent! :1/^<\%(.*" t_\S\S\)\@!/ put! _
 enddef
 
 def MoveKeynamesIntoInlineComments() #{{{2
     #     t_#2 <S-Home>    ^[[1;2H
     #     →
     #     <S-Home>    ^[[1;2H  " t_#2
-    sil! keepj keepp :/Terminal keys/,$ s/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
+    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
 enddef
 
 def AddAssignmentOperators() #{{{2
@@ -109,7 +109,7 @@ def AddAssignmentOperators() #{{{2
     #     <S-Home>    ^[[1;2H  " t_#2
     #     →
     #     <S-Home>=^[[1;2H  " t_#2
-    sil! keepj keepp :/Terminal keys/,$ s/^<.\{-1,}>\zs \+/=/e
+    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/^<.\{-1,}>\zs \+/=/e
 enddef
 
 def AlignInlineComment() #{{{2
@@ -132,11 +132,11 @@ def AlignInlineComment() #{{{2
     # We fix this by passing to `:EasyAlign` the optional argument `{'ig': []}`,
     # which tells it to ignore nothing.
     #}}}
-    sil! keepj keepp :/Terminal keys/+,$ EasyAlign /"/ {'ig': []}
+    silent! keepjumps keeppatterns :/Terminal keys/+1,$ EasyAlign /"/ {'ig': []}
 enddef
 
 def AddSetCommands() #{{{2
-    sil keepj keepp :% s/^\ze\%(t_\|<\)/set /e
+    silent keepjumps keeppatterns :% substitute/^\ze\%(t_\|<\)/set /e
 enddef
 
 def EscapeSpacesInOptionsValues() #{{{2
@@ -144,43 +144,45 @@ def EscapeSpacesInOptionsValues() #{{{2
     #     →
     #     set t_EI=^[[2\ q
     #                  ^
-    sil keepj keepp :% s/\%(set.\{-}=.*[^"]\)\@<= [^" ]/\\&/ge
+    silent keepjumps keeppatterns :% substitute/\%(set.\{-}=.*[^"]\)\@<= [^" ]/\\&/ge
 enddef
 
 def TrimTrailingWhitespace() #{{{2
-    sil! keepj keepp :/Terminal keys/,$ s/ \+$//e
+    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/ \+$//e
 enddef
 
 def TranslateSpecialKeys() #{{{2
     # translate caret notation of control characters
-    sil keepj keepp :% s/\^\[/\="\e"/ge
-    sil keepj keepp :% s/\^\(\u\)/\=eval('"' .. '\x' .. (submatch(1)->char2nr() - 64) .. '"')/ge
-    sil keepj keepp :% s/\^?/\="\x7f"/ge
+    Ref = (): string => eval('"' .. '\x' .. (submatch(1)->char2nr() - 64) .. '"')
+    silent keepjumps keeppatterns :% substitute/\^\[/\="\<Esc>"/ge
+    silent keepjumps keeppatterns :% substitute/\^\(\u\)/\=Ref()/ge
+    silent keepjumps keeppatterns :% substitute/\^?/\="\x7f"/ge
 
     #     <á>=^[a    →    <M-a>=^[a
-    sil keepj keepp :% s/^set <\zs.\ze>=\e\(\l\)/M-\1/e
+    silent keepjumps keeppatterns :% substitute/^set <\zs.\ze>=\e\(\l\)/M-\1/e
 enddef
+var Ref: func: string
 
 def SortLines() #{{{2
     # sort terminal codes: easier to find a given terminal option name
     # sort terminal keys: useful later when vimdiff'ing the output with another one
-    sil! keepj :1/Terminal codes/+,/Terminal keys/-- sort
-    sil! keepj :1/Terminal keys/++;/^$/- sort
-    sil! keepj :1/Terminal keys//^$//^$/+;$ sort
+    silent! keepjumps :1/Terminal codes/+1,/Terminal keys/-2 sort
+    silent! keepjumps :1/Terminal keys/+2;/^$/-1 sort
+    silent! keepjumps :1/Terminal keys//^$//^$/+1;$ sort
 enddef
 
 def CommentSectionHeaders() #{{{2
     #     --- Terminal codes ---    →    " Terminal codes
     #     --- Terminal keys ---     →    " Terminal keys
-    sil keepj keepp :% s/^--- Terminal \(\S*\).*/" Terminal \1/e
+    silent keepjumps keeppatterns :% substitute/^--- Terminal \(\S*\).*/" Terminal \1/e
 enddef
 
 def Fold() #{{{2
-    sil keepj keepp :% s/^" .*\zs/\=' {{' .. '{1'/e
+    silent keepjumps keeppatterns :% substitute/^" .*\zs/\=' {{' .. '{1'/e
 enddef
 
 def InstallMappings() #{{{2
-    nno <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<cmd>q!<cr>'
+    nnoremap <buffer><expr><nowait> q reg_recording() != '' ? 'q' : '<Cmd>quit!<CR>'
     # mapping to compare value on current line with the one in output of `:set termcap`{{{
     #
     # Note that  `:filter` is able  to filter the "Terminal  codes" section,
@@ -191,23 +193,23 @@ def InstallMappings() #{{{2
     # "Terminal codes" section,  it will correctly filter out  all the other
     # terminal codes.
     #}}}
-    nno <buffer><nowait> !!
-        \ <cmd>exe 'filter /' .. getline('.')->matchstr('t_[^=]*') .. '/ set termcap'<cr>
+    nnoremap <buffer><nowait> !!
+        \ <Cmd>execute 'filter /' .. getline('.')->matchstr('t_[^=]*') .. '/ set termcap'<CR>
     # open relevant help tag to get more info about the terminal option under the cursor
-    nno <buffer><nowait> <cr> <cmd>call <sid>GetHelp()<cr>
+    nnoremap <buffer><nowait> <CR> <Cmd>call <SID>GetHelp()<CR>
     # get help about mappings
-    nno <buffer><nowait> g? <cmd>call <sid>PrintHelp()<cr>
+    nnoremap <buffer><nowait> g? <Cmd>call <SID>PrintHelp()<CR>
 enddef
 
 def GetHelp() #{{{2
     var tag: string = getline('.')->matchstr('\%(^set \|" \)\@4<=t_[^=]*')
     if tag != ''
         try
-            exe "h '" .. tag
+            execute "help '" .. tag
         # some terminal options have no help tags (e.g. `'t_FL'`)
         catch /^Vim\%((\a\+)\)\=:E149:/
             echohl ErrorMsg
-            echom v:exception
+            echomsg v:exception
             echohl NONE
         endtry
     else

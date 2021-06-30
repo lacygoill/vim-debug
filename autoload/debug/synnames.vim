@@ -7,7 +7,7 @@ def debug#synnames#main(count: number) #{{{1
     if count != 0
         var name: string = Synnames()->get(count - 1, '')
         if !empty(name)
-            exe 'syntax list ' .. name
+            execute 'syntax list ' .. name
         endif
     else
         echo Synnames()->join()

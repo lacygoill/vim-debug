@@ -20,7 +20,7 @@ def debug#cleanLog() #{{{1
         #     :echo "\<CursorHold>"
         #     <80><fd>`˜
         #}}}
-        sil keepj keepp :% s/\%x80ý[`a]//ge
+        silent keepjumps keeppatterns :% substitute/\%x80ý[`a]//ge
         # Those sequences match meta chords.{{{
         #
         # For example:
@@ -32,25 +32,25 @@ def debug#cleanLog() #{{{1
         #     ...
         #     <80>FR ⇔ M-z
         #}}}
-        sil keepj keepp :% s/\%x80F\([2-9A-R]\)/\=CleanVimKeylogRep()/ge
+        silent keepjumps keeppatterns :% substitute/\%x80F\([2-9A-R]\)/\=CleanVimKeylogRep()/ge
         return
     endif
 
     # clean event log (obtained with `:LogEvents`)
     if getline(1) !~ '\d\{2}:\d{2}'
-        :1 d _
+        :1 delete _
         if getline(1) =~ '\<VimResized\>'
-            sil :1,/^\S/- d _
+            silent :1,/^\S/-1 delete _
         endif
     endif
-    sil keepj keepp :% s/^.\{7}//e
-    sil keepj keepp g/^\%(OptionSet\|SourcePre\|SourcePost\)\s/ :.,/^\S\|\%$/- d _
-    sil keepj keepp g/^\s*afile: "$/d _
-    exe 'sil keepj keepp :% s/^\S\+\s\+amatch:\s*\zs' .. escape($HOME, '/') .. '/\~/e'
+    silent keepjumps keeppatterns :% substitute/^.\{7}//e
+    silent keepjumps keeppatterns global/^\%(OptionSet\|SourcePre\|SourcePost\)\s/ :.,/^\S\|\%$/-1 delete _
+    silent keepjumps keeppatterns global/^\s*afile: "$/delete _
+    execute 'silent keepjumps keeppatterns :% substitute/^\S\+\s\+amatch:\s*\zs' .. escape($HOME, '/') .. '/\~/e'
 enddef
 
 def CleanVimKeylogRep(): string
-    var s: string = "\e"
+    var s: string = "\<Esc>"
     var m: string = submatch(1)
     if m =~ '^\d$'
         s ..= (m->char2nr() + 47)->nr2char()
@@ -74,7 +74,7 @@ def debug#helpAboutLastErrors(): string #{{{1
         .. 'Vim\%((\a\+)\)\=:'
         # In a buffer containing the word 'the', execute:{{{
         #
-        #     :g/the/ .w >>/tmp/some_file
+        #     :global/the/ .w >>/tmp/some_file
         #
         # It raises this error message:
         #
@@ -112,7 +112,7 @@ def debug#helpAboutLastErrors(): string #{{{1
         last_errors.taglist = errors
     endif
 
-    return 'h ' .. get(last_errors.taglist, last_errors.pos, last_errors.taglist[0])
+    return 'help ' .. get(last_errors.taglist, last_errors.pos, last_errors.taglist[0])
 enddef
 var last_errors: dict<any> = {taglist: [], pos: -1}
 
@@ -127,12 +127,12 @@ def debug#lastPressedKeys() #{{{1
         if expand('%:p') != '' || (line('$') + 1)->line2byte() > 2
             new
         endif
-        exe 'sil r ' .. LOGFILE_CHAN
-        sil v/ : raw key input/d _
+        execute 'silent read ' .. LOGFILE_CHAN
+        silent vglobal/ : raw key input/delete _
         #     123.456 : raw key input: "x"
         #     →
         #     123s "x"
-        sil :% s/^\s*\(\d\+\)\.\d\+\s*:\s*raw key input\s*:\s*/\1s /e
+        silent :% substitute/^\s*\(\d\+\)\.\d\+\s*:\s*raw key input\s*:\s*/\1s /e
     endif
 enddef
 
@@ -141,7 +141,7 @@ def debug#logOptions() #{{{1
     execute('set!')
         ->split('\n')
         ->writefile(logfile)
-    exe 'sp ' .. logfile
+    execute 'split ' .. logfile
 enddef
 
 def debug#messages() #{{{1
@@ -189,7 +189,7 @@ def debug#messages() #{{{1
     }
 
     for noise in values(noises)
-        exe 'sil g/^' .. noise .. '$/d _'
+        execute 'silent global/^' .. noise .. '$/delete _'
     endfor
 
     matchadd('ErrorMsg', '^E\d\+:\s\+.*', 0)
@@ -209,11 +209,11 @@ def debug#time(cmd: string, cnt: number) #{{{1
         if cnt > 1
             var i: number = 0
             while i < cnt
-                exe cmd
+                execute cmd
                 ++i
             endwhile
         else
-            exe cmd
+            execute cmd
         endif
     catch
         Catch()
@@ -222,7 +222,7 @@ def debug#time(cmd: string, cnt: number) #{{{1
         # We  clear the  screen  before  displaying the  results,  to erase  the
         # possible messages displayed by the command.
         redraw
-        echom reltime(time)
+        echomsg reltime(time)
             ->reltimestr()
             ->matchstr('.*\....') .. ' seconds to run :' .. cmd
     endtry
@@ -239,25 +239,26 @@ def debug#unusedFunctions() #{{{1
 
     # look for all function definitions in the current repo
     try
-        # Do *not* use `:noa`.{{{
+        # Do *not* use `:noautocmd`.{{{
         #
-        # If `:lvim` needs to look into a  file which is already open in another
-        # Vim instance,  there is  a risk  that `E325` is  raised.  And  if that
-        # happens, you might not be able to see the message, which is confusing,
-        # because it  looks like Vim  is blocked.  The  issue is triggered  by a
-        # combination of `:sil` and `try/catch`.
+        # If `:lvimgrep`  needs to  look into  a file which  is already  open in
+        # another Vim instance,  there is a risk that `E325`  is raised.  And if
+        # that  happens, you  might not  be able  to see  the message,  which is
+        # confusing,  because  it looks  like  Vim  is  blocked.  The  issue  is
+        # triggered by a combination of `:silent` and `try/catch`.
         #
         # You  can work  around it  with an  autocmd listening  to `SwapExists`,
-        # which we currently have in our vimrc.  But `:noa` would suppress it.
+        # which we currently have in our vimrc.  But `:noautocmd` would suppress it.
         #
         # ---
         #
-        # Also, `:noa` would suppress `Syntax`,  which in turn would prevent the
-        # files in which `:lvim` looks for from being highlighted:
+        # Also,  `:noautocmd`  would  suppress  `Syntax`, which  in  turn  would
+        # prevent  the  files   in  which  `:lvimgrep`  looks   for  from  being
+        # highlighted:
         #
-        #     $ vim -Nu NONE --cmd 'syn on' +'noa lvim /autocmd/ $VIMRUNTIME/filetype.vim'
+        #     $ vim -Nu NONE --cmd 'syntax on' +'noautocmd lvimgrep /autocmd/ $VIMRUNTIME/filetype.vim'
         #}}}
-        sil lvim /^\C\s*\%(fu\%[nction]\|def\)\s\+/ ./**/*.vim
+        silent lvimgrep /^\C\s*\%(fu\%[nction]\|def\)\s\+/ ./**/*.vim
     # E480: No match: ...
     catch /^Vim\%((\a\+)\)\=:E480:/
         echo 'Could not find any function in the repo'
@@ -271,9 +272,9 @@ def debug#unusedFunctions() #{{{1
     for afunc in functions
         var pat: string = afunc
         if afunc[: 1] == 's:'
-            pat ..= '\|<sid>' .. afunc[2 :]
+            pat ..= '\|<SID>' .. afunc[2 :]
         endif
-        exe 'sil lvim /\C\%(' .. pat .. '\)(/ ./**/*.vim'
+        execute 'silent lvimgrep /\C\%(' .. pat .. '\)(/ ./**/*.vim'
         # the name of an unused function appears only once
         if getloclist(0, {size: 0}).size <= 1
             unused += [afunc]
@@ -286,7 +287,7 @@ def debug#unusedFunctions() #{{{1
         echo 'No unused function in ' .. getcwd()
     else
         setloclist(0, [], 'f')
-        exe 'lvim /\C\%(' .. unused->join('\|')  .. '\)(/ ./**/*.vim'
+        execute 'lvimgrep /\C\%(' .. unused->join('\|')  .. '\)(/ ./**/*.vim'
     endif
 enddef
 
@@ -315,7 +316,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
             var bufnr: number = bufadd(filename)
             bufload(bufnr)
             getbufline(bufnr, 1, '$')->append('$')
-            exe 'bw! ' .. bufnr
+            execute 'bwipeout! ' .. bufnr
             append('$', '')
             # Sometimes, we have 2 empty lines between 2 major versions, instead of just 1; remove it.{{{
             #
@@ -327,15 +328,15 @@ def debug#vimPatches(n: string, append = false) #{{{1
             # For some  reason, we need to  delay, otherwise we might  delete an
             # empty line which we want to keep (e.g. between 8.0 and 8.1).
             #}}}
-            au SafeState * ++once sil! g/^\n\n\|\%^$\|\%$$/d _
-            #                                 ^----------^
-            #                                 also delete the first and last empty lines
+            autocmd SafeState * ++once silent! global/^\n\n\|\%^$\|\%$$/delete _
+            #                                              ^----------^
+            #                                              also delete the first and last empty lines
         elseif bufloaded(filename)
             Display(filename)
             Mapping()
             return
         else
-            exe 'sil sp ' .. filename
+            execute 'silent split ' .. filename
             debug#vimPatchesPrettify()
             Mapping()
         endif
@@ -356,7 +357,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
             return
         endif
         new
-        exe 'file ' .. fnameescape(filename)
+        execute 'file ' .. fnameescape(filename)
         var ifirst: number = index(MAJOR_VERSIONS, first)
         var ilast: number = index(MAJOR_VERSIONS, last)
         var numbers: list<string> = MAJOR_VERSIONS[ifirst : ilast]
@@ -379,13 +380,13 @@ def Display(filename: string)
     if winid > 0
         win_gotoid(winid)
     else
-        exe 'sp ' .. filename
+        execute 'split ' .. filename
     endif
 enddef
 
 def Error(msg: string)
     echohl ErrorMsg
-    echom msg
+    echomsg msg
     echohl NONE
 enddef
 
@@ -397,23 +398,23 @@ def debug#vimPatchesPrettify() #{{{1
     &l:wrap = false
 
     # remove noise
-    sil g/^Patches for Vim/ :.;/^\s*SIZE/ d _
-    sil! g/^--- The story continues with Vim /d _
-    sil keepj keepp :% s/^\s*\d\+\s\+//e
+    silent global/^Patches for Vim/ :.;/^\s*SIZE/ delete _
+    silent! global/^--- The story continues with Vim /delete _
+    silent keepjumps keeppatterns :% substitute/^\s*\d\+\s\+//e
 
     # format links
-    sil keepj keepp :% s@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
+    silent keepjumps keeppatterns :% substitute@^[0-9.]\+@[&](https://github.com/vim/vim/releases/tag/v&)@e
 
     # conceal url (copied from the markdown syntax plugin)
-    syn match xUrl /\S\+/ contained
-    syn region xLinkText matchgroup=xLinkTextDelimiter
+    syntax match xUrl /\S\+/ contained
+    syntax region xLinkText matchgroup=xLinkTextDelimiter
         \ start=/!\=\[\ze\_[^]]*] \=[[\x28]/ end=/\]\ze \=[[\x28]/
         \ nextgroup=xLink keepend concealends skipwhite
-    syn region xLink matchgroup=xLinkDelimiter
+    syntax region xLink matchgroup=xLinkDelimiter
         \ start=/(/ end=/)/
         \ contained keepend conceal contains=xUrl
-    hi def link xLinkText Underlined
-    hi def link xUrl Float
+    highlight def link xLinkText Underlined
+    highlight def link xUrl Float
     &l:conceallevel = 3
     &l:concealcursor = 'nc'
 enddef

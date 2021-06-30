@@ -16,7 +16,7 @@ export const LOGFILE_CHAN: string = '/tmp/vim_channel_activity.log'
 
 augroup LogChannelActivity
     # we need to delay until `VimEnter` so that `v:servername` has been set
-    au VimEnter * LogChannelActivity()
+    autocmd VimEnter * LogChannelActivity()
 augroup END
 
 def LogChannelActivity()
@@ -37,7 +37,7 @@ def LogChannelActivity()
                 # It would temporarily  delete the logfile which  would stop Vim
                 # from logging channel activity.
                 #}}}
-                'vim -es -Nu NONE -U NONE -i NONE +"v/%s/d _" +"update | qa!" "%s"',
+                'vim -es -Nu NONE -U NONE -i NONE +"vglobal/%s/delete _" +"update | quitall!" "%s"',
                 keep_only_this,
                 LOGFILE_CHAN
             )
@@ -59,9 +59,9 @@ enddef
 
 # Autocmds {{{1
 
-augroup MyDebug | au!
-    au BufNewFile /tmp/*/timer_info debug#timer#populate()
-    au BufReadPost ftp://ftp.vim.org/pub/vim/patches/*/README debug#vimPatchesPrettify()
+augroup MyDebug | autocmd!
+    autocmd BufNewFile /tmp/*/timer_info debug#timer#populate()
+    autocmd BufReadPost ftp://ftp.vim.org/pub/vim/patches/*/README debug#vimPatchesPrettify()
 augroup END
 
 # Commands {{{1
@@ -81,7 +81,7 @@ augroup END
 # What happens if I use a custom mapping while in debug mode?{{{
 #
 # You'll see  the first  line of  the function  which it  calls (it  happens for
-# example with `c-t` ; transpose-chars).  And, you'll step through it.
+# example with `C-t` ; transpose-chars).  And, you'll step through it.
 #}}}
 #   What to do in this case?{{{
 #
@@ -90,17 +90,17 @@ augroup END
 # If you have used one of our custom editing command several times, you'll
 # have to re-execute `cont` as many times as needed.
 #}}}
-com -bar -nargs=1 -complete=customlist,debug#debug#completion Debug debug#debug#wrapper(<q-args>)
+command -bar -nargs=1 -complete=customlist,debug#debug#completion Debug debug#debug#wrapper(<q-args>)
 
 # Wrappers around some debugging commands which don't provide completion for function names.{{{
 #
 # It's especially useful to fix that for  the names of functions which are local
 # to a script.
 #}}}
-cnorea <expr> ba getcmdtype() ==# ':' && getcmdpos() == 3 ? 'Breakadd' : 'ba'
-com -bar -nargs=1 -complete=customlist,debug#break#completion Breakadd debug#break#wrapper('add', <q-args>)
-com -bar -nargs=1 -complete=customlist,debug#break#completion Breakdel debug#break#wrapper('del', <q-args>)
-com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#prof#wrapper(<q-bang>, <q-args>)
+cnoreabbrev <expr> ba getcmdtype() == ':' && getcmdpos() == 3 ? 'Breakadd' : 'ba'
+command -bar -nargs=1 -complete=customlist,debug#break#completion Breakadd debug#break#wrapper('add', <q-args>)
+command -bar -nargs=1 -complete=customlist,debug#break#completion Breakdel debug#break#wrapper('del', <q-args>)
+command -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#prof#wrapper(<q-bang>, <q-args>)
 
 # Purpose:{{{
 # Wrapper around commands such as `:breakadd file */ftplugin/sh.vim`.
@@ -108,22 +108,22 @@ com -bar -bang -nargs=? -complete=customlist,debug#prof#completion Prof debug#pr
 #
 # Useful to debug a filetype/indent/syntax plugin.
 #}}}
-com -bar -nargs=* -complete=custom,debug#localPlugin#complete DebugLocalPlugin
+command -bar -nargs=* -complete=custom,debug#localPlugin#complete DebugLocalPlugin
     \ debug#localPlugin#main(<q-args>)
 
-com -bar DebugMappingsFunctionKeys debug#mappings#usingFunctionKeys()
+command -bar DebugMappingsFunctionKeys debug#mappings#usingFunctionKeys()
 
 # `:DebugTerminfo` dumps the termcap db of the current Vim instance
 # `:DebugTerminfo!` prettifies the termcap db written in the current file
-com -bar -bang DebugTerminfo debug#terminfo#main(<bang>0)
+command -bar -bang DebugTerminfo debug#terminfo#main(<bang>0)
 
 # Sometimes, after a  refactoring, we forget to remove some  functions which are
 # no longer necessary.  This command should list them in the location window.
 # Warning: It might  give false  positives, because a  function may  appear only
 # once in a plugin, but still be called from another plugin.
-com -bar DebugUnusedFunctions debug#unusedFunctions()
+command -bar DebugUnusedFunctions debug#unusedFunctions()
 
-com -bar Scriptnames debug#scriptnames#main()
+command -bar Scriptnames debug#scriptnames#main()
 
 # Since Vim's patch 8.1.1241, a range seems to be, by default, interpreted as a line address.{{{
 #
@@ -131,7 +131,7 @@ com -bar Scriptnames debug#scriptnames#main()
 # And it's possible that we give a count which is bigger than the number of lines in the current buffer.
 # If that happens, `E16` will be raised:
 #
-#     :com -range=1 Cmd echo ''
+#     :command -range=1 Cmd echo ''
 #     :new
 #     :3 Cmd
 #     E16: Invalid range˜
@@ -143,31 +143,31 @@ com -bar Scriptnames debug#scriptnames#main()
 #
 # Solution: use the additional attribute `-addr=other`:
 #
-#                   v---------v
-#     :com -range=1 -addr=other Cmd echo ''
+#                       v---------v
+#     :command -range=1 -addr=other Cmd echo ''
 #     :new
 #     :3 Cmd
 #
 # I think it specifies that the type of  the range is not known (i.e. not a line
 # address, not a buffer number, not a window number, ...).
 #}}}
-com -range=1 -addr=other -nargs=+ -complete=command Time debug#time(<q-args>, <count>)
+command -range=1 -addr=other -nargs=+ -complete=command Time debug#time(<q-args>, <count>)
 # Do *not* give the `-bar` attribute to `:Verbose`.
-com -range=1 -addr=other -nargs=1 -complete=command Verbose
+command -range=1 -addr=other -nargs=1 -complete=command Verbose
     \ debug#log#output({level: <count>, excmd: <q-args>})
 
-com -bar -nargs=1 -complete=option Vo debug#verbose#option(<q-args>)
+command -bar -nargs=1 -complete=option Vo debug#verbose#option(<q-args>)
 
-com -bar -nargs=? -complete=custom,debug#vimPatchesCompletion VimPatches debug#vimPatches(<q-args>)
+command -bar -nargs=? -complete=custom,debug#vimPatchesCompletion VimPatches debug#vimPatches(<q-args>)
 
 # Mappings {{{1
 # C-x C-v   evaluate variable under cursor while on command-line{{{2
 
-cno <unique> <c-x><c-v> <c-\>e debug#cmdline#evalVarUnderCursor()<cr>
+cnoremap <unique> <C-X><C-V> <C-\>e debug#cmdline#evalVarUnderCursor()<CR>
 
 # dg C-l    clean log {{{2
 
-nno dg<c-l> <cmd>call debug#cleanLog()<cr>
+nnoremap dg<C-L> <Cmd>call debug#cleanLog()<CR>
 
 # g!        last page in the output of last command {{{2
 
@@ -176,7 +176,7 @@ nno dg<c-l> <cmd>call debug#cleanLog()<cr>
 # `g!` is easier to type.
 # `g<` could be used with `g>` to perform a pair of opposite actions.
 #}}}
-nno <unique> g! g<
+nnoremap <unique> g! g<
 
 # !c        capture variable {{{2
 
@@ -185,12 +185,12 @@ nno <unique> g! g<
 
 # `!c` captures the latest value of a variable.
 # `!C` captures all the values of a variable during its lifetime.
-nno <expr><unique> !c debug#capture#setup(v:false)
-nno <expr><unique> !C debug#capture#setup(v:true)
+nnoremap <expr><unique> !c debug#capture#setup(v:false)
+nnoremap <expr><unique> !C debug#capture#setup(v:true)
 
 # !d        echo g:d_* {{{2
 
-nno <unique> !d <cmd>call debug#capture#dump()<cr>
+nnoremap <unique> !d <Cmd>call debug#capture#dump()<CR>
 
 # !e        show help about last error {{{2
 
@@ -199,21 +199,21 @@ nno <unique> !d <cmd>call debug#capture#dump()<cr>
 # Press `-e` to open the help topic explaining the last one.
 # Repeat to cycle through all the help topics related to the rest of the errors.
 
-#             ┌ error
-#             │
-nno <unique> !e <cmd>exe debug#helpAboutLastErrors()<cr>
+#                  ┌ error
+#                  │
+nnoremap <unique> !e <Cmd>execute debug#helpAboutLastErrors()<CR>
 
 # !K        show last pressed keys {{{2
 
-nno <unique> !K <cmd>call debug#lastPressedKeys()<cr>
+nnoremap <unique> !K <Cmd>call debug#lastPressedKeys()<CR>
 
 # !m        show messages {{{2
 
-nno <unique> !m <cmd>call debug#messages()<cr>
+nnoremap <unique> !m <Cmd>call debug#messages()<CR>
 
 # !M        clean messages {{{2
 
-nno <unique> !M <cmd>messages clear <bar> echo 'messages cleared'<cr>
+nnoremap <unique> !M <Cmd>messages clear <Bar> echo 'messages cleared'<CR>
 
 # !o        paste Output of last Ex command  {{{2
 
@@ -221,7 +221,7 @@ nmap <expr><unique> !o debug#output#lastExCommand()
 
 # !O        log Vim options {{{2
 
-nno !O <cmd>call debug#logOptions()<cr>
+nnoremap !O <Cmd>call debug#logOptions()<CR>
 
 # !s        show syntax groups under cursor {{{2
 
@@ -232,17 +232,17 @@ nno !O <cmd>call debug#logOptions()<cr>
 #     1!s    show the definition of the innermost syntax group
 #     3!s    show the definition of the 3rd syntax group
 
-nno <unique> !s <cmd>call debug#synnames#main(v:count)<cr>
+nnoremap <unique> !s <Cmd>call debug#synnames#main(v:count)<CR>
 
 # !S        autoprint stack items under the cursor {{{2
 
-nno <unique> !S <cmd>call debug#autoSynstack#main()<cr>
+nnoremap <unique> !S <Cmd>call debug#autoSynstack#main()<CR>
 
 # !T        measure time to do task {{{2
 
-nno <unique> !T <cmd>call debug#timer#measure()<cr>
+nnoremap <unique> !T <Cmd>call debug#timer#measure()<CR>
 
 # !t        show info about running timers {{{2
 
-nno <unique> !t <cmd>call debug#timer#infoOpen()<cr>
+nnoremap <unique> !t <Cmd>call debug#timer#infoOpen()<CR>
 
