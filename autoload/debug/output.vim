@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def debug#output#lastExCommand(): string #{{{1
     setreg('o', GetOutput(), 'c')
     return '"o]p'

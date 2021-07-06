@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def debug#mappings#usingFunctionKeys() #{{{1
     var pat: string = '\cno mapping found'
     var lines: list<string> = ['']

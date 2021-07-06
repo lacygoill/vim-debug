@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def debug#localPlugin#main(args: string) #{{{1
     var splitted_args: list<string> = split(args)
     var kind: string = args->matchstr('-kind\s\+\zs[^ -]\S*')

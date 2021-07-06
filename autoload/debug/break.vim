@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 import FuncComplete from 'lg.vim'
 
 # We can't use `getcompletion('breakadd ', 'cmdline')`.{{{
@@ -33,13 +30,13 @@ def debug#break#completion(
         && cmdline !~ '^\CBreak\%(add\|del\) file\s\+\S\+\s\+'
         if arglead =~ '$\h\w*$'
             return getcompletion(arglead[1 :], 'environment')
-                ->map((_, v: string): string => '$' .. v)
+                ->map((_, v: string) => '$' .. v)
         else
             return getcompletion(arglead, 'file')
         endif
     elseif cmdline =~ '^\CBreakadd \%(' .. ADD_ARGUMENTS->join('\|') .. '\)'
         || cmdline =~ '^\CBreakdel \%('
-            .. mapnew(DEL_ARGUMENTS, (_, v: string): string => escape(v, '*'))
+            .. mapnew(DEL_ARGUMENTS, (_, v: string) => escape(v, '*'))
                 ->join('\|')
             .. '\)'
         return []

@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 import Catch from 'lg.vim'
 import LOGFILE_CHAN from '../plugin/debug.vim'
 
@@ -92,7 +89,7 @@ def debug#helpAboutLastErrors(): string #{{{1
     endif
 
     var errors: list<string> = messages[i : j - 1]
-        ->map((_, v: string): string => v->matchstr(pat_error))
+        ->map((_, v: string) => v->matchstr(pat_error))
         # remove lines  which don't contain  an error,  or which contain  the errors
         # E662 / E663 / E664 (they aren't interesting and come frequently)
         ->filter((_, v: string): bool => !empty(v) && v !~ '^E66[234]$')
@@ -188,7 +185,7 @@ def debug#messages() #{{{1
         'yanked lines':  '\%(block of \)\=\d\+ lines yanked',
     }
 
-    for noise in values(noises)
+    for noise in noises->values()
         execute 'silent global/^' .. noise .. '$/delete _'
     endfor
 
@@ -256,7 +253,8 @@ def debug#unusedFunctions() #{{{1
         # prevent  the  files   in  which  `:lvimgrep`  looks   for  from  being
         # highlighted:
         #
-        #     $ vim -Nu NONE --cmd 'syntax on' +'noautocmd lvimgrep /autocmd/ $VIMRUNTIME/filetype.vim'
+        #     syntax on
+        #     noautocmd lvimgrep /autocmd/ $VIMRUNTIME/filetype.vim
         #}}}
         silent lvimgrep /^\C\s*\%(fu\%[nction]\|def\)\s\+/ ./**/*.vim
     # E480: No match: ...

@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def debug#timerInfo#undoFtplugin()
     set bufhidden<
     set buftype<

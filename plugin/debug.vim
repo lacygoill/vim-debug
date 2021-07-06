@@ -167,7 +167,7 @@ cnoremap <unique> <C-X><C-V> <C-\>e debug#cmdline#evalVarUnderCursor()<CR>
 
 # dg C-l    clean log {{{2
 
-nnoremap dg<C-L> <Cmd>call debug#cleanLog()<CR>
+nnoremap <unique> dg<C-L> <Cmd>call debug#cleanLog()<CR>
 
 # g!        last page in the output of last command {{{2
 
@@ -196,12 +196,13 @@ nnoremap <unique> !d <Cmd>call debug#capture#dump()<CR>
 
 # Description:
 # You execute some function/command which raises one or several errors.
-# Press `-e` to open the help topic explaining the last one.
+# Press `!e` to open the help topic explaining the last one.
 # Repeat to cycle through all the help topics related to the rest of the errors.
 
-#                  ┌ error
-#                  │
-nnoremap <unique> !e <Cmd>execute debug#helpAboutLastErrors()<CR>
+# An intermediate `<Plug>`  mapping is necessary to make  the mapping repeatable
+# via our submode api.
+nmap <unique> !e <Plug>(help-last-errors)
+nnoremap <Plug>(help-last-errors) <Cmd>execute debug#helpAboutLastErrors()<CR>
 
 # !K        show last pressed keys {{{2
 
@@ -221,7 +222,7 @@ nmap <expr><unique> !o debug#output#lastExCommand()
 
 # !O        log Vim options {{{2
 
-nnoremap !O <Cmd>call debug#logOptions()<CR>
+nnoremap <unique> !O <Cmd>call debug#logOptions()<CR>
 
 # !s        show syntax groups under cursor {{{2
 

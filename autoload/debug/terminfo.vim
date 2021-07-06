@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 # Interface {{{1
 def debug#terminfo#main(use_curfile: bool) #{{{2
     if use_curfile

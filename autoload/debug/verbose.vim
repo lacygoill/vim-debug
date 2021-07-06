@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 import Catch from 'lg.vim'
 const OPTIONS_DOC: list<string> = readfile($VIMRUNTIME .. '/doc/options.txt')
 
@@ -52,7 +49,7 @@ def GetCurrentValue(opt: string): list<string> #{{{2
             global:  %s
             type:    %s
         END
-        msg->map((i: number, v: string): string =>
+        msg->map((i: number, v: string) =>
                     v->substitute(
                         '%s',
                         escape([vlocal, vglobal, type][i], '&\'),

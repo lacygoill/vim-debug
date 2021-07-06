@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 import FuncComplete from 'lg.vim'
 
 const DIR: string = getenv('XDG_RUNTIME_VIM') ?? '/tmp'
@@ -28,7 +25,7 @@ def debug#prof#completion( #{{{1
     && cmdline !~ '^\CProf\s\+\%(file\|start\)\s\+\S\+\s\+'
         if arglead =~ '$\h\w*$'
             return getcompletion(arglead[1 :], 'environment')
-                ->map((_, v: string): string => '$' .. v)
+                ->map((_, v: string) => '$' .. v)
         else
             return getcompletion(arglead, 'file')
         endif
@@ -54,7 +51,7 @@ def debug#prof#completion( #{{{1
 
     elseif last_dash_to_cursor =~ '^-plugin\s\+\S*$'
         var plugin_names: list<string> = ['minpac/start', 'minpac/opt', 'mine/start', 'mine/opt']
-            ->map((_, v: string): string => $HOME .. '/.vim/pack/' .. v)
+            ->map((_, v: string) => $HOME .. '/.vim/pack/' .. v)
             ->filter((_, v: string): bool => isdirectory(v))
             ->mapnew((_, v: string): list<string> => readdir(v))
             ->reduce((a: list<string>, v: list<string>): list<string> => a + v)
@@ -118,7 +115,7 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
 
     plugin_files
         ->filter((_, v: string): bool => v !~ '\c/t\%[est]/')
-        ->map((_, v: string): string => 'source ' .. v)
+        ->map((_, v: string) => 'source ' .. v)
         ->writefile(DIR .. '/profile.log')
     execute 'silent! source ' .. DIR .. '/profile.log'
 
@@ -126,7 +123,7 @@ def debug#prof#wrapper(bang: string, args: string) #{{{1
             start_cmd,
             file_cmd,
             plugin_files
-                ->map((_, v: string): string => '    ' .. v)
+                ->map((_, v: string) => '    ' .. v)
                 ->join("\n"))
 
     # TODO: If Vim had  the subcommand `dump` (like Neovim), we  would not need to restart Vim. {{{

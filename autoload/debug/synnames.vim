@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def debug#synnames#main(count: number) #{{{1
     if count != 0
         var name: string = Synnames()->get(count - 1, '')

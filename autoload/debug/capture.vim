@@ -1,12 +1,6 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
-import {
-    Catch,
-    IsVim9,
-} from 'lg.vim'
+import Catch from 'lg.vim'
 
 import WinScratch from 'lg/window.vim'
 
@@ -25,7 +19,7 @@ def debug#capture#dump() #{{{2
         echo 'there are no debugging variables'
         return
     endif
-    vars->map((_, v: string): string =>
+    vars->map((_, v: string) =>
                 v .. ' = ' .. eval('g:' .. v)->string())
     try
         WinScratch(vars)
@@ -53,10 +47,9 @@ def Variable(_) #{{{2
         return
     endif
     copy .
-    var cmd: string = IsVim9() ? '' : 'let '
     var rep: string = all_values
-        ? cmd .. 'g:d_\2 = get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
-        : cmd .. 'g:d_\2 = deepcopy(\1\2)'
+        ? 'g:d_\2 = get(g:, ''d_\2'', []) + [deepcopy(\1\2)]'
+        : 'g:d_\2 = deepcopy(\1\2)'
     execute 'silent keepjumps keeppatterns substitute/' .. pat .. '/' .. rep .. '/e'
 enddef
 #}}}1

@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 def FoldSection() #{{{1
     var new_line: string = getline('.')->substitute('^', '# ', '')
     setline('.', ['#'] + [new_line])
@@ -101,17 +98,11 @@ def debug#timer#populate() #{{{1
     #
     # MWE:
     #
-    #     nnoremap <F3> <Cmd>call FuncA()<CR>
-    #     function FuncA() abort
-    #         :. global/^/call FuncB()
-    #     endfunction
-    #     function FuncB() abort
-    #         call append('.', ['abc', 'def', 'ghi'])
-    #     endfunction
-    #
-    # Press `F3`:
-    #
-    #     3 more lines
+    #     def Func()
+    #         ['abc', 'def', 'ghi']->append('.')
+    #     enddef
+    #     :. global/^/Func()
+    #     3 more lines˜
     #}}}
     silent keepjumps keeppatterns global/^callback\s\+function('.\{-}')$/PutDefinition()
     keepjumps keeppatterns global/^id\s\+/FoldSection()
@@ -131,7 +122,7 @@ def PutDefinition() #{{{1
     endif
     (
           ['---']
-        + definition->map((_, v: string): string => '    ' .. v)
+        + definition->map((_, v: string) => '    ' .. v)
     )->append('.')
 enddef
 

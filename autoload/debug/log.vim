@@ -1,8 +1,5 @@
 vim9script noclear
 
-if exists('loaded') | finish | endif
-var loaded = true
-
 import Catch from 'lg.vim'
 
 def debug#log#output(what: dict<any>) #{{{1
@@ -108,7 +105,7 @@ def debug#log#output(what: dict<any>) #{{{1
     &l:buflisted = false
     &l:swapfile = false
     &l:wrap = false
-    nmap <buffer><nowait> q <Plug>(my_quit)
+    nmap <buffer><nowait> q <Plug>(my-quit)
     search('Last set from \zs')
     nnoremap <buffer><nowait> DD <Cmd>silent keepjumps keeppatterns global/^\s*Last set from/delete _<CR>
 enddef
