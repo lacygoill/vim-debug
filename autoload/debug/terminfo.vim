@@ -23,6 +23,10 @@ def debug#terminfo#main(use_curfile: bool) #{{{2
     Fold()
     InstallMappings()
 
+    # turn into Vim9 script
+    ['vim9script', '']->append(0)
+    doautocmd Syntax
+
     # bang to  suppress error  when we  don't have our  autocmd which  creates a
     # missing directory
     silent! update
@@ -97,7 +101,7 @@ def MoveKeynamesIntoInlineComments() #{{{2
     #     t_#2 <S-Home>    ^[[1;2H
     #     →
     #     <S-Home>    ^[[1;2H  " t_#2
-    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3" \1/e
+    silent! keepjumps keeppatterns :/Terminal keys/,$ substitute/^\(t_\S\+ \+\)\(<.\{-1,}>\)\(.*\)/\2\3# \1/e
 enddef
 
 def AddAssignmentOperators() #{{{2
@@ -129,7 +133,7 @@ def AlignInlineComment() #{{{2
     # We fix this by passing to `:EasyAlign` the optional argument `{'ig': []}`,
     # which tells it to ignore nothing.
     #}}}
-    silent! keepjumps keeppatterns :/Terminal keys/+1,$ EasyAlign /"/ {'ig': []}
+    silent! keepjumps keeppatterns :/Terminal keys/+1,$ EasyAlign /#/ {'ig': []}
 enddef
 
 def AddSetCommands() #{{{2
@@ -141,7 +145,7 @@ def EscapeSpacesInOptionsValues() #{{{2
     #     →
     #     set t_EI=^[[2\ q
     #                  ^
-    silent keepjumps keeppatterns :% substitute/\%(set.\{-}=.*[^"]\)\@<= [^" ]/\\&/ge
+    silent keepjumps keeppatterns :% substitute/\%(set.\{-}=.*[^#]\)\@<= [^# ]/\\&/ge
 enddef
 
 def TrimTrailingWhitespace() #{{{2
@@ -171,11 +175,11 @@ enddef
 def CommentSectionHeaders() #{{{2
     #     --- Terminal codes ---    →    " Terminal codes
     #     --- Terminal keys ---     →    " Terminal keys
-    silent keepjumps keeppatterns :% substitute/^--- Terminal \(\S*\).*/" Terminal \1/e
+    silent keepjumps keeppatterns :% substitute/^--- Terminal \(\S*\).*/# Terminal \1/e
 enddef
 
 def Fold() #{{{2
-    silent keepjumps keeppatterns :% substitute/^" .*\zs/\=' {{' .. '{1'/e
+    silent keepjumps keeppatterns :% substitute/^# .*\zs/\=' {{' .. '{1'/e
 enddef
 
 def InstallMappings() #{{{2
