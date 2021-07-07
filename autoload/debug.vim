@@ -185,7 +185,7 @@ def debug#messages() #{{{1
         'yanked lines':  '\%(block of \)\=\d\+ lines yanked',
     }
 
-    for noise in noises->values()
+    for noise: string in noises->values()
         execute 'silent global/^' .. noise .. '$/delete _'
     endfor
 
@@ -267,7 +267,7 @@ def debug#unusedFunctions() #{{{1
 
     # build a list of unused functions
     var unused: list<string>
-    for afunc in functions
+    for afunc: string in functions
         var pat: string = afunc
         if afunc[: 1] == 's:'
             pat ..= '\|<SID>' .. afunc[2 :]
@@ -359,7 +359,7 @@ def debug#vimPatches(n: string, append = false) #{{{1
         var ifirst: number = index(MAJOR_VERSIONS, first)
         var ilast: number = index(MAJOR_VERSIONS, last)
         var numbers: list<string> = MAJOR_VERSIONS[ifirst : ilast]
-        for number in numbers
+        for number: string in numbers
             debug#vimPatches(number, true)
         endfor
         debug#vimPatchesPrettify()
